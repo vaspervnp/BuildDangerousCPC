@@ -13,12 +13,16 @@ THANOS_WALK_L   equ 4
 START_X         equ 3
 START_Y         equ 21
 
+PS_WALK         equ 0
+PS_VIGNETTE     equ 1           ; a trap is going off: input locked
+
 player_init:
         ld a,START_X
         ld (pl_x),a
         ld a,START_Y
         ld (pl_y),a
         xor a
+        ld (pl_state),a
         ld (pl_dir),a
         ld (pl_anim),a
         ld (pl_climb),a
@@ -26,6 +30,15 @@ player_init:
         jp player_draw
 
 player_update:
+        ld a,(pl_state)
+        cp PS_VIGNETTE
+        jp z,vig_update
+        ld a,(keys_new)         ; Fire is checked every frame, not just on step frames
+        and KEY_FIRE
+        jr z,.no_fire
+        call try_trigger
+        ret c
+.no_fire:
         ld a,(pl_wait)
         or a
         jr z,.act

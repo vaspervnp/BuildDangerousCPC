@@ -84,10 +84,19 @@ cell_addr:
         inc h
         ret
 
-; Draw the room-map tile at D=row, E=col. Preserves DE; trashes AF,BC,HL.
+; Draw the room-map cell at D=row, E=col: its tile, plus the hazard sitting on it if
+; bit 7 is set. Preserves DE; trashes AF,BC,HL.
 draw_cell:
         call map_addr
         ld a,(hl)
+        or a
+        jp p,draw_tile_at
+        and #7f
+        call draw_tile_at
+        call hazard_find
+        ret nc
+        jp draw_hazard
+
 ; Draw tile A at D=row, E=col. Preserves DE; trashes AF,BC,HL.
 draw_tile_at:
         push de
@@ -123,17 +132,44 @@ draw_tile_at:
 draw_sprite16:
         ld (spr_ptr),hl
         call cell_addr
-        call .half
+        push de
+        ld de,(spr_ptr)
+        ld b,4
+        call blit_masked8
+        ld (spr_ptr),de
+        pop de
         inc d
         call cell_addr
-        call .half
+        push de
+        ld de,(spr_ptr)
+        ld b,4
+        call blit_masked8
+        pop de
         dec d
         ret
-.half:  push de
+
+; Masked 8x8 sprite at cell D=row, E=col.
+; In: HL = frame (8 lines x 2 x (mask,data)). Preserves DE; trashes AF,BC,HL.
+draw_sprite8:
+        ld (spr_ptr),hl
+        call cell_addr
+        push de
         ld de,(spr_ptr)
+        ld b,2
+        call blit_masked8
+        pop de
+        ret
+
+; 8 lines of masked bytes: screen = (screen AND mask) OR data.
+; In: HL = screen, DE = (mask,data) pairs, B = width in bytes. Out: DE past the data.
+; Trashes AF,BC,HL.
+blit_masked8:
+        ld a,b
+        ld (blit_w),a
         ld c,8
 .line:  push hl
-        ld b,4
+        ld a,(blit_w)
+        ld b,a
 .byte:  ld a,(de)               ; mask
         and (hl)
         inc de
@@ -150,8 +186,17 @@ draw_sprite16:
         ld h,a
         dec c
         jr nz,.line
-        ld (spr_ptr),de
-        pop de
+        ret
+
+; Lightning flash: A bit 0 set turns pen 0 white, clear restores it. Trashes BC,F.
+set_flash:
+        ld bc,#7f00             ; select pen 0
+        out (c),c
+        rra
+        ld a,INK_BLACK
+        jr nc,.set
+        ld a,INK_BRWHITE
+.set:   out (c),a
         ret
 
 row_scr:

@@ -1,0 +1,60 @@
+; Milestone 2: Fire on a hazard -> vignette -> caption -> energy -> disarmed.
+; Hazard list in room data: *room_hazards = count, then 4 bytes each (x, row, type, state):
+;   #0 live socket col 10 row 21 (bottom floor)   state at *room_hazards+4
+;   #1 live socket col 24 row 14 (middle floor)   state at *room_hazards+8
+; Reach: the socket must be within one column of Thanos's 2-column body.
+
+run 30
+expect energy 8
+expect *room_hazards+0 3
+expect *room_hazards+4 0
+shot hz_boot
+
+run 1 fire                      ; nothing in reach from x=3
+run 5
+expect pl_state 0
+expect energy 8
+
+run 25 right                    ; 5 steps to x=8: socket at col 10 is in reach
+expect pl_x 8
+run 5
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 2
+shot hz_zap_flash               ; pen 0 flashed white
+run 4
+shot hz_zap_xray
+run 30
+shot hz_zap_singed              ; caption still up
+run 30
+expect pl_state 0
+expect *room_hazards+4 1
+shot hz_disarmed
+
+run 1 fire                      ; already disarmed: nothing happens
+run 5
+expect pl_state 0
+expect energy 7
+
+run 100
+shot hz_caption_gone
+
+poke lang 1                     ; Greek (the menu's L key arrives with the title screen)
+run 300 right
+run 35 left
+expect pl_x 30
+run 60 up
+expect pl_y 14
+run 25 left                     ; x=25: socket at col 24 in reach
+expect pl_x 25
+run 5
+run 1 fire
+expect pl_state 1
+expect energy 6
+run 40
+shot hz_greek_caption
+run 30
+expect pl_state 0
+expect *room_hazards+8 1
+expect *room_hazards+12 0       ; the top-floor socket is untouched

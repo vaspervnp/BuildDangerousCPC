@@ -56,7 +56,11 @@ input_read:
         ld c,a
 .skip:  inc hl
         jr .map
-.done:  ld a,c
+.done:  ld a,(keys)              ; keys_new = pressed now but not last frame
+        cpl
+        and c
+        ld (keys_new),a
+        ld a,c
         ld (keys),a
         ret
 

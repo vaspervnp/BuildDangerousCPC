@@ -3,7 +3,8 @@ IDSK ?= iDSK
 PY   ?= python3
 B    := build
 
-ASSETS := $(B)/tiles.bin $(B)/thanos.bin $(B)/room_test.bin
+ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
+          $(B)/hazards.bin $(B)/room_test.bin $(B)/strings.asm
 SRC    := $(wildcard src/*.asm)
 
 all: $(B)/bd.dsk
@@ -14,8 +15,20 @@ $(B):
 $(B)/tiles.bin: assets/gfx/tiles.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py tiles $< $@
 
+$(B)/font.bin: assets/gfx/font.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py tiles $< $@
+
 $(B)/thanos.bin: assets/gfx/thanos.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py sprites $< $@ --mirror
+
+$(B)/vignettes.bin: assets/gfx/vignettes.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py sprites $< $@
+
+$(B)/hazards.bin: assets/gfx/hazards.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py sprites8 $< $@
+
+$(B)/strings.asm: assets/text/strings.txt assets/gfx/font.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py text $< $@ assets/gfx/font.png
 
 $(B)/room_%.bin: assets/rooms/%.txt tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py room $< $@
@@ -28,9 +41,12 @@ $(B)/bd.dsk: $(B)/bd.bin
 	$(IDSK) $@ -n
 	$(IDSK) $@ -i $< -t 1 -c 1000 -e 1000
 
-# Headless smoke run: walks Thanos around the test room and saves screenshots to build/shots/.
+# Headless runs of every tests/*.txt script; screenshots go to build/shots/.
 test: $(B)/bd.bin
-	$(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script tests/smoke.txt --out $(B)/shots
+	@set -e; for t in tests/*.txt; do \
+	  echo "== $$t"; \
+	  $(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $$t --out $(B)/shots; \
+	done
 
 clean:
 	rm -rf $(B)

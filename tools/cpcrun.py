@@ -10,7 +10,10 @@ VSYNC bit. Drives it from a script and saves Mode 1 screenshots / checks variabl
 Script lines (';' starts a comment):
   run <frames> [key+key...]     hold keys (or none) for N frames
   shot <name>                   save <out>/<name>.png
-  expect <symbol> <value>       assert byte at symbol == value (decimal or #hex)
+  expect <addr> <value>         assert byte at addr == value (decimal or #hex)
+  poke <addr> <value>           write a byte
+
+<addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
 Keys: up down left right fire mark lang (keyboard) and jup jdown jleft jright jfire1 jfire2.
 """
@@ -72,9 +75,12 @@ class CPC:
         self.ppi_c = 0
         self.psg_reg = 0
         self.matrix = [0xFF] * 10
-        self.busy = []          # T-states of work per frame (vsync start -> next wait_vbl)
+        self.busy = []          # (loop no, T-states of work from vsync start to next wait_vbl)
+        self.frame_no = 0
+        self.at_wait = False
         self.wait_vbl = syms.get('WAIT_VBL')
         self.vsync_start_t = None
+        self.last_vsync_read = 1
         self.m.set_output_callback(self.on_out)
         self.m.set_input_callback(self.on_in)
         if self.wait_vbl is not None:
@@ -112,8 +118,9 @@ class CPC:
             port = (addr >> 8) & 3
             if port == 1:
                 v = 1 if self.vsync() else 0
-                if v and self.vsync_start_t is None:
+                if v and not self.last_vsync_read:      # the rising edge wait_vbl waits for
                     self.vsync_start_t = self.t
+                self.last_vsync_read = v
                 return 0x1E | v
             if port == 0 and (self.ppi_c >> 6) == 1 and self.psg_reg == 14:
                 line = self.ppi_c & 0x0F
@@ -127,27 +134,46 @@ class CPC:
             self.matrix[line] &= ~(1 << bit) & 0xFF
 
     def run_frames(self, n):
+        """Run n game-loop iterations: stop when the game enters wait_vbl for the n-th time,
+        so every frame's work is complete when a script inspects memory. Without a
+        wait_vbl symbol, falls back to n * FRAME_T T-states."""
         target = self.t + n * FRAME_T
-        while self.t < target:
+        loops = 0
+        while (loops < n) if self.wait_vbl is not None else (self.t < target):
+            if self.m.pc == self.wait_vbl and self.at_wait:
+                self.m.clear_breakpoint(self.wait_vbl)      # step past the breakpoint
+                self.m.ticks_to_stop = 1
+                self.m.run()
+                self.t += 4
+                self.m.set_breakpoint(self.wait_vbl)
+                self.at_wait = False
             self.m.ticks_to_stop = SLICE_T
             events = self.m.run()
-            used = SLICE_T - self.m.ticks_to_stop
-            self.t += used
+            self.t += SLICE_T - self.m.ticks_to_stop
             pc = self.m.pc
             if pc == self.wait_vbl and events & z80.Z80Machine._BREAKPOINT_HIT:
+                self.at_wait = True
+                loops += 1
                 if self.vsync_start_t is not None:
-                    self.busy.append(self.t - self.vsync_start_t)
+                    self.busy.append((self.frame_no, self.t - self.vsync_start_t))
                     self.vsync_start_t = None
-                self.m.clear_breakpoint(pc)
-                self.m.ticks_to_stop = 1
-                self.t += 4 - self.m.ticks_to_stop  # approximate
-                self.m.run()
-                self.m.set_breakpoint(pc)
+                self.frame_no += 1
             if not (self.org <= pc < self.end or pc in (0x38, 0x39)):
                 raise RuntimeError(f"PC escaped the program: #{pc:04X}")
 
     def peek(self, addr):
         return self.m.memory[addr]
+
+    def poke(self, addr, value):
+        self.m.memory[addr] = value
+
+    def resolve(self, expr, syms):
+        deref = expr.startswith('*')
+        name, _, off = expr.lstrip('*').partition('+')
+        addr = syms[name.upper()]
+        if deref:
+            addr = self.peek(addr) | (self.peek(addr + 1) << 8)
+        return addr + (int(off) if off else 0)
 
     def screenshot(self, path):
         base = ((self.crtc[12] & 0x30) << 10) | ((self.crtc[12] & 0x03) << 9) | (self.crtc[13] << 1)
@@ -202,20 +228,25 @@ def main():
             path = os.path.join(args.out, st[1] + '.png')
             cpc.screenshot(path)
             print(f"shot {path}")
-        elif cmd == 'expect':
-            sym, want = st[1].upper(), st[2]
-            want = int(want[1:], 16) if want.startswith('#') else int(want)
-            got = cpc.peek(syms[sym])
-            ok = got == want
+        elif cmd in ('expect', 'poke'):
+            value = int(st[2][1:], 16) if st[2].startswith('#') else int(st[2])
+            addr = cpc.resolve(st[1], syms)
+            if cmd == 'poke':
+                cpc.poke(addr, value)
+                continue
+            got = cpc.peek(addr)
+            ok = got == value
             failures += not ok
-            print(f"{'ok  ' if ok else 'FAIL'} {sym} = {got} (expected {want})")
+            print(f"{'ok  ' if ok else 'FAIL'} {st[1]} = {got} (expected {value})")
         else:
             sys.exit(f"unknown script command: {cmd}")
 
     if cpc.busy:
-        worst = max(cpc.busy[1:] or cpc.busy)
-        print(f"frames: {len(cpc.busy)}, worst per-frame work: {worst} T "
-              f"({100 * worst / FRAME_T:.0f}% of a 50Hz frame, before wait states)")
+        frame, worst = max(cpc.busy, key=lambda b: b[1])
+        over = [f for f, t in cpc.busy if t > FRAME_T]
+        print(f"frames: {len(cpc.busy)}, worst per-frame work: {worst} T in loop {frame} "
+              f"({100 * worst / FRAME_T:.0f}% of a 50Hz frame, before wait states)"
+              + (f"; over budget in loops {over}" if over else ""))
     if failures:
         sys.exit(f"{failures} expectation(s) failed")
 

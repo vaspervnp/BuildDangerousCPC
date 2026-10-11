@@ -1,0 +1,3 @@
+; ID | English | Greek
+; Capitals only (lower case is folded, Greek accents are dropped). Max 40 characters.
+CAP_ZAP | Filed under: electrocution. Again. | Καταχωρήθηκε: ηλεκτροπληξία. Ξανά.

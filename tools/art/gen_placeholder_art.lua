@@ -1,6 +1,8 @@
--- Bootstrap generator for placeholder art. Run inside Aseprite (via MCP: dofile on this path).
--- Writes assets/gfx/*.aseprite (editable sources) and *.png (consumed by tools/cpcgfx.py).
--- Re-running OVERWRITES hand-edited art; once art is polished in Aseprite, stop using this.
+-- Bootstrap generator for placeholder art. Run inside Aseprite (via MCP), e.g.:
+--   ONLY = { font = true }; dofile("<repo>\\tools\\art\\gen_placeholder_art.lua")
+-- With ONLY unset every asset is regenerated. Writes assets/gfx/<name>.aseprite (editable
+-- source) and <name>.png (read by tools/cpcgfx.py).
+-- Re-running an asset OVERWRITES hand edits to it; once it is polished in Aseprite, leave it out.
 
 local root = "\\\\wsl.localhost\\Ubuntu\\home\\vasilhs\\repos\\BuildDangerousCPC\\assets\\gfx\\"
 
@@ -9,9 +11,10 @@ local function rgba(r, g, b) return app.pixelColor.rgba(r, g, b, 255) end
 -- Mode 1 palette for building 1: K=black O=orange B=sky blue W=bright white. '.' = transparent.
 local pal = { K = rgba(0, 0, 0), O = rgba(255, 128, 0), B = rgba(0, 128, 255), W = rgba(255, 255, 255) }
 
-local function paint(img, ox, oy, rows, mirror)
+local function paint(img, ox, oy, rows, w, h, mirror, name)
+  assert(#rows == h, name .. ": expected " .. h .. " rows, got " .. #rows)
   for y, row in ipairs(rows) do
-    local w = #row
+    assert(#row == w, name .. " row " .. y .. ": expected " .. w .. " columns, got " .. #row)
     for x = 1, w do
       local c = pal[row:sub(x, x)]
       if c then
@@ -31,42 +34,45 @@ local function setPal(spr)
   spr:setPalette(p)
 end
 
------------------------------------------------------------------- tiles (8x8)
--- Order must match TILE_* constants in src/tiles.asm.
-local tiles = {
-  { -- 0 BLACK
-    "KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK" },
-  { -- 1 WALLPAPER
-    "KKKKKKKK","KKKBKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKB","KKKKKKKK","KKKKKKKK" },
-  { -- 2 FLOOR slab
-    "WWWWWWWW","OOOOOOKO","OOOOOOKO","KKKKKKKK","BKBBBBBB","BBBBBKBB","BBKBBBBB","KKKKKKKK" },
-  { -- 3 BRICK
-    "BBBBBBBK","BBBBBBBK","BBBBBBBK","KKKKKKKK","BBBKBBBB","BBBKBBBB","BBBKBBBB","KKKKKKKK" },
-  { -- 4 LADDER_L
-    "KWKKKKKK","KWKKKKKK","KWWWWWWW","KWKKKKKK","KWKKKKKK","KWKKKKKK","KWWWWWWW","KWKKKKKK" },
-  { -- 5 LADDER_R
-    "KKKKKKWK","KKKKKKWK","WWWWWWWK","KKKKKKWK","KKKKKKWK","KKKKKKWK","WWWWWWWK","KKKKKKWK" },
-  { -- 6 WINDOW
-    "OOOOOOOO","OBBBOBBO","OBWBOBBO","OBBBOBBO","OOOOOOOO","OBBBOBBO","OBBBOBWO","OOOOOOOO" },
-  { -- 7 DOOR_T
-    "KKKKKKKK","KOOOOOOK","KOKKKKOK","KOKOOKOK","KOKOOKOK","KOKKKKOK","KOOOOOOK","KOOOOOOK" },
-  { -- 8 DOOR_B
-    "KOOOOOOK","KOOOOWOK","KOKKKKOK","KOKOOKOK","KOKOOKOK","KOKKKKOK","KOOOOOOK","KOOOOOOK" },
-  { -- 9 LAMP
-    "KKKBKKKK","KKKBKKKK","KKKBKKKK","KKOOOKKK","KOOOOOKK","OOOOOOOK","KKWWWKKK","KKKKKKKK" },
-}
-
-do
-  local n = #tiles
-  local spr = Sprite(8 * n, 8, ColorMode.RGB)
+-- One strip image: all cells side by side, saved as <name>.aseprite and <name>.png.
+local function saveStrip(name, cells, w, h)
+  local spr = Sprite(w * #cells, h, ColorMode.RGB)
   setPal(spr)
-  local img = Image(8 * n, 8, ColorMode.RGB)
-  for i, t in ipairs(tiles) do paint(img, (i - 1) * 8, 0, t) end
+  local img = Image(w * #cells, h, ColorMode.RGB)
+  for i, c in ipairs(cells) do paint(img, (i - 1) * w, 0, c.rows, w, h, c.mirror, name .. "#" .. i) end
   spr:newCel(spr.layers[1], 1, img, Point(0, 0))
-  spr:saveAs(root .. "tiles.aseprite")
-  spr:saveCopyAs(root .. "tiles.png")
+  spr:saveAs(root .. name .. ".aseprite")
+  spr:saveCopyAs(root .. name .. ".png")
   spr:close()
-  print("tiles: " .. n)
+  print(name .. ": " .. #cells)
+end
+
+local function cells(list)
+  local t = {}
+  for i, r in ipairs(list) do t[i] = { rows = r } end
+  return t
+end
+
+local gen = {}
+
+------------------------------------------------------------------ tiles (8x8)
+-- Order must match TILE_* in src/tiles.asm and ROOM_LEGEND in tools/cpcgfx.py.
+gen.tiles = function()
+  saveStrip("tiles", cells({
+    { "KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK" }, -- 0 BLACK
+    { "KKKKKKKK","KKKBKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKB","KKKKKKKK","KKKKKKKK" }, -- 1 WALLPAPER
+    { "WWWWWWWW","OOOOOOKO","OOOOOOKO","KKKKKKKK","BKBBBBBB","BBBBBKBB","BBKBBBBB","KKKKKKKK" }, -- 2 FLOOR
+    { "BBBBBBBK","BBBBBBBK","BBBBBBBK","KKKKKKKK","BBBKBBBB","BBBKBBBB","BBBKBBBB","KKKKKKKK" }, -- 3 BRICK
+    { "KWKKKKKK","KWKKKKKK","KWWWWWWW","KWKKKKKK","KWKKKKKK","KWKKKKKK","KWWWWWWW","KWKKKKKK" }, -- 4 LADDER_L
+    { "KKKKKKWK","KKKKKKWK","WWWWWWWK","KKKKKKWK","KKKKKKWK","KKKKKKWK","WWWWWWWK","KKKKKKWK" }, -- 5 LADDER_R
+    { "OOOOOOOO","OBBBOBBO","OBWBOBBO","OBBBOBBO","OOOOOOOO","OBBBOBBO","OBBBOBWO","OOOOOOOO" }, -- 6 WINDOW
+    { "KKKKKKKK","KOOOOOOK","KOKKKKOK","KOKOOKOK","KOKOOKOK","KOKKKKOK","KOOOOOOK","KOOOOOOK" }, -- 7 DOOR_T
+    { "KOOOOOOK","KOOOOWOK","KOKKKKOK","KOKOOKOK","KOKOOKOK","KOKKKKOK","KOOOOOOK","KOOOOOOK" }, -- 8 DOOR_B
+    { "KKKBKKKK","KKKBKKKK","KKKBKKKK","KKOOOKKK","KOOOOOKK","OOOOOOOK","KKWWWKKK","KKKKKKKK" }, -- 9 LAMP
+    { "KKKKKKKK","KWWWWWKK","KWKWKWKK","KWWWWWKK","KWKWKWKK","KWWWWWKK","KKKKKKKK","KKKKKKKK" }, -- 10 SOCKET (safe)
+    { "KKKKKKKK","KKKWWKKK","KKWWWWKK","KWWWWWWK","KWWOOWWK","WWWWWWWW","KKKKKKKK","KKKKKKKK" }, -- 11 HAT_FULL
+    { "KKKKKKKK","KKKBBKKK","KKBKKBKK","KBKKKKBK","KBKKKKBK","BBBBBBBB","KKKKKKKK","KKKKKKKK" }, -- 12 HAT_EMPTY
+  }), 8, 8)
 end
 
 ------------------------------------------------------------------ Thanos (16x16)
@@ -86,55 +92,184 @@ local head = {
   "...KBBKBBBOOWWK.",
   "....KBBBBBBKKK..",
 }
-local function withLegs(a, b)
+local body = { table.unpack(head, 11, 14) }
+
+local function concat(...)
   local t = {}
-  for i, r in ipairs(head) do t[i] = r end
-  t[15] = a; t[16] = b
+  for _, part in ipairs({ ... }) do for _, r in ipairs(part) do t[#t + 1] = r end end
   return t
 end
 
-local walk0 = withLegs("....KKK..KKK....", "...KKKK..KKKK...")
-local walk1 = withLegs(".....KKKKKK.....", ".....KKKKKKK....")
-local climb = {
-  "....KKKKKKKK....",
-  "...KWWWWWWWWK...",
-  "..KWWWWWWWWWWK..",
-  ".KKKKKKKKKKKKKK.",
-  "...KKKKKKKKKK...",
-  "OK.KKKKKKKKKK...",
-  "OK.KKKKKKKKKK...",
-  "BK..KOOOOOOK....",
-  "BKKKBBBBBBBBKKK.",
-  ".KBBBBBBBBBBBBK.",
-  "..KBBBBBBBBBBKBK",
-  "..KBBBBBBBBBBKOK",
-  "..KBBBBBBBBBBK..",
-  "..KKKKKKKKKKKK..",
-  "..KKKK....KKKK..",
-  "..KKKK....KKKK..",
+local legsApart = { "....KKK..KKK....", "...KKKK..KKKK..." }
+local legsTogether = { ".....KKKKKK.....", ".....KKKKKKK...." }
+
+-- Frame order must match THANOS_* in src/player.asm: 0 walk A, 1 walk B, 2 climb A,
+-- 3 climb B (mirrored climb A). Left-facing frames come from cpcgfx.py --mirror.
+gen.thanos = function()
+  local climb = {
+    "....KKKKKKKK....",
+    "...KWWWWWWWWK...",
+    "..KWWWWWWWWWWK..",
+    ".KKKKKKKKKKKKKK.",
+    "...KKKKKKKKKK...",
+    "OK.KKKKKKKKKK...",
+    "OK.KKKKKKKKKK...",
+    "BK..KOOOOOOK....",
+    "BKKKBBBBBBBBKKK.",
+    ".KBBBBBBBBBBBBK.",
+    "..KBBBBBBBBBBKBK",
+    "..KBBBBBBBBBBKOK",
+    "..KBBBBBBBBBBK..",
+    "..KKKKKKKKKKKK..",
+    "..KKKK....KKKK..",
+    "..KKKK....KKKK..",
+  }
+  saveStrip("thanos", {
+    { rows = concat(head, legsApart) },
+    { rows = concat(head, legsTogether) },
+    { rows = climb },
+    { rows = climb, mirror = true },
+  }, 16, 16)
+end
+
+------------------------------------------------------------------ trap vignettes (16x16)
+-- Order must match VF_* in src/vignette.asm.
+gen.vignettes = function()
+  local zapA = concat({
+    ".....KKKKK......",
+    "....KWWWWWK.....",
+    "...KKKKKKKKK....",
+    "..W.K.W.K.W.....",
+    "....KOOOOOOOK...",
+    "....KOOOKKOOK...",
+    "W...KOOOOWOOK..W",
+    "....KOOOOOOOOK..",
+    "....KOOKKKKOK...",
+    ".W...KKOOOOKK...",
+    "....KBBBBBBKWWK.",
+    "..WKBBBBBBBKWWK.",
+    "...KBBKBBBOOWWKW",
+    "....KBBBBBBKKK..",
+    "..W.KKK..KKK....",
+    "...KKKK..KKKK.W.",
+  })
+  local zapB = { -- x-ray
+    "......KKKKK.....",
+    ".....KWWWWWK....",
+    "....KWWWWWWWK...",
+    "...KKKKKKKKKKKK.",
+    "....KKWWWWWKK...",
+    "....KWKKWKKWK...",
+    "....KWWWWWWWK...",
+    "....KKWKWKWKKK..",
+    "....KKKWWWKKK...",
+    ".....KKKWKKK....",
+    "....KWWWWWWWKWK.",
+    "...KKKKWKKKKKWK.",
+    "...KWWWWWWWKWWK.",
+    "....KKKKWKKKKK..",
+    "....KWK..KWK....",
+    "...KKWK..KWKK...",
+  }
+  local zapC = concat({ -- singed, smoking, still unimpressed
+    ".......W..W.....",
+    "......W..W......",
+    "......KKKKK.....",
+    ".....KWWWWWK....",
+    "...KKKKKKKKKKK..",
+    "...K.K.K.K.K....",
+    "....KKKKKKKKK...",
+    "....KKKKWKKKK...",
+    "....KKKKKKKKKK..",
+    "....KKKKKKKKK...",
+  }, body, legsApart)
+  saveStrip("vignettes", cells({ zapA, zapB, zapC }), 16, 16)
+end
+
+------------------------------------------------------------------ hazard tells (8x8, masked)
+-- Order must match HSPR_* in src/hazards.asm: each hazard has its armed tell, then disarmed.
+gen.hazards = function()
+  saveStrip("hazards", cells({
+    { "......W.",".WWWWWOW",".WKWKWO.",".WWWWWO.",".WKWKW.O",".WWWWW.O",".......O","......OO" }, -- socket, live wire
+    { "........",".WWWWW..",".WOWOW..",".WWOWW..",".WOWOW..",".WWWWW..","........","........" }, -- socket, taped
+  }), 8, 8)
+end
+
+------------------------------------------------------------------ font (8x8, white on transparent)
+-- Glyph order must match FONT_CHARS in tools/cpcgfx.py. Capitals only; Greek letters that
+-- look like Latin ones (A B E Z H I K M N O P T Y X) reuse the Latin glyph.
+local FONT = {
+  { " ", { ".....", ".....", ".....", ".....", ".....", ".....", "....." } },
+  { "A", { ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" } },
+  { "B", { "####.", "#...#", "#...#", "####.", "#...#", "#...#", "####." } },
+  { "C", { ".###.", "#...#", "#....", "#....", "#....", "#...#", ".###." } },
+  { "D", { "####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####." } },
+  { "E", { "#####", "#....", "#....", "####.", "#....", "#....", "#####" } },
+  { "F", { "#####", "#....", "#....", "####.", "#....", "#....", "#...." } },
+  { "G", { ".###.", "#...#", "#....", "#.###", "#...#", "#...#", ".####" } },
+  { "H", { "#...#", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" } },
+  { "I", { ".###.", "..#..", "..#..", "..#..", "..#..", "..#..", ".###." } },
+  { "J", { "..###", "...#.", "...#.", "...#.", "...#.", "#..#.", ".##.." } },
+  { "K", { "#...#", "#..#.", "#.#..", "##...", "#.#..", "#..#.", "#...#" } },
+  { "L", { "#....", "#....", "#....", "#....", "#....", "#....", "#####" } },
+  { "M", { "#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#" } },
+  { "N", { "#...#", "#...#", "##..#", "#.#.#", "#..##", "#...#", "#...#" } },
+  { "O", { ".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###." } },
+  { "P", { "####.", "#...#", "#...#", "####.", "#....", "#....", "#...." } },
+  { "Q", { ".###.", "#...#", "#...#", "#...#", "#.#.#", "#..#.", ".##.#" } },
+  { "R", { "####.", "#...#", "#...#", "####.", "#.#..", "#..#.", "#...#" } },
+  { "S", { ".####", "#....", "#....", ".###.", "....#", "....#", "####." } },
+  { "T", { "#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.." } },
+  { "U", { "#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###." } },
+  { "V", { "#...#", "#...#", "#...#", "#...#", "#...#", ".#.#.", "..#.." } },
+  { "W", { "#...#", "#...#", "#...#", "#.#.#", "#.#.#", "#.#.#", ".#.#." } },
+  { "X", { "#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#" } },
+  { "Y", { "#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.." } },
+  { "Z", { "#####", "....#", "...#.", "..#..", ".#...", "#....", "#####" } },
+  { "0", { ".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###." } },
+  { "1", { "..#..", ".##..", "..#..", "..#..", "..#..", "..#..", ".###." } },
+  { "2", { ".###.", "#...#", "....#", "...#.", "..#..", ".#...", "#####" } },
+  { "3", { "#####", "...#.", "..#..", "...#.", "....#", "#...#", ".###." } },
+  { "4", { "...#.", "..##.", ".#.#.", "#..#.", "#####", "...#.", "...#." } },
+  { "5", { "#####", "#....", "####.", "....#", "....#", "#...#", ".###." } },
+  { "6", { "..##.", ".#...", "#....", "####.", "#...#", "#...#", ".###." } },
+  { "7", { "#####", "....#", "...#.", "..#..", ".#...", ".#...", ".#..." } },
+  { "8", { ".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###." } },
+  { "9", { ".###.", "#...#", "#...#", ".####", "....#", "...#.", ".##.." } },
+  { ".", { ".....", ".....", ".....", ".....", ".....", ".##..", ".##.." } },
+  { ",", { ".....", ".....", ".....", ".....", ".##..", "..#..", ".#..." } },
+  { "!", { "..#..", "..#..", "..#..", "..#..", "..#..", ".....", "..#.." } },
+  { "?", { ".###.", "#...#", "....#", "...#.", "..#..", ".....", "..#.." } },
+  { ":", { ".....", ".##..", ".##..", ".....", ".##..", ".##..", "....." } },
+  { ";", { ".....", ".##..", ".##..", ".....", ".##..", "..#..", ".#..." } },
+  { "-", { ".....", ".....", ".....", "#####", ".....", ".....", "....." } },
+  { "'", { "..#..", "..#..", ".#...", ".....", ".....", ".....", "....." } },
+  { "/", { "....#", "....#", "...#.", "..#..", ".#...", "#....", "#...." } },
+  { "Γ", { "#####", "#....", "#....", "#....", "#....", "#....", "#...." } },
+  { "Δ", { "..#..", "..#..", ".#.#.", ".#.#.", "#...#", "#...#", "#####" } },
+  { "Θ", { ".###.", "#...#", "#...#", "#####", "#...#", "#...#", ".###." } },
+  { "Λ", { "..#..", "..#..", ".#.#.", ".#.#.", "#...#", "#...#", "#...#" } },
+  { "Ξ", { "#####", ".....", ".....", ".###.", ".....", ".....", "#####" } },
+  { "Π", { "#####", "#...#", "#...#", "#...#", "#...#", "#...#", "#...#" } },
+  { "Σ", { "#####", "#....", ".#...", "..#..", ".#...", "#....", "#####" } },
+  { "Φ", { "..#..", ".###.", "#.#.#", "#.#.#", "#.#.#", ".###.", "..#.." } },
+  { "Ψ", { "#.#.#", "#.#.#", "#.#.#", ".###.", "..#..", "..#..", "..#.." } },
+  { "Ω", { ".###.", "#...#", "#...#", "#...#", ".#.#.", ".#.#.", "##.##" } },
 }
 
--- Frame order must match THANOS_* constants in src/player.asm:
--- 0 walk-right A, 1 walk-right B, 2 climb A, 3 climb B (mirrored climb A).
--- Left-facing frames are produced by cpcgfx.py --mirror, not drawn here.
-local frames = { { walk0, false }, { walk1, false }, { climb, false }, { climb, true } }
-
-do
-  local spr = Sprite(16, 16, ColorMode.RGB)
-  setPal(spr)
-  local sheet = Image(16 * #frames, 16, ColorMode.RGB)
-  for i, f in ipairs(frames) do
-    if i > 1 then spr:newEmptyFrame() end
-    local img = Image(16, 16, ColorMode.RGB)
-    paint(img, 0, 0, f[1], f[2])
-    spr:newCel(spr.layers[1], i, img, Point(0, 0))
-    paint(sheet, (i - 1) * 16, 0, f[1], f[2])
+gen.font = function()
+  local list = {}
+  for i, g in ipairs(FONT) do
+    local rows = {}
+    for r = 1, 7 do rows[r] = "." .. g[2][r]:gsub("#", "W") .. ".." end
+    rows[8] = "........"
+    list[i] = rows
   end
-  spr:saveAs(root .. "thanos.aseprite")
-  spr:close()
-  local s2 = Sprite(16 * #frames, 16, ColorMode.RGB)
-  s2:newCel(s2.layers[1], 1, sheet, Point(0, 0))
-  s2:saveCopyAs(root .. "thanos.png")
-  s2:close()
-  print("thanos frames: " .. #frames)
+  saveStrip("font", cells(list), 8, 8)
 end
+
+------------------------------------------------------------------
+for name, fn in pairs(gen) do
+  if ONLY == nil or ONLY[name] then fn() end
+end
+ONLY = nil
