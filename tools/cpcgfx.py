@@ -196,8 +196,46 @@ def convert_tilemap(src, dst, label):
     print(f"{dst}: {len(rows)} rows, {len(out)} bytes")
 
 
+def encode_cells(cells, width=ROOM_W):
+    """Room tiles, row by row, as byte codes (room.asm room_load decodes them):
+      1-127, tile        a run of that many of one tile
+      %10tttttt          one tile (0-63)
+      %11nnnnnn          copy n+1 cells from the row above (rooms repeat a lot vertically)
+      0                  end
+    Greedy: the longer of a run and a copy; a single cell is one byte."""
+    assert max(cells) < 64, "tile ids must stay below 64 for the one-byte form"
+    out, i, n = bytearray(), 0, len(cells)
+    while i < n:
+        run = 1
+        while i + run < n and cells[i + run] == cells[i] and run < 127:
+            run += 1
+        copy = 0
+        if i >= width:
+            while i + copy < n and cells[i + copy] == cells[i + copy - width] and copy < 64:
+                copy += 1
+        if copy >= 2 and copy >= run:
+            out.append(0xC0 | (copy - 1))
+            i += copy
+        elif run >= 2:
+            out += bytes((run, cells[i]))
+            i += run
+        else:
+            out.append(0x80 | cells[i])
+            i += 1
+    out.append(0)
+    return out
+
+
+def skip_cells(data):
+    """Offset just past encode_cells' end marker."""
+    i = 0
+    while data[i]:
+        i += 2 if data[i] < 0x80 else 1
+    return i + 1
+
+
 def load_room(src):
-    """Room text -> (grid of chars, room data bytes): RLE tiles (count, tile)... 0, then
+    """Room text -> (grid of chars, room data bytes): the tiles (encode_cells), then
     hazard count and (x, row, type, state) per hazard, then the owner's nephew: 0, or 1 and
     (x, top row, xmin, xmax) - he paces xmin..xmax on one floor.
 
@@ -220,15 +258,7 @@ def load_room(src):
             if ch not in ROOM_LEGEND:
                 sys.exit(f"{src}:{y + 1}:{x + 1}: unknown tile char {ch!r}")
             cells.append(ROOM_LEGEND[ch])
-    out = bytearray()
-    i = 0
-    while i < len(cells):
-        run = 1
-        while i + run < len(cells) and cells[i + run] == cells[i] and run < 255:
-            run += 1
-        out += bytes((run, cells[i]))
-        i += run
-    out.append(0)
+    out = encode_cells(cells)
 
     # hazard <type> <x> <row>   (row counted within the room, 0-22)
     out.append(len(hazard_lines))

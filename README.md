@@ -137,6 +137,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-12 — **Loading screen from the user's photorealistic picture**, converted to Mode 0 (hand-picked inks for the dusk sky, saturation/contrast lift, Bayer dithering); checked in Caprice32 together with the new title.
 - 2026-10-12 — **Loading screen replaced by the user's illustrated version** (flat colours and outlines keep much better in 16 colours): cropped/stretched to 16:10 (`--crop`), automatic inks. Checked in Caprice32.
 - 2026-10-12 — **Sixth building: Hard Knock Hotel & Casino** (requested as "Hard Rock"; renamed to a parody, since it's a real brand and every building here is booby-trapped). Six rooms in neon magenta before the Skyscraper finale: casino floor with slot machines and escalators (and Bambis), card tables, a stage with amp stacks and signed guitars, hotel rooms, the rock-star suite, a rooftop pool; 13 traps, three calls, 240 s clock. Three new tiles. Fixed the route scripts' start (Fire was still held when play began, so a trap within reach of the start was never set off). Binary 37.3K, ~1.1K free.
+- 2026-10-12 — **Smaller rooms.** Room tiles are now coded as runs, one-byte single tiles and one-byte "copy n cells from the row above" (rooms repeat a lot vertically): room data shrank 42% (8.9K → 5.1K), freeing ~3.8K for furniture. Binary 33.4K.
 
 ---
 

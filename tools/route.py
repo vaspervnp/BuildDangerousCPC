@@ -15,7 +15,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cpcgfx import HAZARD_TYPES, HUD_ROWS, parse_building  # noqa: E402
+from cpcgfx import HAZARD_TYPES, HUD_ROWS, parse_building, skip_cells  # noqa: E402
 
 MAP_W, MAP_H = 40, 25
 EXIT_DOOR = 'x'
@@ -53,11 +53,8 @@ class Building:
 
     @staticmethod
     def _hazard_list(data):
-        """Offset of the hazard count in room data (after the RLE runs)."""
-        i = 0
-        while data[i]:          # RLE runs (count, tile) end with a 0 count
-            i += 2
-        return i + 1
+        """Offset of the hazard count in room data (after the tiles)."""
+        return skip_cells(data)
 
     def _hazards(self, data):
         i = self._hazard_list(data)

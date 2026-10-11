@@ -123,10 +123,11 @@ hazards_reset_all:
         inc hl
         ld d,(hl)
         ex de,hl                ; HL = room data
-.rle:   ld a,(hl)               ; skip the (count, tile) pairs
+.rle:   ld a,(hl)               ; skip the tile codes: 1-127 run + tile, #80+ one byte, 0 end
         inc hl
         or a
         jr z,.list
+        jp m,.rle
         inc hl
         jr .rle
 .list:  ld b,(hl)

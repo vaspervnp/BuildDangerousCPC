@@ -1,6 +1,7 @@
 ; ---------------------------------------------------------------- room
 ; The room map mirrors the screen: 40x25 cells. Rows 0-1 are the HUD band,
-; rows 2-24 come from the room's RLE data: (count, tile)... terminated by count 0.
+; rows 2-24 come from the room's tile codes (runs, single tiles, copies of the row above;
+; see room_load and cpcgfx.py encode_cells), terminated by 0.
 ; The hazard list follows (see hazards.asm). Cells holding a hazard have bit 7 set.
 ; Room data lives in RAM and hazard states are written back into it, so a room
 ; remembers what was disarmed when it is loaded again.
@@ -12,19 +13,35 @@ HUD_ROWS        equ 2
 ; In: HL = room data. The HUD rows of the map are left alone (the HUD owns them).
 room_load:
         ld de,room_map+MAP_W*HUD_ROWS
-.run:   ld a,(hl)
+.op:    ld a,(hl)               ; tile codes (cpcgfx.py encode_cells)
+        inc hl
         or a
         jr z,.hazards
-        ld b,a
-        inc hl
+        jp m,.short
+        ld b,a                  ; 1-127: a run, then its tile
         ld a,(hl)
         inc hl
 .fill:  ld (de),a
         inc de
         djnz .fill
-        jr .run
+        jr .op
+.short: bit 6,a
+        jr nz,.copy
+        and #3f                 ; %10tttttt: one tile
+        ld (de),a
+        inc de
+        jr .op
+.copy:  and #3f                 ; %11nnnnnn: n+1 cells from the row above
+        inc a
+        ld c,a
+        ld b,0
+        push hl
+        ld hl,-MAP_W
+        add hl,de
+        ldir
+        pop hl
+        jr .op
 .hazards:
-        inc hl
         ld (room_hazards),hl
         ld b,(hl)
         inc hl
