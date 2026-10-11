@@ -78,12 +78,12 @@ expect outcome 0
 expect miss_tally 0
 expect energy 16
 expect evidence 0
-expect bld_sunnyvale_0+184 1
-expect bld_sunnyvale_0+188 1
-expect bld_sunnyvale_1+183 1
-expect bld_sunnyvale_1+187 1
-expect bld_sunnyvale_2+154 1
-expect bld_sunnyvale_2+158 1
-expect bld_sunnyvale_3+148 1
-expect bld_sunnyvale_3+152 1
+expect bld_sunnyvale_0+244 1
+expect bld_sunnyvale_0+248 1
+expect bld_sunnyvale_1+253 1
+expect bld_sunnyvale_1+257 1
+expect bld_sunnyvale_2+210 1
+expect bld_sunnyvale_2+214 1
+expect bld_sunnyvale_3+218 1
+expect bld_sunnyvale_3+222 1
 shot route_sunnyvale_results

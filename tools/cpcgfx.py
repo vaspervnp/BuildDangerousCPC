@@ -31,6 +31,8 @@ ROOM_LEGEND = {
     'u': 45, 'U': 46, 'n': 47, 'N': 48,         # escalators: up rising right / left, down ...
     'T': 49, 'Z': 50, 'I': 51,                  # title logo: bricks, barrier stripes, girder
     '$': 52, 'G': 53, 'A': 54,                  # Hard Knock: slot machine, guitar, amp
+    'y': 55, 'z': 56, 'P': 57, 'c': 58,         # furniture: sofa left/right, picture, clock,
+    't': 59, 'F': 60, 'f': 61, 'm': 62,         # TV, fridge top/bottom, bin
 }
 
 # Building palettes: hardware ink for pen 2 (walls, windows... and Thanos's suit).
