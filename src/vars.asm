@@ -118,3 +118,4 @@ npc_pose:       defs 1              ; 1: phone up
 selfie_step:    defs 1
 selfie_timer:   defs 1
 selfie_index:   defs 1
+paused:         defs 1              ; ESC in a building

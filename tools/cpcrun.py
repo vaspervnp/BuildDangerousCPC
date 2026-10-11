@@ -26,7 +26,7 @@ LFSR noise, logarithmic volumes; no envelopes, which the game doesn't use).
 
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
-Keys: up down left right fire mark lang (keyboard) and jup jdown jleft jright jfire1 jfire2.
+Keys: up down left right fire mark lang esc (keyboard) and jup jdown jleft jright jfire1 jfire2.
 """
 import argparse
 import os
@@ -41,7 +41,7 @@ SLICE_T = 64
 
 KEYS = {
     'up': (0, 0), 'right': (0, 1), 'down': (0, 2), 'left': (1, 0),
-    'fire': (5, 7), 'mark': (4, 6), 'lang': (4, 4),
+    'fire': (5, 7), 'mark': (4, 6), 'lang': (4, 4), 'esc': (8, 2),
     'jup': (9, 0), 'jdown': (9, 1), 'jleft': (9, 2), 'jright': (9, 3),
     'jfire2': (9, 4), 'jfire1': (9, 5),
 }

@@ -40,8 +40,28 @@ building_new:
 play_begin:
         ld a,GS_PLAY
         ld (game_state),a
+        xor a
+        ld (paused),a
         ld a,(bld_start)
         jp room_change
+
+; ESC in a building: stop everything (the clock included) until ESC again.
+pause_toggle:
+        ld a,(paused)
+        xor 1
+        ld (paused),a
+        ld d,1                  ; the caption row
+        jr z,.resume
+        call sound_init         ; silence
+        call clear_row
+        ld a,STR_PAUSED
+        call get_string
+        ld d,1
+        ld c,PEN2_MASK
+        jp print_centered
+.resume:
+        call clear_row
+        jp caption_reset
 
 ; A scene ended or was skipped with Fire.
 scene_finish:

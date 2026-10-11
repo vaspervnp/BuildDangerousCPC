@@ -47,7 +47,13 @@ main_loop:
 .scene_end:
         call scene_finish
         jr main_loop
-.play:  call player_update
+.play:  ld a,(keys_new)
+        and KEY_PAUSE
+        call nz,pause_toggle
+        ld a,(paused)
+        or a
+        jr nz,main_loop         ; paused: everything waits, the clock too
+        call player_update
         call nephew_update
         call hud_update
         call play_update

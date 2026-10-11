@@ -9,6 +9,7 @@ KEY_RIGHT       equ %00001000
 KEY_FIRE        equ %00010000
 KEY_MARK        equ %00100000
 KEY_LANG        equ %01000000
+KEY_PAUSE       equ %10000000
 
 input_read:
         ld hl,kb_matrix
@@ -83,4 +84,5 @@ key_map:
         db 4,%01000000,KEY_MARK         ; M
         db 9,%00010000,KEY_MARK         ; joystick fire 2
         db 4,%00010000,KEY_LANG         ; L
+        db 8,%00000100,KEY_PAUSE        ; ESC
         db #ff

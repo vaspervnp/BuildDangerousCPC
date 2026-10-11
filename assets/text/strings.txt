@@ -59,7 +59,7 @@ TITLE_TAG | Immortal. Unimpressed. On duty. | Αθάνατος. Ασυγκίνη
 TITLE_START | Press fire to start | Πατήστε fire για να ξεκινήσετε
 TITLE_LANG | L: Ελληνικά | L: English
 TITLE_KEYS1 | Move: cursor keys or Q A O P | Κίνηση: βελάκια ή Q A O P
-TITLE_KEYS2 | Space: trap   M: sign off | Space: παγίδα   M: υπογραφή
+TITLE_KEYS2 | Space: trap  M: sign off  ESC: pause | Space: παγίδα  M: υπογραφή  ESC: παύση
 TITLE_KEYS3 | Up at the exit door: leave | Πάνω στην έξοδο: αποχώρηση
 LBL_HISCORE | Hi-score | Ρεκόρ
 LBL_FINAL | Final score | Τελικό σκορ
@@ -137,3 +137,5 @@ NEPHEW_HI2 | Bambis: Say hi to my 12 followers! | Μπάμπης: Πες γει�
 NEPHEW_BYE2 | Flash was off. One more! ...Done. | Δεν είχε φλας. Άλλη μία! ...Τέλεια.
 NEPHEW_HI3 | Bambis: Uncle says you're too slow. | Μπάμπης: Ο θείος λέει ότι αργείς.
 NEPHEW_BYE3 | Now you're content! Bye! | Τώρα είσαι περιεχόμενο! Γεια!
+PAUSED | Paused. ESC to carry on. | Παύση. ESC για συνέχεια.
+PHONE_HINT | Up/down, then fire: | Πάνω/κάτω και fire:

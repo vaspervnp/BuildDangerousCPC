@@ -17,6 +17,15 @@ goto 0 7 21 right               ; the foot of the up escalator
 goto 0 8 20 up                  ; step on...
 run 2
 psgon 9                         ; the escalator hums
+poke clock_lo #50               ; a known clock
+run 1 esc                       ; pause mid-ride: everything stops, the clock too
+expect paused 1
+expect pl_x 8
+run 120
+expect pl_x 8
+expect clock_lo #50
+run 1 esc                       ; and carry on
+expect paused 0
 until pl_y 14 - 25              ; ...and ride the rest, no keys, in under 25 frames
 expect pl_x 14
 shot esc_top

@@ -176,6 +176,14 @@ phone_update:
         ld (call_state),a
         ld a,CALL_WAIT
         ld (call_timer),a
+        ld a,STR_PHONE_HINT     ; how to answer, on the spare row
+        call get_string
+        ld a,(call_row)
+        add a,3
+        ld d,a
+        ld e,PANEL_TEXT_COL
+        ld c,PEN2_MASK
+        call print_str
         jp draw_answers
 .answer:
         call panel_draw
