@@ -70,6 +70,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 | `assets/gfx/` | `.aseprite` sources (edit these) and their `.png` exports (what the build reads). |
 | `assets/buildings/` | Buildings: which rooms, how they connect (`left=`/`right=`/`up=`/`down=`), start position. Also clock, `misses_ok`, sign/welcome strings and wall `palette`. The converter checks that neighbours' edges line up and that flights through ceilings carry on in the room above. |
 | `assets/rooms/` | Room layouts as 40×23 text grids plus `hazard <type> <x> <row>` lines; legend in `tools/cpcgfx.py`. |
+| `assets/title.txt` | The title screen logo as a tile map (same characters as rooms). |
 | `assets/text/strings.txt` | Every in-game string, `ID \| English \| Greek`. |
 | `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, building + room text → `build/bld_*.asm`, strings → `build/strings.asm`. |
 | `tools/cpcrun.py` | Headless CPC test harness. `--wav file` renders what the AY played. |
@@ -132,6 +133,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — **Pause and tuning.** ESC pauses inside a building (clock too). The phone panel shows how to answer ("Up/down, then fire:"). Clocks raised by the distractions' cost, estimated by `tools/route.py` (Mall 310, Hotel 300, Hospital 270, Skyscraper 335). 359 checks pass. Binary 35.1K.
 - 2026-10-12 — **Real emulator check** in Caprice32 (snap, driven with `--autocmd` keys and screenshots): loads from the `.dsk`, title, intro, a building, a trap and a phone call all behave as in the headless harness. Tasha's answer window raised to 8 s after seeing it there. **Call times are random** now (requested): the building file gives the number of calls, the first comes 20–51 s in and the next ones 30–61 s apart.
 - 2026-10-12 — **Loading screen.** Dusk, the new tower in scaffolding with a crane, lit and trap-sparking windows, ribbon and crowd, Inspector Thanos with hard hat, hi-vis vest and clipboard, BUILD in bricks and DANGEROUS on a hazard-tape banner. Painted in Aseprite (Blender MCP unavailable), converted to Mode 0 with `tools/loadscreen.py`; a BASIC loader shows it while the game loads. Checked in Caprice32.
+- 2026-10-12 — **Title screen logo from building materials** (requested): BUILD in orange bricks with white mortar sitting on a steel girder, DANGEROUS in orange/white road-works barrier stripes, a string of work lamps above, Thanos and an electrocuted Thanos standing on the girder's ends. The logo is a tile map (`assets/title.txt`, converted by `cpcgfx.py tilemap`), three new tiles.
 
 ---
 

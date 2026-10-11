@@ -127,6 +127,34 @@ draw_cell:
         ret nc
         jp draw_hazard
 
+; Draw an RLE tile map (cpcgfx.py tilemap) from the top-left of the screen, skipping
+; black cells (the screen is clear). In: HL = map. Trashes AF,BC,DE,HL.
+draw_tilemap:
+        ld de,0
+.run:   ld a,(hl)
+        or a
+        ret z
+        ld b,a
+        inc hl
+        ld c,(hl)
+        inc hl
+.cell:  ld a,c
+        or a
+        jr z,.skip
+        push bc
+        push hl
+        call draw_tile_at
+        pop hl
+        pop bc
+.skip:  inc e
+        ld a,e
+        cp MAP_W
+        jr nz,.next
+        ld e,0
+        inc d
+.next:  djnz .cell
+        jr .run
+
 ; Draw tile A at D=row, E=col. Preserves DE; trashes AF,BC,HL.
 draw_tile_at:
         push de

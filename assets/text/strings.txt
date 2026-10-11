@@ -53,8 +53,6 @@ BLD_HOSP_WELCOME | Welcome to Mega Hospital. Get well soon! | Καλώς ήρθ�
 BLD_SKY_SIGN | The Skyscraper | Ο Ουρανοξύστης
 BLD_SKY_WELCOME | Welcome to my tower. Nothing to see! | Ο πύργος μου. Τίποτα ύποπτο εδώ!
 CAP_EVIDENCE | An insurance claim. Dated opening day! | Ασφαλιστήριο για τη μέρα των εγκαινίων!
-TITLE_1 | Build | Build
-TITLE_2 | Dangerous | Dangerous
 TITLE_TAG | Immortal. Unimpressed. On duty. | Αθάνατος. Ασυγκίνητος. Σε υπηρεσία.
 TITLE_START | Press fire to start | Πατήστε fire για να ξεκινήσετε
 TITLE_LANG | L: Ελληνικά | L: English

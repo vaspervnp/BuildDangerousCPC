@@ -38,46 +38,40 @@ title_draw:                     ; (L redraws it in the other language, without t
         ld (ink_table+2),a
         call palette_black
         call screen_clear
-        ld a,STR_TITLE_1
-        ld d,2
-        ld c,PEN1_MASK
-        call big_text
-        ld a,STR_TITLE_2
-        ld d,5
-        ld c,PEN1_MASK
-        call big_text
-        ld hl,thanos_gfx        ; Thanos, and Thanos mid-electrocution
-        ld de,9*256+17
+        ld hl,title_logo        ; BUILD in bricks on a girder, DANGEROUS in barrier stripes
+        call draw_tilemap
+        ld hl,thanos_gfx        ; on the girder: Thanos, and Thanos mid-electrocution
+        ld de,6*256+1
         call draw_sprite16
         ld a,AF_VIGNETTE+VF_ZAP_B
         call frame_addr
-        ld de,9*256+21
+        ld de,6*256+37
         call draw_sprite16
         ld a,STR_TITLE_TAG
-        ld d,12
+        ld d,15
         ld c,PEN3_MASK
         call print_text_centered
         ld a,STR_TITLE_START
-        ld d,15
+        ld d,17
         ld c,PEN2_MASK
         call print_text_centered
         ld a,STR_TITLE_LANG
-        ld d,17
+        ld d,18
         ld c,PEN1_MASK
         call print_text_centered
         ld a,STR_TITLE_KEYS1
-        ld d,19
-        ld c,PEN3_MASK
-        call print_text_centered
-        ld a,STR_TITLE_KEYS2
         ld d,20
         ld c,PEN3_MASK
         call print_text_centered
-        ld a,STR_TITLE_KEYS3
+        ld a,STR_TITLE_KEYS2
         ld d,21
         ld c,PEN3_MASK
         call print_text_centered
-        ld d,23
+        ld a,STR_TITLE_KEYS3
+        ld d,22
+        ld c,PEN3_MASK
+        call print_text_centered
+        ld d,24
         call hiscore_line
         jp palette_normal
 

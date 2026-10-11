@@ -1,0 +1,18 @@
+; Title screen logo (rows 0-14 of the screen; tools/cpcgfx.py tilemap).
+;   T bricks, Z barrier stripes, I steel girder, L work lamps. Thanos stands on the
+;   girder at both ends (sprites, campaign.asm title_show).
+  L    L    L    L    L    L    L    L  
+     TTTT  T   T TTTTT T     TTTT       
+     T   T T   T   T   T     T   T      
+     T   T T   T   T   T     T   T      
+     TTTT  T   T   T   T     T   T      
+     T   T T   T   T   T     T   T      
+     T   T T   T   T   T     T   T      
+     TTTT   TTT  TTTTT TTTTT TTTT       
+IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+  ZZ   Z  Z  Z  ZZ ZZZ ZZ   Z  Z Z ZZZ  
+  Z Z Z Z ZZ Z Z   Z   Z Z Z Z Z Z Z    
+  Z Z ZZZ Z ZZ Z Z ZZ  ZZ  Z Z Z Z ZZZ  
+  Z Z Z Z Z  Z Z Z Z   Z Z Z Z Z Z   Z  
+  ZZ  Z Z Z  Z  ZZ ZZZ Z Z  Z  ZZZ ZZZ  
+                                        
