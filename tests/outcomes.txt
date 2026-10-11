@@ -19,17 +19,21 @@ expect clock_hi 3
 expect clock_lo 0
 expect score+2 0
 
-; --- energy runs out: thrown out, game over
+; --- a trap costs no energy; a Miss on the last of it: thrown out, game over
 run 25 right
 expect pl_x 8
 run 5
-poke energy 1
 run 1 fire
-run 70                          ; the trap still plays out first
+run 70
+expect energy 16
+expect score+2 80               ; the disarm scored 50
+poke energy 4
+run 1 mark                      ; two live sockets left: a Miss
+run 3
 expect game_state 3
 expect outcome 3
 expect energy 0
-expect score+2 80               ; the disarm still scored 50
+expect score+2 0                ; 50 - 200, stops at 0
 run 45
 shot out_fired_scene
 run 1 fire                      ; skip the rest of the outro
@@ -41,7 +45,7 @@ expect pl_x 8
 run 1 fire
 run 3
 expect game_state 5             ; terminated
-expect hi_score+2 80
+expect hi_score+2 0
 shot out_gameover
 run 1 fire
 run 3

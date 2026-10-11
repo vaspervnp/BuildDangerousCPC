@@ -166,7 +166,7 @@ run 5
 run 1 up                        ; all four rooms signed off: out
 run 3
 expect pl_state 2
-expect energy 8                 ; 8 traps at half a hat each
+expect energy 16                ; traps cost time, not energy
 expect miss_tally 0
 expect game_state 3             ; outro: ribbon cut, crowd cheers
 run 160
@@ -177,7 +177,7 @@ shot sv_done
 run 1 fire                      ; Sunny Vale is the whole campaign so far: the ending
 run 3
 expect game_state 5
-expect hi_score+1 #39            ; 003900 recorded as the hi-score
+expect hi_score+1 #41            ; 004100 recorded as the hi-score
 shot sv_ending
 run 1 fire
 run 3

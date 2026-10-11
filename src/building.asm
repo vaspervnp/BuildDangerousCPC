@@ -11,7 +11,7 @@
 ;   per room: dw room data, db exit left, right, up, down (room index or NO_EXIT)
 
 MAX_ROOMS       equ 32          ; bld_marked is 4 bytes
-MISS_COST       equ 4           ; two hats; a trap costs half a hat
+MISS_COST       equ 4           ; two hats; traps cost no energy, only time
 MISS_TALLY_MAX  equ #99         ; BCD
 MISS_BORDER_FRAMES equ 12
 

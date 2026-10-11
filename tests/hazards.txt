@@ -25,7 +25,7 @@ expect pl_x 8
 run 5
 run 1 fire
 expect pl_state 1
-expect energy 15
+expect energy 16                ; traps cost time, not energy
 run 2
 shot hz_zap_flash               ; pen 0 flashed white
 run 4
@@ -40,7 +40,7 @@ shot hz_disarmed
 run 1 fire                      ; already disarmed: nothing happens
 run 5
 expect pl_state 0
-expect energy 15
+expect energy 16                ; traps cost time, not energy
 
 run 100
 shot hz_caption_gone
@@ -56,7 +56,7 @@ expect pl_x 25
 run 5
 run 1 fire
 expect pl_state 1
-expect energy 14
+expect energy 16
 run 40
 shot hz_greek_caption
 run 30

@@ -1,6 +1,6 @@
 ; ---------------------------------------------------------------- HUD band (rows 0-1)
 ; Row 0, left to right:
-;   hats (energy, two units per hat: a trap costs half a hat)
+;   hats (energy, two units per hat: a Miss costs two hats)
 ;   current-room checkbox, rooms signed off / rooms in the building
 ;   Miss icon and tally
 ;   clock dial (the crowd's patience) and seconds left

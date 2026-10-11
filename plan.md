@@ -119,7 +119,7 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 
 ### 5. Energy, Scoring, and the Outside Clock
 
-- **Energy:** 16 units shown as 8 hard hats in the HUD band (full / half / empty). Each hazard trigger = −1 unit (half a hat); each Miss = −4 units (two hats); collectible "hard hat" pickups (rare, 8×8, placed like hazards but safe) restore +1.
+- **Energy:** 16 units shown as 8 hard hats in the HUD band (full / half / empty). Hazard triggers cost no energy (their cost is the clock time the vignette takes); each Miss = −4 units (two hats); collectible "hard hat" pickups (rare, 8×8, placed like hazards but safe) restore +1.
 - **Outside clock:** seconds per building (`clock` in the building file, default 300, BCD so it prints without division), ticking every 50 frames while Thanos is inside, shown as seconds plus a 9-state 8×8 dial tile that empties in eighths. Running out ends the building: soft fail if at least half the rooms are signed off, fail otherwise (see scenario.md).
 - **Miss tolerance (grading, not gating):** each building defines a miss-tally threshold (`misses_ok`, default 2) used only to pick the win verdict: no Misses = clean sweep, up to the threshold = "a few misses", more = "passed, barely" — stored in the building header. It does **not** affect whether the player is allowed to exit; the exit gate above is unconditional once all rooms are marked.
 - **Scoring:** 6-digit BCD score. +50 per hazard disarmed, +100 per clean sign-off, −200 per Miss (never below 0). Winning adds seconds left ×10, energy units ×25, and +500 for a clean sweep; the results panel itemises them.

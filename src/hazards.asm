@@ -1,7 +1,10 @@
 ; ---------------------------------------------------------------- hazards
 ; Room hazard list: count, then per hazard 4 bytes: x, row, type, state.
-; Triggering an armed hazard is the only way to disarm it: it always plays the
-; type's vignette and always costs energy.
+; Triggering an armed hazard is the only way to disarm it: it always plays the type's
+; vignette. It costs time (the clock runs on while he is being wrecked), not energy:
+; energy is for Misses. TRAP_COST is per-type data if that ever needs tuning.
+
+TRAP_COST       equ 0
 
 ; Type ids follow HAZARD_TYPES in tools/cpcgfx.py.
 HZ_ELECTRIC     equ 0
@@ -45,29 +48,29 @@ HZT_SIZE        equ 5
 
 hz_types:
         dw vig_electric
-        db HZ_ELECTRIC*2, STR_CAP_ZAP, 1
+        db HZ_ELECTRIC*2, STR_CAP_ZAP, TRAP_COST
         dw vig_bite
-        db HZ_BITE*2, STR_CAP_BITE, 1
+        db HZ_BITE*2, STR_CAP_BITE, TRAP_COST
         dw vig_drown
-        db HZ_DROWN*2, STR_CAP_DROWN, 1
+        db HZ_DROWN*2, STR_CAP_DROWN, TRAP_COST
         dw vig_head
-        db HZ_HEAD*2, STR_CAP_HEAD, 1
+        db HZ_HEAD*2, STR_CAP_HEAD, TRAP_COST
         dw vig_cut
-        db HZ_CUT*2, STR_CAP_CUT, 1
+        db HZ_CUT*2, STR_CAP_CUT, TRAP_COST
         dw vig_impale
-        db HZ_IMPALE*2, STR_CAP_IMPALE, 1
+        db HZ_IMPALE*2, STR_CAP_IMPALE, TRAP_COST
         dw vig_squash
-        db HZ_SQUASH*2, STR_CAP_SQUASH, 1
+        db HZ_SQUASH*2, STR_CAP_SQUASH, TRAP_COST
         dw vig_fire
-        db HZ_FIRE*2, STR_CAP_FIRE, 1
+        db HZ_FIRE*2, STR_CAP_FIRE, TRAP_COST
         dw vig_ice
-        db HZ_ICE*2, STR_CAP_ICE, 1
+        db HZ_ICE*2, STR_CAP_ICE, TRAP_COST
         dw vig_poison
-        db HZ_POISON*2, STR_CAP_POISON, 1
+        db HZ_POISON*2, STR_CAP_POISON, TRAP_COST
         dw vig_suck
-        db HZ_SUCK*2, STR_CAP_SUCK, 1
+        db HZ_SUCK*2, STR_CAP_SUCK, TRAP_COST
         dw vig_catapult
-        db HZ_CATAPULT*2, STR_CAP_CATAPULT, 1
+        db HZ_CATAPULT*2, STR_CAP_CATAPULT, TRAP_COST
         dw vig_evidence
         db HZ_EVIDENCE*2, STR_CAP_EVIDENCE, 0
 hz_types_end:
