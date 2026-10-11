@@ -19,6 +19,8 @@ TILE_CHECK_DONE equ 14
 TILE_EXIT_T     equ 15          ; building exit door
 TILE_EXIT_B     equ 16
 TILE_HAT_HALF   equ 17          ; HUD: half a hat of energy left
+TILE_MISS       equ 18          ; HUD: Miss tally icon
+TILE_DIAL_0     equ 19          ; HUD: clock dial, full ... TILE_DIAL_0+8 empty
 
 TILEF_SOLID     equ 1
 TILEF_CLIMB     equ 2
@@ -42,3 +44,5 @@ tile_flags:
         db 0                    ; EXIT_T
         db 0                    ; EXIT_B
         db 0                    ; HAT_HALF
+        db 0                    ; MISS
+        ds 9,0                  ; DIAL_0..8

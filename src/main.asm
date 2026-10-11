@@ -17,16 +17,22 @@ start:
         ld (lang),a             ; English until L is pressed in the menu
         ld (keys),a
         ld hl,(boot_building)
-        call building_start
-        call hud_init
-        call player_init
+        ld (bld_ptr),hl
+        call game_new
         ei
 
 main_loop:
         call wait_vbl
         call input_read
+        ld a,(game_state)
+        cp GS_PLAY
+        jr nz,.outcome
         call player_update
         call hud_update
+        call play_update
+        jr main_loop
+.outcome:
+        call outcome_update
         jr main_loop
 
 boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other buildings
@@ -41,6 +47,7 @@ boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other b
         include "player.asm"
         include "text.asm"
         include "hud.asm"
+        include "outcome.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

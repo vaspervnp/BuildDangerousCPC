@@ -17,3 +17,17 @@ CAP_ICE | Freezer handle: decorative. Me: frozen. | Καταψύκτης χωρ�
 CAP_POISON | 'Cleaning supplies'. I feel cleansed. | 'Καθαριστικά'. Νιώθω πολύ καθαρός.
 CAP_SUCK | Vent with no grille. It inhaled me. | Αεραγωγός χωρίς σχάρα. Με ρούφηξε.
 CAP_CATAPULT | Cable snapped. Saw the roof. Both sides. | Κόπηκε το συρματόσχοινο. Είδα τη στέγη.
+OUT_TIMEUP | Time's up! | Τέλος χρόνου!
+OUT_DELAY | The owner delays the opening. | Ο ιδιοκτήτης αναβάλλει τα εγκαίνια.
+OUT_RIBBON | The ribbon is cut. The crowd goes in. | Η κορδέλα κόπηκε. Το κοινό μπαίνει.
+OUT_FIRED | Contract terminated. | Η σύμβαση καταγγέλθηκε.
+OUT_NOENERGY | Reputation: zero. Even for an immortal. | Φήμη: μηδέν. Ακόμα και για αθάνατο.
+OUT_CLEAN | Clean sweep! Not a single miss. | Καθαρή δουλειά! Καμία αστοχία.
+OUT_GOOD | A few misses. Nobody noticed. | Λίγες αστοχίες. Κανείς δεν κατάλαβε.
+OUT_BARELY | Passed. Barely. | Πέρασε. Με το ζόρι.
+LBL_MISSES | Misses | Αστοχίες
+LBL_TIME | Time bonus | Μπόνους χρόνου
+LBL_ENERGY | Energy bonus | Μπόνους ενέργειας
+LBL_CLEAN | Clean sweep | Καθαρή σάρωση
+LBL_SCORE | Score | Βαθμολογία
+PRESS_FIRE | Press fire | Πατήστε fire

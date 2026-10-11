@@ -250,6 +250,8 @@ vig_update:
         ld e,(ix+HZ_X)
         ld d,(ix+HZ_ROW)
         call draw_cell
+        ld de,SCORE_DISARM
+        call score_add
         ld a,PS_WALK
         ld (pl_state),a
         jp player_draw

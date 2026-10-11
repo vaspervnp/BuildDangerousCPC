@@ -74,8 +74,8 @@ The owner of the Skyscraper isn't just cheap — he's deliberately under-buildin
 Every room must be marked safe before the exit unlocks — that part isn't optional or graded, it's the gate. What's graded is *how* he got there:
 
 - **Win (clean/good exit):** every room marked safe, energy above zero, exit reached before the outside clock runs out. The fewer Misses on the building's tally, the better the grade — a zero-Miss run is a "clean sweep" and the best version of this ending.
-- **Partial/soft-fail:** the outside clock runs out before every room is marked, but energy is still above zero and he'd gotten through most of the building — owner is embarrassed into a short delay, small reputation penalty, proceed to next building anyway.
-- **Fail:** energy hits zero at any point, or the clock runs out with too much of the building still unchecked — contract-ending outcome for that run (game over, or a "fired, try again" restart depending on difficulty mode).
+- **Partial/soft-fail:** the outside clock runs out before every room is marked, but energy is still above zero and at least half the rooms are signed off — owner is embarrassed into a short delay, small reputation penalty, proceed to next building anyway.
+- **Fail:** energy hits zero at any point, or the clock runs out with fewer than half the rooms signed off — contract-ending outcome for that run (game over, or a "fired, try again" restart depending on difficulty mode).
 
 ## Scoring
 

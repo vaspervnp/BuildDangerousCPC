@@ -57,8 +57,33 @@ local gen = {}
 
 ------------------------------------------------------------------ tiles (8x8)
 -- Order must match TILE_* in src/tiles.asm and ROOM_LEGEND in tools/cpcgfx.py.
+-- Clock dial: ring with the time left as an orange pie, emptying clockwise from 12 o'clock.
+local function dial(eighthsGone)
+  local rows = {}
+  for y = 0, 7 do
+    local r = {}
+    for x = 0, 7 do
+      local dx, dy = x - 3.5, y - 3.5
+      local d = math.sqrt(dx * dx + dy * dy)
+      local ch = "K"
+      if d <= 3.9 then
+        if d > 2.9 then
+          ch = "W"
+        else
+          local a = math.atan(dx, -dy)
+          if a < 0 then a = a + 2 * math.pi end
+          ch = (a / (2 * math.pi) < eighthsGone / 8) and "K" or "O"
+        end
+      end
+      r[#r + 1] = ch
+    end
+    rows[#rows + 1] = table.concat(r)
+  end
+  return rows
+end
+
 gen.tiles = function()
-  saveStrip("tiles", cells({
+  local list = {
     { "KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK" }, -- 0 BLACK
     { "KKKKKKKK","KKKBKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKB","KKKKKKKK","KKKKKKKK" }, -- 1 WALLPAPER
     { "WWWWWWWW","OOOOOOKO","OOOOOOKO","KKKKKKKK","BKBBBBBB","BBBBBKBB","BBKBBBBB","KKKKKKKK" }, -- 2 FLOOR
@@ -77,7 +102,10 @@ gen.tiles = function()
     { "WWWWWWWW","WBBBBBBW","WBBBOBBW","WBBBOOBW","WOOOOOOW","WBBBOOBW","WBBBOBBW","WBBBBBBW" }, -- 15 EXIT_T
     { "WBBBBBBW","WBBBBBBW","WBBBBBBW","WBBBBBBW","WBBBBBBW","WBBBBBBW","WBBBBBBW","WBBBBBBW" }, -- 16 EXIT_B
     { "KKKKKKKK","KKKWBKKK","KKWWKBKK","KWWWKKBK","KWWOKKBK","WWWWBBBB","KKKKKKKK","KKKKKKKK" }, -- 17 HAT_HALF
-  }), 8, 8)
+    { "KKKKKKKK","KOKKKKOK","KKOKKOKK","KKKOOKKK","KKKOOKKK","KKOKKOKK","KOKKKKOK","KKKKKKKK" }, -- 18 MISS icon
+  }
+  for s = 0, 8 do list[#list + 1] = dial(s) end                                                     -- 19-27 DIAL_0..8
+  saveStrip("tiles", cells(list), 8, 8)
 end
 
 ------------------------------------------------------------------ Thanos (16x16)

@@ -1,16 +1,38 @@
 ; ---------------------------------------------------------------- HUD band (rows 0-1)
-; Row 0: energy as hard hats, two units per hat (a trap costs half a hat).
-; Row 1: caption line, typed out a few characters per
-; frame (keeps every frame inside budget) and cleared after CAPTION_FRAMES.
-; Row 1 must stay plain black (TILE_BLACK): caption_clear just zeroes it.
+; Row 0, left to right:
+;   hats (energy, two units per hat: a trap costs half a hat)
+;   current-room checkbox, rooms signed off / rooms in the building
+;   Miss icon and tally
+;   clock dial (the crowd's patience) and seconds left
+;   score
+; Icons are tiles written into the map's HUD row, so room redraws keep them; numbers
+; are printed straight to the screen and must be reprinted after a full redraw.
+; Row 1: caption line, typed out a few characters per frame (keeps every frame inside
+; budget) and cleared after CAPTION_FRAMES. It must stay plain black (TILE_BLACK):
+; caption_clear just zeroes it.
 
 ENERGY_MAX      equ 16          ; units; shown as ENERGY_HATS hats
 ENERGY_HATS     equ 8
-ENERGY_ROW      equ 0
+HUD_ROW         equ 0
+ENERGY_ROW      equ HUD_ROW
 ENERGY_COL      equ 1
-ROOM_ICON_ROW   equ 0
-ROOM_ICON_COL   equ 11
+ROOM_ICON_ROW   equ HUD_ROW
+ROOM_ICON_COL   equ 10
+ROOMS_COL       equ 11          ; "nn/nn"
+MISS_ICON_COL   equ 17
+MISS_COL        equ 18
+DIAL_COL        equ 22
+CLOCK_COL       equ 23          ; 4 digits
+SCORE_COL       equ 33          ; 6 digits
 CAPTION_ROW     equ 1
+
+FRAMES_PER_SECOND equ 50
+DIAL_STEPS      equ 8
+
+SCORE_DISARM    equ #0050       ; BCD
+SCORE_SIGNOFF   equ #0100
+SCORE_MISS      equ #0200       ; taken off
+SCORE_CLEAN_SWEEP equ #0500
 CAPTION_FRAMES  equ 150         ; 3 seconds
 CAPTION_CPF     equ 2           ; characters typed per frame
 
@@ -19,9 +41,162 @@ hud_init:
         ld (energy),a
         xor a
         ld (border_timer),a
+        ld a,INK_BLACK
+        call set_border
         call caption_reset
+        ld a,TILE_MISS
+        ld d,HUD_ROW
+        ld e,MISS_ICON_COL
+        call hud_set_tile
         call hud_draw_room_status
-        jp hud_draw_energy
+        call hud_draw_energy
+        call hud_draw_dial
+        jp hud_draw_numbers
+
+; In: A = tile, D,E = HUD cell. Writes it into the map and draws it.
+hud_set_tile:
+        call map_addr_keep_a
+        ld (hl),a
+        jp draw_cell
+
+; Everything printed rather than tiled; needed after any full-screen redraw.
+hud_draw_numbers:
+        call hud_draw_rooms
+        call hud_draw_misses
+        call hud_draw_clock
+        jp hud_draw_score
+
+hud_draw_rooms:
+        ld d,HUD_ROW
+        ld e,ROOMS_COL
+        ld c,PEN3_MASK
+        ld hl,signed_bcd
+        ld b,1
+        call print_bcd
+        ld a,GLYPH_SLASH
+        call print_char
+        inc e
+        ld hl,rooms_bcd
+        ld b,1
+        jp print_bcd
+
+hud_draw_misses:
+        ld d,HUD_ROW
+        ld e,MISS_COL
+        ld c,PEN1_MASK
+        ld hl,miss_tally
+        ld b,1
+        jp print_bcd
+
+hud_draw_clock:
+        ld d,HUD_ROW
+        ld e,CLOCK_COL
+        ld c,PEN3_MASK
+        ld hl,clock_hi
+        ld b,2
+        jp print_bcd
+
+hud_draw_dial:
+        ld a,(dial_index)
+        add a,TILE_DIAL_0
+        ld d,HUD_ROW
+        ld e,DIAL_COL
+        jp hud_set_tile
+
+hud_draw_score:
+        ld d,HUD_ROW
+        ld e,SCORE_COL
+        ld c,PEN3_MASK
+        ld hl,score
+        ld b,3
+        jp print_bcd_zeros
+
+; One frame of the outside clock: a second goes every FRAMES_PER_SECOND frames, the
+; dial loses an eighth every dial_step seconds. Stops at zero.
+clock_update:
+        ld a,(clock_hi)
+        ld b,a
+        ld a,(clock_lo)
+        or b
+        ret z
+        ld hl,clock_frames
+        dec (hl)
+        ret nz
+        ld (hl),FRAMES_PER_SECOND
+        ld a,(clock_lo)
+        sub 1
+        daa
+        ld (clock_lo),a
+        ld a,(clock_hi)
+        sbc a,0
+        daa
+        ld (clock_hi),a
+        ld b,a
+        ld a,(clock_lo)
+        or b
+        jr z,.empty
+        ld hl,dial_ctr
+        dec (hl)
+        jp nz,hud_draw_clock
+        ld a,(dial_step)
+        ld (hl),a
+        ld a,(dial_index)
+        cp DIAL_STEPS-1         ; the last eighth only goes when the clock hits zero
+        jp nc,hud_draw_clock
+        inc a
+        jr .dial
+.empty: ld a,DIAL_STEPS
+.dial:  ld (dial_index),a
+        call hud_draw_dial
+        jp hud_draw_clock
+
+; In: DE = BCD amount 0-9999. Saturates at 999999.
+score_add:
+        ld hl,score+2
+        ld a,(hl)
+        add a,e
+        daa
+        ld (hl),a
+        dec hl
+        ld a,(hl)
+        adc a,d
+        daa
+        ld (hl),a
+        dec hl
+        ld a,(hl)
+        adc a,0
+        daa
+        ld (hl),a
+        jp nc,hud_draw_score
+        ld a,#99
+        jr score_fill
+
+; In: DE = BCD amount 0-9999. Stops at 0.
+score_sub:
+        ld hl,score+2
+        ld a,(hl)
+        sub e
+        daa
+        ld (hl),a
+        dec hl
+        ld a,(hl)
+        sbc a,d
+        daa
+        ld (hl),a
+        dec hl
+        ld a,(hl)
+        sbc a,0
+        daa
+        ld (hl),a
+        jp nc,hud_draw_score
+        xor a
+score_fill:
+        ld (hl),a
+        inc hl
+        ld (hl),a
+        inc hl
+        ld (hl),a
+        jp hud_draw_score
 
 ; Forget any caption in progress (the screen under it has been redrawn).
 caption_reset:
@@ -49,9 +224,7 @@ hud_draw_room_status:
         ld a,TILE_CHECK_DONE
 .set:   ld d,ROOM_ICON_ROW
         ld e,ROOM_ICON_COL
-        call map_addr_keep_a
-        ld (hl),a
-        jp draw_cell
+        jp hud_set_tile
 
 ; Hats are written into the HUD rows of the room map, so redraws keep them.
 hud_draw_energy:
@@ -102,21 +275,8 @@ caption_show:
         ret
 
 caption_clear:
-        ld hl,SCREEN+CAPTION_ROW*SCR_ROW_BYTES
-        ld a,8
-.line:  push hl
-        ld d,h
-        ld e,l
-        inc de
-        ld (hl),0
-        ld bc,SCR_ROW_BYTES-1
-        ldir
-        pop hl
-        ld bc,#0800
-        add hl,bc
-        dec a
-        jr nz,.line
-        ret
+        ld d,CAPTION_ROW
+        jp clear_row
 
 hud_update:
         ld a,(border_timer)

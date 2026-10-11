@@ -93,6 +93,27 @@ cell_addr:
         inc h
         ret
 
+; Zero one character row of the screen (pen 0). In: D = row. Preserves DE; trashes AF,BC,HL.
+clear_row:
+        push de
+        ld e,0
+        call cell_addr
+        ld a,8
+.line:  push hl
+        ld d,h
+        ld e,l
+        inc de
+        ld (hl),0
+        ld bc,SCR_ROW_BYTES-1
+        ldir
+        pop hl
+        ld bc,#0800
+        add hl,bc
+        dec a
+        jr nz,.line
+        pop de
+        ret
+
 ; Draw the room-map cell at D=row, E=col: its tile, plus the hazard sitting on it if
 ; bit 7 is set. Preserves DE; trashes AF,BC,HL.
 draw_cell:

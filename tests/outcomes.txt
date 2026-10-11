@@ -1,0 +1,85 @@
+; Milestone 6: every way a building can end, the results panel, and restarting.
+; Test building (one room, 3 live sockets, exit at col 36, default clock 300s).
+; outcome: 0 win, 1 soft fail (owner delays), 2 fail (ribbon cut), 3 fail (no energy).
+; Score is BCD: score+2 holds the last two digits (#50 = 80).
+
+pokew boot_building bld_test
+run 30
+expect game_state 0
+expect clock_hi 3
+expect clock_lo 0
+expect score+2 0
+
+; --- energy runs out: contract terminated
+run 25 right
+expect pl_x 8
+run 5
+poke energy 1
+run 1 fire
+run 70                          ; the trap still plays out first
+expect game_state 1
+expect outcome 3
+expect energy 0
+expect score+2 80               ; the disarm still scored 50
+shot out_fired
+run 10 left                     ; nothing moves on the panel
+expect pl_x 8
+
+; --- Fire: the building starts again from scratch
+run 1 fire
+run 30
+expect game_state 0
+expect energy 16
+expect pl_x 3
+expect *room_hazards+4 0        ; re-armed
+expect score+2 0
+expect clock_hi 3
+
+; --- time runs out with the only room signed off (with a Miss): soft fail
+run 1 mark
+run 3
+expect bld_signed 1
+expect miss_tally 1
+poke clock_hi 0
+poke clock_lo 2
+run 120
+expect clock_lo 0
+expect game_state 1
+expect outcome 1
+shot out_delay
+run 1 fire
+run 30
+expect game_state 0
+expect bld_signed 0
+expect bld_marked 0
+expect miss_tally 0
+
+; --- time runs out with nothing signed off: the ribbon is cut
+poke clock_hi 0
+poke clock_lo 1
+run 70
+expect game_state 1
+expect outcome 2
+shot out_ribbon
+run 1 fire
+run 30
+
+; --- the clock ticks once a second
+run 50
+expect clock_hi 2
+expect clock_lo #99
+
+; --- a win with one Miss (building allows 2): graded "a few misses"
+poke lang 1                     ; and check the panel in Greek
+run 1 mark
+run 3
+run 300 right
+run 5 left
+expect pl_x 36
+run 5
+run 1 up
+run 3
+expect game_state 1
+expect outcome 0
+expect miss_tally 1
+shot out_win_good

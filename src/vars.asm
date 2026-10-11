@@ -19,6 +19,21 @@ pl_wait:        defs 1
 pl_onladder:    defs 1
 old_xy:         defs 2
 
+game_state:     defs 1          ; GS_*
+outcome:        defs 1          ; OUT_*
+score:          defs 3          ; BCD, most significant byte first
+bonus_time:     defs 2          ; BCD, high byte first (these three are cleared together)
+bonus_energy:   defs 2
+bonus_clean:    defs 2
+bcd_lead:       defs 1
+
+clock_hi:       defs 1          ; seconds left, BCD; clock_hi/clock_lo adjacent
+clock_lo:       defs 1
+clock_frames:   defs 1
+dial_step:      defs 1          ; seconds per eighth of the dial
+dial_ctr:       defs 1
+dial_index:     defs 1          ; 0 full .. DIAL_STEPS empty
+
 energy:         defs 1
 border_timer:   defs 1
 caption_timer:  defs 1
@@ -30,12 +45,17 @@ vig_timer:      defs 1
 vig_hazard:     defs 2
 vig_row:        defs 1          ; row the last vignette frame was drawn at
 
+bld_ptr:        defs 2          ; building being played
 bld_rooms:      defs 1
+rooms_bcd:      defs 1
+bld_signed:     defs 1          ; rooms signed off
+signed_bcd:     defs 1
+miss_ok:        defs 1          ; BCD: Misses still graded "good"
 bld_room_list:  defs 2
 bld_marked:     defs MAX_ROOMS/8 ; bit per room: signed off
 cur_room:       defs 1
 cur_exits:      defs 4          ; neighbours: left, right, up, down (NO_EXIT = none)
-miss_tally:     defs 1
+miss_tally:     defs 1          ; BCD
 
 room_hazards:   defs 2          ; -> hazard list inside the current room's data
 room_map:       defs MAP_W*MAP_H
