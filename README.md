@@ -38,7 +38,7 @@ Requirements: `rasm`, `iDSK`, `make`, Python 3 with Pillow, and the `z80` packag
 make
 ```
 
-Produces `build/bd.dsk`. In an emulator (CPCEC, Caprice32, Arnold, WinAPE…) or on real hardware, insert the disk and type `RUN"BD`.
+Produces `build/bd.dsk`. In an emulator (CPCEC, Caprice32, Arnold, WinAPE…) or on real hardware, insert the disk and type `RUN"BD`: the loading screen appears as it loads, then the game starts. `tools/cap32.sh` runs the disk in the Caprice32 snap (optionally typing keys from a script file, with screenshots).
 
 ```bash
 make test
@@ -73,6 +73,9 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 | `assets/text/strings.txt` | Every in-game string, `ID \| English \| Greek`. |
 | `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, building + room text → `build/bld_*.asm`, strings → `build/strings.asm`. |
 | `tools/cpcrun.py` | Headless CPC test harness. `--wav file` renders what the AY played. |
+| `tools/loadscreen.py` | Loading screen: 320×200 painting → Mode 0 (best 16 of the 27 inks, Bayer dithering) + the BASIC loader `BD.BAS`. |
+| `tools/art/gen_loadscreen.lua` | Aseprite script that paints the loading screen (`assets/gfx/loadscreen.png`). |
+| `tools/cap32.sh` | Runs the disk in Caprice32. |
 | `tools/route.py` | Route planner: plans a clean run through a building and writes it as a harness script. |
 | `tools/art/gen_placeholder_art.lua` | Aseprite script that created the placeholder art. Set `ONLY = { name = true }` to regenerate a single asset; re-running an asset overwrites hand edits to it. |
 | `tests/` | Harness scripts. |
@@ -103,6 +106,8 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Distractions cost time, not energy.** Like traps, Tasha's calls and the nephew's selfies only run the clock down (the user asked for non-physical delays). The phone always comes (2–3 calls per building at random times after the first 20 seconds; answering well shortens it); the nephew can sometimes be avoided.
 - **Tasha's portrait is 32×32 plus an 8×8 mouth patch** (user's suggestion, to save memory): 272 bytes instead of two 48×48 frames (1,152).
 - **Variables live above the loaded binary**, at #A600 (former AMSDOS workspace, free once the firmware is off), assembled with rasm's `nocode` and zeroed at boot. Frees ~1.2K of the load-limited area.
+- **The loading screen is painted, not rendered.** The plan was a Blender scene rendered photorealistically, but the Blender MCP didn't respond, so (as the user asked in that case) it is painted in Aseprite by a script: full-colour gradients, lighting and glow at 320×200, which `tools/loadscreen.py` halves to Mode 0, picks the best 16 inks for, and Bayer-dithers (Floyd–Steinberg was tried; it turned the sky to noise). DANGEROUS sits on a black hazard-tape banner in exact CPC colours so the dithering leaves it legible.
+- **Disk layout:** `BD.BAS` (ASCII BASIC loader: Mode 0, inks, `LOAD"SCREEN.BIN",&C000`, `RUN"GAME"`), `SCREEN.BIN`, `GAME.BIN`. `RUN"BD` finds BD.BAS before any BD.BIN.
 - **Room data is generated per building** into one assembly file with the room records (data pointer + left/right/up/down neighbours) and the rooms' data, so hazard states live in RAM per building.
 
 ## Log
@@ -126,6 +131,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — **Distractions** (requested: non-physical obstacles that delay the inspection). Tasha (Τασία) phones 2–3 times per building — her face in a corner window, six rotating dialogues with a right answer that ends the call fast (+50) and a wrong one (or silence) that earns a longer reply and a rant. Bambis (Μπάμπης), the owner's influencer nephew, paces a floor in 7 rooms and stops Thanos for a selfie (two flashes, a caption) once per visit. Portrait reworked to 32×32 + mouth patch, variables moved above the loaded binary. New `tests/phone.txt`, `tests/nephew.txt`; 15 scripts, 354 checks. Binary 34.9K, ~3.4K free.
 - 2026-10-11 — **Pause and tuning.** ESC pauses inside a building (clock too). The phone panel shows how to answer ("Up/down, then fire:"). Clocks raised by the distractions' cost, estimated by `tools/route.py` (Mall 310, Hotel 300, Hospital 270, Skyscraper 335). 359 checks pass. Binary 35.1K.
 - 2026-10-12 — **Real emulator check** in Caprice32 (snap, driven with `--autocmd` keys and screenshots): loads from the `.dsk`, title, intro, a building, a trap and a phone call all behave as in the headless harness. Tasha's answer window raised to 8 s after seeing it there. **Call times are random** now (requested): the building file gives the number of calls, the first comes 20–51 s in and the next ones 30–61 s apart.
+- 2026-10-12 — **Loading screen.** Dusk, the new tower in scaffolding with a crane, lit and trap-sparking windows, ribbon and crowd, Inspector Thanos with hard hat, hi-vis vest and clipboard, BUILD in bricks and DANGEROUS on a hazard-tape banner. Painted in Aseprite (Blender MCP unavailable), converted to Mode 0 with `tools/loadscreen.py`; a BASIC loader shows it while the game loads. Checked in Caprice32.
 
 ---
 

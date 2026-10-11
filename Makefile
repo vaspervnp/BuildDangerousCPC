@@ -49,10 +49,18 @@ $(B)/bld_%.asm: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/cpcg
 $(B)/bd.bin: $(SRC) $(ASSETS)
 	$(RASM) src/main.asm -I. -ob $@ -os $(B)/bd.sym -s -sl
 
-$(B)/bd.dsk: $(B)/bd.bin
+# The loading screen: a 320x200 painting -> Mode 0 screen + the BASIC loader (BD.BAS).
+$(B)/screen.bin $(B)/bd.bas: assets/gfx/loadscreen.png tools/loadscreen.py | $(B)
+	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas
+
+# The disk: RUN"BD finds BD.BAS (loader: inks, SCREEN.BIN to #C000, RUN"GAME").
+$(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas
 	rm -f $@
+	cp $(B)/bd.bin $(B)/game.bin
 	$(IDSK) $@ -n
-	$(IDSK) $@ -i $< -t 1 -c 1000 -e 1000
+	$(IDSK) $@ -i $(B)/bd.bas -t 0
+	$(IDSK) $@ -i $(B)/screen.bin -t 1 -c c000
+	$(IDSK) $@ -i $(B)/game.bin -t 1 -c 1000 -e 1000
 
 # Planned clean runs through each campaign building (tools/route.py), run by `make test`.
 tests/route_%.txt: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/route.py tools/cpcgfx.py
