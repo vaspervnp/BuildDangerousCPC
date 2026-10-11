@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
-"""Loading screen: a full-colour 320x200 picture -> Amstrad CPC Mode 0 (160x200, 16 inks).
+"""Loading screen: a full-colour 16:10 picture -> Amstrad CPC Mode 0 (160x200, 16 inks).
 
-  loadscreen.py IN.png SCREEN.BIN LOADER.BAS [--preview OUT.png]
+  loadscreen.py IN.png|jpg SCREEN.BIN LOADER.BAS [--preview OUT.png] [--dither ordered|fs]
 
-Halves the width (Mode 0 pixels are twice as wide), picks the 16 of the CPC's 27 colours
+Scales to 160x200 (Mode 0 pixels are twice as wide), picks the 16 of the CPC's 27 colours
 that fit the picture best (black always kept for pen 0, the border), dithers with
 Floyd-Steinberg, and writes the screen as the 16K at #C000 in CPC memory order. LOADER.BAS
 is the disk's BD.BAS (ASCII BASIC; RUN"BD finds it before BD.BIN): Mode 0, the inks, load
 the picture to #C000 (it appears as it loads, the classic way), then run the game (GAME.BIN).
 """
 import argparse
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageFilter
 
 LEVELS = (0, 128, 255)
 # firmware colour n = 9*green + 3*red + blue, each 0/1/2
 CPC = [(LEVELS[(n // 3) % 3], LEVELS[n // 9], LEVELS[n % 3]) for n in range(27)]
-WEIGHTS = (3, 4, 2)            # rough perceptual weighting for R, G, B
 
 
 def dist(a, b):
-    return sum(w * (x - y) ** 2 for w, x, y in zip(WEIGHTS, a, b))
+    """'Redmean' colour distance: cheap, and much closer to the eye than plain RGB."""
+    rm = (a[0] + b[0]) / 2
+    dr, dg, db = a[0] - b[0], a[1] - b[1], a[2] - b[2]
+    return (2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db
 
 
 def pick_inks(pixels, count=16):
@@ -48,7 +50,7 @@ def pick_inks(pixels, count=16):
     return inks
 
 
-def dither(img, inks, strength=0.85):
+def dither(img, inks, strength=0.7):
     w, h = img.size
     buf = [[list(img.getpixel((x, y))) for x in range(w)] for y in range(h)]
     pal = [CPC[i] for i in inks]
@@ -72,7 +74,7 @@ def dither(img, inks, strength=0.85):
 BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 
 
-def dither_ordered(img, inks, spread=56):
+def dither_ordered(img, inks, spread=40):
     """4x4 Bayer: a fixed pattern, the regular cross-hatch of classic CPC screens."""
     w, h = img.size
     pal = [CPC[i] for i in inks]
@@ -118,16 +120,26 @@ def main():
     ap.add_argument('basic')
     ap.add_argument('--preview')
     ap.add_argument('--dither', choices=('ordered', 'fs'), default='ordered')
+    ap.add_argument('--saturation', type=float, default=1.35)
+    ap.add_argument('--contrast', type=float, default=1.15)
+    ap.add_argument('--inks', help='the 16 firmware colours to use (comma-separated), '
+                                   'instead of picking them; 0 first')
     args = ap.parse_args()
     im = Image.open(args.src).convert('RGB')
-    if im.size != (320, 200):
-        raise SystemExit(f"{args.src}: expected 320x200, got {im.size}")
-    half = Image.new('RGB', (160, 200))
-    for y in range(200):
-        for x in range(160):
-            a, b = im.getpixel((2 * x, y)), im.getpixel((2 * x + 1, y))
-            half.putpixel((x, y), tuple((p + q) // 2 for p, q in zip(a, b)))
-    inks = pick_inks([half.getpixel((x, y)) for y in range(200) for x in range(160)])
+    w, h = im.size
+    if abs(w / h - 1.6) > 0.03:
+        raise SystemExit(f"{args.src}: expected a 16:10 picture (320x200, 1024x640...), got {im.size}")
+    half = im.resize((160, 200), Image.LANCZOS)     # Mode 0: half the width, same height
+    # the CPC's inks are saturated: lift a dark, hazy picture towards them
+    half = ImageEnhance.Color(half).enhance(args.saturation)
+    half = ImageEnhance.Contrast(half).enhance(args.contrast)
+    half = half.filter(ImageFilter.UnsharpMask(radius=1, percent=60, threshold=2))
+    if args.inks:
+        inks = [int(v) for v in args.inks.split(',')]
+        if len(inks) != 16 or inks[0] != 0 or len(set(inks)) != 16 or not all(0 <= i < 27 for i in inks):
+            raise SystemExit("--inks: 16 different colours 0-26, black (0) first")
+    else:
+        inks = pick_inks([half.getpixel((x, y)) for y in range(200) for x in range(160)])
     pens = dither_ordered(half, inks) if args.dither == 'ordered' else dither(half, inks)
     open(args.screen, 'wb').write(encode(pens))
     open(args.basic, 'wb').write(loader(inks))

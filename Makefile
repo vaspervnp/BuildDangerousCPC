@@ -52,9 +52,11 @@ $(B)/bld_%.asm: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/cpcg
 $(B)/bd.bin: $(SRC) $(ASSETS)
 	$(RASM) src/main.asm -I. -ob $@ -os $(B)/bd.sym -s -sl
 
-# The loading screen: a 320x200 painting -> Mode 0 screen + the BASIC loader (BD.BAS).
-$(B)/screen.bin $(B)/bd.bas: assets/gfx/loadscreen.png tools/loadscreen.py | $(B)
-	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas
+# The loading screen: the picture -> Mode 0 screen + the BASIC loader (BD.BAS). The inks
+# are picked by hand for the dusk sky (the automatic pick turns it grey).
+LOADSCREEN_INKS := 0,1,3,6,4,10,5,11,15,2,24,14,16,23,25,26
+$(B)/screen.bin $(B)/bd.bas: assets/gfx/loadscreen_photo.jpg tools/loadscreen.py | $(B)
+	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas --inks $(LOADSCREEN_INKS)
 
 # The disk: RUN"BD finds BD.BAS (loader: inks, SCREEN.BIN to #C000, RUN"GAME").
 $(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas

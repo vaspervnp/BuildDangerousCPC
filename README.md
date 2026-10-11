@@ -74,7 +74,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 | `assets/text/strings.txt` | Every in-game string, `ID \| English \| Greek`. |
 | `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, building + room text → `build/bld_*.asm`, strings → `build/strings.asm`. |
 | `tools/cpcrun.py` | Headless CPC test harness. `--wav file` renders what the AY played. |
-| `tools/loadscreen.py` | Loading screen: 320×200 painting → Mode 0 (best 16 of the 27 inks, Bayer dithering) + the BASIC loader `BD.BAS`. |
+| `tools/loadscreen.py` | Loading screen: a 16:10 picture → Mode 0 (16 of the 27 inks, picked or given with `--inks`; Bayer or Floyd–Steinberg dithering; `--preview`) + the BASIC loader `BD.BAS`. |
 | `tools/art/gen_loadscreen.lua` | Aseprite script that paints the loading screen (`assets/gfx/loadscreen.png`). |
 | `tools/cap32.sh` | Runs the disk in Caprice32. |
 | `tools/route.py` | Route planner: plans a clean run through a building and writes it as a harness script. |
@@ -107,7 +107,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Distractions cost time, not energy.** Like traps, Tasha's calls and the nephew's selfies only run the clock down (the user asked for non-physical delays). The phone always comes (2–3 calls per building at random times after the first 20 seconds; answering well shortens it); the nephew can sometimes be avoided.
 - **Tasha's portrait is 32×32 plus an 8×8 mouth patch** (user's suggestion, to save memory): 272 bytes instead of two 48×48 frames (1,152).
 - **Variables live above the loaded binary**, at #A600 (former AMSDOS workspace, free once the firmware is off), assembled with rasm's `nocode` and zeroed at boot. Frees ~1.2K of the load-limited area.
-- **The loading screen is painted, not rendered.** The plan was a Blender scene rendered photorealistically, but the Blender MCP didn't respond, so (as the user asked in that case) it is painted in Aseprite by a script: full-colour gradients, lighting and glow at 320×200, which `tools/loadscreen.py` halves to Mode 0, picks the best 16 inks for, and Bayer-dithers (Floyd–Steinberg was tried; it turned the sky to noise). DANGEROUS sits on a black hazard-tape banner in exact CPC colours so the dithering leaves it legible.
+- **The loading screen is the user's photorealistic picture** (`assets/gfx/loadscreen_photo.jpg`, 1024×637). `tools/loadscreen.py` scales it to Mode 0's 160×200, lifts saturation and contrast a little (the CPC's inks are saturated; a dark hazy photo turns to mud), sharpens, and Bayer-dithers it (Floyd–Steinberg was noisier). The 16 inks are picked by hand in the Makefile: the automatic pick (nearest single ink per pixel) turned the violet dusk sky grey, since it doesn't know dithering mixes inks. The earlier painted version (`tools/art/gen_loadscreen.lua`, `loadscreen.png`) is kept as an alternative; Blender's MCP didn't respond, which is why it was painted.
 - **Disk layout:** `BD.BAS` (ASCII BASIC loader: Mode 0, inks, `LOAD"SCREEN.BIN",&C000`, `RUN"GAME"`), `SCREEN.BIN`, `GAME.BIN`. `RUN"BD` finds BD.BAS before any BD.BIN.
 - **Room data is generated per building** into one assembly file with the room records (data pointer + left/right/up/down neighbours) and the rooms' data, so hazard states live in RAM per building.
 
@@ -134,6 +134,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-12 — **Real emulator check** in Caprice32 (snap, driven with `--autocmd` keys and screenshots): loads from the `.dsk`, title, intro, a building, a trap and a phone call all behave as in the headless harness. Tasha's answer window raised to 8 s after seeing it there. **Call times are random** now (requested): the building file gives the number of calls, the first comes 20–51 s in and the next ones 30–61 s apart.
 - 2026-10-12 — **Loading screen.** Dusk, the new tower in scaffolding with a crane, lit and trap-sparking windows, ribbon and crowd, Inspector Thanos with hard hat, hi-vis vest and clipboard, BUILD in bricks and DANGEROUS on a hazard-tape banner. Painted in Aseprite (Blender MCP unavailable), converted to Mode 0 with `tools/loadscreen.py`; a BASIC loader shows it while the game loads. Checked in Caprice32.
 - 2026-10-12 — **Title screen logo from building materials** (requested): BUILD in orange bricks with white mortar sitting on a steel girder, DANGEROUS in orange/white road-works barrier stripes, a string of work lamps above, Thanos and an electrocuted Thanos standing on the girder's ends. The logo is a tile map (`assets/title.txt`, converted by `cpcgfx.py tilemap`), three new tiles.
+- 2026-10-12 — **Loading screen from the user's photorealistic picture**, converted to Mode 0 (hand-picked inks for the dusk sky, saturation/contrast lift, Bayer dithering); checked in Caprice32 together with the new title.
 
 ---
 
