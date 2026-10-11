@@ -123,6 +123,9 @@ clock_update:
         dec (hl)
         ret nz
         ld (hl),FRAMES_PER_SECOND
+        ld hl,(bld_elapsed)     ; seconds into the inspection (Tasha's call times)
+        inc hl
+        ld (bld_elapsed),hl
         ld a,(clock_lo)
         sub 1
         daa

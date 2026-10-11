@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------- variables
-; Uninitialised RAM; it is part of the loaded binary for now (small enough not to matter).
+; RAM above the loaded binary (see main.asm): zeroed at boot, not in the file.
 
 keys:           defs 1
 keys_new:       defs 1          ; pressed this frame, not the previous one
@@ -89,3 +89,19 @@ room_map:       defs MAP_W*MAP_H
 snd_voice0:     defs V_SIZE         ; sound.asm voices
 snd_voice1:     defs V_SIZE
 snd_babble:     defs 7              ; one speech syllable, built on the fly
+bld_calls:      defs 6              ; this building's call times (s into the inspection)
+bld_elapsed:    defs 2              ; seconds into the inspection
+call_next:      defs 1              ; phone.asm: next of bld_calls
+call_count:     defs 1              ; script rotation, campaign-wide
+rant_index:     defs 1
+call_state:     defs 1              ; CS_*
+call_timer:     defs 1
+call_script:    defs 2
+call_row:       defs 1              ; panel top row
+call_choice:    defs 1              ; 0 top answer, 1 bottom
+call_mouth:     defs 1
+call_asked:     defs 1              ; the current line is the question
+call_happy:     defs 1              ; answered right
+call_q:         defs 6              ; up to 3 pairs of lines still to say
+call_qlen:      defs 1
+call_qpos:      defs 1

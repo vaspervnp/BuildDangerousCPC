@@ -7,6 +7,7 @@
 ; walking off both side edges, hazards staying disarmed when a room is revisited, and the
 ; exit. goto fails the test if Thanos doesn't get to exactly that room/x/y.
 
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 pokew boot_campaign campaign_single   ; Sunny Vale alone: the campaign would go on to the mall
 run 5                           ; title screen
 expect game_state 4

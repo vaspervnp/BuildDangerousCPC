@@ -2,6 +2,7 @@
 ; floor (y 21) and the 1st floor (y 14). Up one: foot x 7, top x 14. Down one: top x 23,
 ; foot x 16. Once on, they carry him: no keys held, 3 frames a step (stairs take 5).
 
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 pokew campaign_single+1 bld_mall
 pokew boot_campaign campaign_single
 run 5

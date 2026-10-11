@@ -7,7 +7,7 @@ BUILDINGS := sunnyvale test gallery mall hotel hospital skyscraper
 CAMPAIGN  := sunnyvale mall hotel hospital skyscraper
 ROUTES    := $(CAMPAIGN:%=tests/route_%.txt)
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
-          $(B)/hazards.bin $(B)/people.bin $(B)/strings.asm $(B)/room_outdoor.asm \
+          $(B)/hazards.bin $(B)/people.bin $(B)/tasha.bin $(B)/strings.asm $(B)/room_outdoor.asm \
           $(BUILDINGS:%=$(B)/bld_%.asm)
 SRC    := $(wildcard src/*.asm)
 
@@ -33,6 +33,9 @@ $(B)/hazards.bin: assets/gfx/hazards.png tools/cpcgfx.py | $(B)
 
 $(B)/people.bin: assets/gfx/people.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py sprites $< $@
+
+$(B)/tasha.bin: assets/gfx/tasha.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py portrait $< $@ 12 22 8 8    # the mouth: MOUTH_* in src/phone.asm
 
 $(B)/room_outdoor.asm: assets/rooms/outdoor.txt tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py room $< $@ room_outdoor

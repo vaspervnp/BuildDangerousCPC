@@ -229,15 +229,20 @@ voice_tick:
         ret
 
 ; A syllable of speech on voice 1, its pitch picked by A (any value): a 4-frame blip,
-; sagging, built in snd_babble. Preserves all but AF.
+; sagging, built in snd_babble. sfx_babble_hi is Tasha on the phone. Preserves all but AF.
+sfx_babble_hi:
+        push hl
+        push de
+        ld hl,babble_pitches_hi
+        jr sfx_babble.pick
 sfx_babble:
         push hl
         push de
-        and 7
+        ld hl,babble_pitches
+.pick:  and 7
         add a,a
         ld e,a
         ld d,0
-        ld hl,babble_pitches
         add hl,de
         ld e,(hl)
         inc hl
@@ -264,6 +269,8 @@ sfx_babble:
 
 babble_pitches:
         dw 180, 150, 210, 165, 240, 140, 195, 225
+babble_pitches_hi:
+        dw 90, 75, 105, 82, 120, 70, 98, 112
 
 ; ---------------------------------------------------------------- effects
 ; Notes as periods: C3 477  G3 319  C4 239  E4 189  G4 159  A4 142  C5 119  E5 95
@@ -436,6 +443,28 @@ sfx_trombone:   db 14 : dw 319 : db 1, 0, #0c   ; wah
                 db 20 : dw 389 : db 1, 0, #2a
                 db 0
 sfx_thud:       db 8 : dw 0 : db 0, 26, #1f
+                db 0
+sfx_ring:       db 2 : dw 45 : db 0, 0, #0c     ; brrring...
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 10 : dw 0 : db 0, 0, #00
+                db 2 : dw 45 : db 0, 0, #0c     ; ...brrring
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 2 : dw 45 : db 0, 0, #0c
+                db 2 : dw 38 : db 0, 0, #0c
+                db 0
+sfx_hangup:     db 2 : dw 0 : db 0, 1, #0c      ; click
+                db 4 : dw 0 : db 0, 0, #00
+                db 2 : dw 0 : db 0, 1, #0a
                 db 0
 sfx_jingle:     db 6 : dw 159 : db 0, 0, #0c    ; G4
                 db 6 : dw 119 : db 0, 0, #0c    ; C5

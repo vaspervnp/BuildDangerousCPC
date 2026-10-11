@@ -57,6 +57,7 @@ VF_CAT_A        equ 33              ; crouch
 VF_CAT_B        equ 34              ; launched
 VF_CAT_D        equ 35              ; landed, plaster and feathers
 VF_READ         equ 36              ; reading the owner's papers
+VF_PHONE        equ 37              ; on the phone (not a trap: phone.asm)
 
 vig_electric:
         db VF_ZAP_A, 3, FX_FLASH, 0

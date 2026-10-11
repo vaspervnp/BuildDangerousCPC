@@ -4,6 +4,7 @@
 ; outcome: 0 win, 1 soft fail (owner delays), 2 fail (ribbon cut), 3 fail (no energy).
 ; Score is BCD: score+2 holds the last two digits (#50 = 80).
 
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 pokew boot_campaign campaign_test
 run 5
 expect game_state 4

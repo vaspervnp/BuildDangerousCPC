@@ -12,9 +12,9 @@ LANG_GR         equ 1
 
 ; In: A = STR_* id. Out: HL = string in the current language. Trashes AF,DE.
 get_string:
-        add a,a
         ld l,a
         ld h,0
+        add hl,hl               ; ids go past 127
         ld a,(lang)
         or a
         ld de,strings_en

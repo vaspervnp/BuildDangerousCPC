@@ -13,3 +13,4 @@ misses_ok 2
 sign BLD_MALL_SIGN
 welcome BLD_MALL_WELCOME
 palette green
+calls 20 70

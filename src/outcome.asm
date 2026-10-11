@@ -75,7 +75,7 @@ play_update:
         ld b,a
         ld a,(clock_lo)
         or b
-        ret nz
+        jp nz,phone_check       ; time left: maybe Tasha calls
         ld a,(bld_signed)       ; time's up: at least half signed off is a soft fail
         add a,a
         ld b,a

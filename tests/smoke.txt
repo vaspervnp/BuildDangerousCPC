@@ -1,6 +1,7 @@
 ; Smoke test for the engine skeleton, using assets/rooms/test.txt.
 ; Thanos starts bottom-left (x=3, y=21). A step takes STEP_DELAY+1 = 5 frames.
 
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 pokew boot_campaign campaign_test
 run 1 fire                      ; title: start
 run 3

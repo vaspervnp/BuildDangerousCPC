@@ -14,3 +14,4 @@ misses_ok 2
 sign BLD_HOTEL_SIGN
 welcome BLD_HOTEL_WELCOME
 palette mauve
+calls 20 60 110

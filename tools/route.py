@@ -318,6 +318,7 @@ def main(argv):
            f"; A clean run: every hazard set off, every room signed off, out through the exit.",
            f"; {len(b.names)} rooms, {n_haz} hazards; estimated {frames} frames "
            f"({frames / 50:.0f} s of a {b.clock} s clock).",
+           "poke calls_enabled 0              ; Tasha's calls are tested in tests/phone.txt",
            f"pokew campaign_single+1 {b.label}",
            "pokew boot_campaign campaign_single",
            "run 5",

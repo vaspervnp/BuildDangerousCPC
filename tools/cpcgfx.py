@@ -6,6 +6,8 @@
                                                (16 lines x 4 x (mask,data)); --mirror appends
                                                horizontally flipped copies of every frame
   cpcgfx.py sprites8 IN.png OUT.bin            8x8 masked frames, 32 bytes each
+  cpcgfx.py portrait IN.png OUT.bin X Y W H    32x32 face + the WxH patch at X,Y where the
+                                               second frame differs (the mouth), unmasked
   cpcgfx.py building IN.txt OUT.asm LABEL      building (rooms + exits) -> asm, room data
                                                included (see convert_building)
   cpcgfx.py room     IN.txt OUT.asm LABEL      one standalone room -> asm (outdoor scene)
@@ -131,6 +133,36 @@ def convert_sprites8(src, dst):
     print(f"{dst}: {w // 8} frames, {len(out)} bytes")
 
 
+def convert_portrait(src, dst, patch, size=32):
+    """Phone portrait: two square frames side by side, the second differing only inside
+    patch = (x, y, w, h) (x and w multiples of 4). Out: frame 0 unmasked (size/4 bytes a
+    line, size lines), then just the patch of frame 1 (w/4 bytes a line, h lines) - the
+    open mouth, drawn over frame 0 to animate it."""
+    im = load(src)
+    w, h = im.size
+    if (w, h) != (2 * size, size):
+        sys.exit(f"{src}: expected two {size}x{size} frames side by side, got {w}x{h}")
+    px, py, pw, ph = patch
+    if px % 4 or pw % 4:
+        sys.exit(f"{src}: the patch must start and end on a byte (4 pixels)")
+    for y in range(size):
+        for x in range(size):
+            inside = px <= x < px + pw and py <= y < py + ph
+            if not inside and im.getpixel((x, y)) != im.getpixel((size + x, y)):
+                sys.exit(f"{src}: frames differ at ({x},{y}), outside the patch {patch}")
+
+    def rows(ox, x0, x1, y0, y1):
+        out = bytearray()
+        for y in range(y0, y1):
+            for bx in range(x0 // 4, x1 // 4):
+                pens = [pen_of(im.getpixel((ox + bx * 4 + n, y))) for n in range(4)]
+                out.append(encode_byte([0 if p is None else p for p in pens]))
+        return out
+    out = rows(0, 0, size, 0, size) + rows(size, px, px + pw, py, py + ph)
+    open(dst, 'wb').write(out)
+    print(f"{dst}: {size}x{size} face + {pw}x{ph} mouth, {len(out)} bytes")
+
+
 def load_room(src):
     """Room text -> (grid of chars, room data bytes): RLE tiles (count, tile)... 0, then
     hazard count and (x, row, type, state) per hazard."""
@@ -195,10 +227,13 @@ def parse_building(src):
       sign <STRING_ID>       name lit up on the facade in the outdoor scene
       welcome <STRING_ID>    the owner's first line
       palette <name>         wall colour (pen 2): skyblue (default), green, mauve, cyan, paleblue
+      calls <s> [<s> [<s>]]  Tasha phones this many seconds into the inspection (up to 3;
+                             default 20 60)
 
     Rooms are assets/rooms/<name>.txt, indexed in the order listed."""
     rooms, links, start = [], {}, None
     clock, misses_ok, sign, welcome, palette = 300, 2, None, None, 'skyblue'
+    calls = [20, 60]
     for n, line in enumerate(open(src, encoding='utf-8'), 1):
         parts = line.split(';', 1)[0].split()
         if not parts:
@@ -220,6 +255,10 @@ def parse_building(src):
             misses_ok = int(parts[1])
         elif parts[0] == 'palette' and len(parts) == 2 and parts[1] in PALETTES:
             palette = parts[1]
+        elif parts[0] == 'calls' and 1 <= len(parts) <= 4:
+            calls = [int(v) for v in parts[1:]]
+            if calls != sorted(calls) or not all(0 < v < 1000 for v in calls):
+                sys.exit(f"{src}:{n}: calls must be increasing seconds, 1-999")
         elif parts[0] in ('sign', 'welcome') and len(parts) == 2:
             if parts[0] == 'sign':
                 sign = parts[1]
@@ -269,7 +308,7 @@ def parse_building(src):
                 if not below and not flights:
                     sys.exit(f"{src}: {a} up={b} needs a ladder or a flight of stairs between them")
     return dict(rooms=rooms, links=links, start=start, clock=clock, misses_ok=misses_ok,
-                sign=sign, welcome=welcome, palette=palette, loaded=loaded)
+                sign=sign, welcome=welcome, palette=palette, calls=calls, loaded=loaded)
 
 
 def convert_building(src, dst, label):
@@ -286,7 +325,9 @@ def convert_building(src, dst, label):
            f"        db #{clock // 100:02x}, #{clock % 100 // 10}{clock % 10}, {-(-clock // 8)}, {misses_ok}"
            "   ; clock (BCD hi, lo), seconds per dial step, misses graded good",
            f"        db STR_{sign}, STR_{welcome}, #{PALETTES[palette]:02x}"
-           "   ; outdoor scene: facade sign, owner's welcome; pen 2 ink"]
+           "   ; outdoor scene: facade sign, owner's welcome; pen 2 ink",
+           f"        dw {', '.join(str(c) for c in (b['calls'] + [0, 0, 0])[:3])}"
+           "   ; Tasha calls at these seconds in (0 = no more)"]
     for i, r in enumerate(rooms):
         ex = [rooms.index(links[r][d]) if d in links[r] else NO_EXIT for d in DIRS]
         out.append(f"        dw {label}_{i}")
@@ -329,7 +370,8 @@ def convert_text(src, dst, font_png):
         rows.append((parts[0], encode_text(parts[1], f"{src}:{n} EN"),
                      encode_text(parts[2], f"{src}:{n} GR")))
     out = [f"; Generated by tools/cpcgfx.py from {src}. Do not edit.", "",
-           f"GLYPH_0 equ {FONT_CHARS.index('0')}", f"GLYPH_SLASH equ {FONT_CHARS.index('/')}", ""]
+           f"GLYPH_0 equ {FONT_CHARS.index('0')}", f"GLYPH_SLASH equ {FONT_CHARS.index('/')}",
+           f"GLYPH_DASH equ {FONT_CHARS.index('-')}", ""]
     for i, (sid, _, _) in enumerate(rows):
         out.append(f"STR_{sid} equ {i}")
     for lang in ('en', 'gr'):
@@ -362,6 +404,8 @@ def main(argv):
         convert_sprites(src, dst, '--mirror' in argv[4:])
     elif cmd == 'sprites8':
         convert_sprites8(src, dst)
+    elif cmd == 'portrait' and len(argv) == 8:
+        convert_portrait(src, dst, tuple(int(v) for v in argv[4:8]))
     elif cmd == 'room' and len(argv) > 4:
         convert_room(src, dst, argv[4])
     elif cmd == 'building' and len(argv) > 4:

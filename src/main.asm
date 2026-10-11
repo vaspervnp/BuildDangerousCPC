@@ -12,6 +12,11 @@ start:
         ld hl,#c9fb             ; RST #38 handler = EI : RET
         ld (#0038),hl
         im 1
+        ld hl,vars_start        ; variables start zeroed
+        ld de,vars_start+1
+        ld bc,vars_end-vars_start-1
+        ld (hl),0
+        ldir
         call video_init         ; also pages out the ROMs, so #0038 now reads our RAM
         call sound_init
         xor a
@@ -70,6 +75,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "scene.asm"
         include "campaign.asm"
         include "sound.asm"
+        include "phone.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings
@@ -91,9 +97,18 @@ thanos_gfx:     incbin "build/thanos.bin"
 vignette_gfx:   incbin "build/vignettes.bin"
 hazard_gfx:     incbin "build/hazards.bin"
 people_gfx:     incbin "build/people.bin"
-
-; ---------------------------------------------------------------- variables
-        include "vars.asm"
+tasha_gfx:      incbin "build/tasha.bin"
 
 code_end:
         assert code_end < #a600, "binary overlaps AMSDOS/firmware workspace at load time"
+
+; ---------------------------------------------------------------- variables
+; Above the loaded binary, in what was AMSDOS/firmware workspace (unused once the
+; firmware is off); not part of the file. Boot zeroes them. The stack grows down from #C000.
+        nocode
+        org #a600
+vars_start:
+        include "vars.asm"
+vars_end:
+        code
+        assert vars_end < #bc00, "variables run into the stack"

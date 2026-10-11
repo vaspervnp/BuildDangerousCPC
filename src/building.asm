@@ -62,11 +62,17 @@ building_start:
         ld a,(hl)
         ld (ink_table+2),a
         inc hl
+        ld de,bld_calls
+        ld bc,6
+        ldir
         ld (bld_room_list),hl
         ld a,FRAMES_PER_SECOND
         ld (clock_frames),a
         xor a
         ld (dial_index),a
+        ld (call_next),a
+        ld (bld_elapsed),a
+        ld (bld_elapsed+1),a
         ld (miss_tally),a
         ld (bld_signed),a
         ld (signed_bcd),a

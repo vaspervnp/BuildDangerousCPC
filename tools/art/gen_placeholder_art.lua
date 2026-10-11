@@ -372,10 +372,13 @@ gen.vignettes = function()
   local read = over(std, { [5] = "........WWWWWW..", [6] = "........WKKKKW..", [7] = "........WWWWWW..",
                            [8] = "........WKKKWW..", [9] = "........WWWWWW..", [10] = "........OWWWWO.." })
 
+  -- on the phone to Tasha: handset at his ear, eyes on the ceiling
+  local phone = over(std, { [4] = "............KKK.", [5] = ".............KWK", [6] = ".............KWK",
+    [7] = ".............KWK", [8] = "............OKK.", [9] = "...........OO..." })
   saveStrip("vignettes", cells({
     zapA, zapB, zapC, biteA, biteB, biteC, drownA, drownB, drownC, headA, headB, headC,
     cutA, cutB, cutC, impA, impB, impC, sqA, sqB, sqC, fireA, fireB, fireC,
-    iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD, read,
+    iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD, read, phone,
   }), 16, 16)
 end
 
@@ -578,6 +581,53 @@ gen.font = function()
     list[i] = rows
   end
   saveStrip("font", cells(list), 8, 8)
+end
+
+------------------------------------------------------------------ Tasha (32x32 portrait)
+-- Thanos's wife on the phone: orange bouffant in curlers, handset, raised eyebrows.
+-- Frame 0 mouth shut, frame 1 open; they differ only inside the 8x8 mouth patch at
+-- (12,22), which cpcgfx.py cuts out as its own little sprite. Background is pen 2.
+gen.tasha = function()
+  local function frame(open)
+    local rows = {}
+    for y = 0, 31 do
+      local r = {}
+      for x = 0, 31 do
+        local function ell(cx, cy, rx, ry) local dx, dy = (x - cx) / rx, (y - cy) / ry return dx * dx + dy * dy end
+        local ch = "B"
+        if ell(16, 37, 15, 8) <= 1 then ch = ((x + y) % 5 == 0 and y > 30) and "W" or "K" end  -- shoulders
+        local hair = ell(16, 12, 14.5, 10.5)
+        if hair <= 1 then ch = (hair > 0.82) and "K" or "O" end             -- bouffant
+        for _, c in ipairs({ { 7, 5 }, { 16, 2 }, { 25, 5 }, { 3, 13 }, { 29, 13 } }) do  -- curlers
+          local d = ell(c[1], c[2], 2.3, 2.3)
+          if d <= 1 then ch = (d < 0.3) and "B" or "W" end
+        end
+        local face = ell(16, 19, 8.5, 10.5)
+        if face <= 1 then ch = (face > 0.8) and "K" or "W" end
+        if face <= 1 and y < 12 then ch = "O" end                           -- fringe
+        if y == 14 and ((x >= 11 and x <= 14) or (x >= 18 and x <= 21)) then ch = "K" end  -- brows, up
+        if y == 13 and (x == 11 or x == 21) then ch = "K" end
+        if (y == 16 or y == 17) and (x == 13 or x == 19) then ch = "K" end  -- eyes
+        if y == 15 and (x == 12 or x == 14 or x == 18 or x == 20) then ch = "K" end  -- lashes
+        if y == 21 and (x == 10 or x == 22) then ch = "O" end               -- blush
+        if y == 19 and x == 16 then ch = "K" end                            -- nose
+        if open then
+          if y >= 23 and y <= 27 and x >= 13 and x <= 18 then
+            ch = (y == 23 or y == 27 or x == 13 or x == 18) and "O" or "K"
+          end
+        elseif y == 24 and x >= 13 and x <= 18 then ch = "O" end
+        if ell(7, 22, 1.2, 1.2) <= 1 then ch = "O" end                      -- earring
+        if x >= 24 and x <= 27 and y >= 14 and y <= 28 then                  -- handset
+          ch = (x == 25 and y > 15 and y < 27) and "W" or "K"
+        end
+        if x >= 22 and x <= 28 and y >= 26 and y <= 29 and ch ~= "K" then ch = "O" end  -- hand
+        r[#r + 1] = ch
+      end
+      rows[#rows + 1] = table.concat(r)
+    end
+    return rows
+  end
+  saveStrip("tasha", cells({ frame(false), frame(true) }), 32, 32)
 end
 
 ------------------------------------------------------------------

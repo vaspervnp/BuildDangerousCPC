@@ -14,6 +14,7 @@ THANOS_WALK_L   equ 4
 PS_WALK         equ 0
 PS_VIGNETTE     equ 1           ; a trap is going off: input locked
 PS_DONE         equ 2           ; left the building: input locked
+PS_PHONE        equ 3           ; on the phone to Tasha (phone.asm): input is hers
 
 ; Position comes from building_start; he is drawn when his first room is.
 player_init:
@@ -31,6 +32,8 @@ player_update:
         jr z,.walking
         cp PS_VIGNETTE
         jp z,vig_update
+        cp PS_PHONE
+        jp z,phone_update
         ret
 
 ; One-shot actions are checked every frame (keys_new lasts a single frame),
