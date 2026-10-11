@@ -14,8 +14,8 @@ ENERGY_REFILL   equ 6           ; 3 hats between buildings
 
 ; db building count, then dw building per building
 campaign_main:
-        db 1
-        dw bld_sunnyvale
+        db 5
+        dw bld_sunnyvale, bld_mall, bld_hotel, bld_hospital, bld_skyscraper
 ; for the test harness (pokew boot_campaign ...)
 campaign_test:                  ; the test building twice: progression and endings
         db 2
@@ -23,11 +23,16 @@ campaign_test:                  ; the test building twice: progression and endin
 campaign_gallery:
         db 1
         dw bld_gallery
+campaign_single:                ; one building, poked in by generated route tests
+        db 1
+        dw bld_sunnyvale
 
 ; ---------------------------------------------------------------- title
 title_show:
         ld a,GS_TITLE
         ld (game_state),a
+        ld a,INK_SKYBLUE
+        ld (ink_table+2),a
         call palette_black
         call screen_clear
         ld a,STR_TITLE_1

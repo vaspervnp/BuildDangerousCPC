@@ -13,6 +13,11 @@ Script lines (';' starts a comment):
   expect <addr> <value>         assert byte at addr == value (decimal or #hex)
   poke <addr> <value>           write a byte
   pokew <addr> <value>          write a word; value may be a symbol (e.g. a building to boot)
+  until <addr> <value> [keys] [max]   run frames (holding keys, or - for none) until the
+                                byte equals value; fails after max frames (default 3000)
+  goto <room> <x> <y> [keys] [max]    hold keys until Thanos is in that room at x, y
+                                (cur_room, pl_x, pl_y); fails after max frames (default 1000)
+  print <addr> [count]          print bytes (hex), e.g. the clock left at the end of a run
 
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
@@ -199,6 +204,15 @@ class CPC:
         img.save(path)
 
 
+def parse_value(v, cpc, syms):
+    """#hex, decimal, or a symbol (its address)."""
+    if v.startswith('#'):
+        return int(v[1:], 16)
+    if v.lstrip('-').isdigit():
+        return int(v)
+    return cpc.resolve(v, syms)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('binary')
@@ -233,14 +247,35 @@ def main():
             path = os.path.join(args.out, st[1] + '.png')
             cpc.screenshot(path)
             print(f"shot {path}")
-        elif cmd in ('expect', 'poke', 'pokew'):
-            v = st[2]
-            if v.startswith('#'):
-                value = int(v[1:], 16)
-            elif v.lstrip('-').isdigit():
-                value = int(v)
+        elif cmd in ('until', 'goto'):
+            if cmd == 'until':
+                addrs = [cpc.resolve(st[1], syms)]
+                want = [parse_value(st[2], cpc, syms)]
+                rest = st[3:]
+                limit = 3000
             else:
-                value = cpc.resolve(v, syms)
+                addrs = [syms['CUR_ROOM'], syms['PL_X'], syms['PL_Y']]
+                want = [int(v) for v in st[1:4]]
+                rest = st[4:]
+                limit = 1000
+            keys = rest[0].split('+') if rest and rest[0] != '-' else []
+            if len(rest) > 1:
+                limit = int(rest[1])
+            cpc.set_keys(keys)
+            n = 0
+            while [cpc.peek(a) for a in addrs] != want and n < limit:
+                cpc.run_frames(1)
+                n += 1
+            if [cpc.peek(a) for a in addrs] != want:
+                failures += 1
+                print(f"FAIL {' '.join(st)}: got {[cpc.peek(a) for a in addrs]} after {n} frames")
+                break               # the rest of a route makes no sense from the wrong place
+        elif cmd == 'print':
+            addr = cpc.resolve(st[1], syms)
+            count = int(st[2]) if len(st) > 2 else 1
+            print(f"{st[1]}: " + ' '.join(f"{cpc.peek(addr + i):02x}" for i in range(count)))
+        elif cmd in ('expect', 'poke', 'pokew'):
+            value = parse_value(st[2], cpc, syms)
             addr = cpc.resolve(st[1], syms)
             if cmd == 'poke':
                 cpc.poke(addr, value)

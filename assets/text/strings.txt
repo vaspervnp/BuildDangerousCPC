@@ -44,6 +44,14 @@ BLD_SV_SIGN | Sunny Vale Apts. | Πολυκατοικία Λιακάδα
 BLD_SV_WELCOME | Welcome to Sunny Vale Apartments! | Καλώς ήρθατε στην πολυκατοικία Λιακάδα!
 BLD_TEST_SIGN | Test building | Κτίριο δοκιμών
 BLD_TEST_WELCOME | Welcome to the test building! | Καλώς ήρθατε στο κτίριο δοκιμών!
+BLD_MALL_SIGN | Big Box Mall | Εμπορικό Κέντρο
+BLD_MALL_WELCOME | Welcome to Big Box Mall! Mind the sales! | Καλώς ήρθατε! Προσφορές για όλους!
+BLD_HOTEL_SIGN | Grand Hotel | Ξενοδοχείο Γκραντ
+BLD_HOTEL_WELCOME | Welcome to the Grand Hotel. Check in! | Καλώς ήρθατε στο Ξενοδοχείο Γκραντ!
+BLD_HOSP_SIGN | Mega Hospital | Μέγα Νοσοκομείο
+BLD_HOSP_WELCOME | Welcome to Mega Hospital. Get well soon! | Καλώς ήρθατε! Περαστικά σας!
+BLD_SKY_SIGN | The Skyscraper | Ο Ουρανοξύστης
+BLD_SKY_WELCOME | Welcome to my tower. Nothing to see! | Ο πύργος μου. Τίποτα ύποπτο εδώ!
 CAP_EVIDENCE | An insurance claim. Dated opening day! | Ασφαλιστήριο για τη μέρα των εγκαινίων!
 TITLE_1 | Build | Build
 TITLE_2 | Dangerous | Dangerous

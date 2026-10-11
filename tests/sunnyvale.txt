@@ -5,6 +5,7 @@
 ; Covers walking off both side edges, climbing up and down through ceilings/floors,
 ; hazards staying disarmed when a room is revisited, and the exit gate.
 
+pokew boot_campaign campaign_single   ; Sunny Vale alone: the campaign would go on to the mall
 run 5                           ; title screen
 expect game_state 4
 shot sv_title

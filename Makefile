@@ -3,7 +3,9 @@ IDSK ?= iDSK
 PY   ?= python3
 B    := build
 
-BUILDINGS := sunnyvale test gallery
+BUILDINGS := sunnyvale test gallery mall hotel hospital skyscraper
+CAMPAIGN  := sunnyvale mall hotel hospital skyscraper
+ROUTES    := $(CAMPAIGN:%=tests/route_%.txt)
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
           $(B)/hazards.bin $(B)/people.bin $(B)/strings.asm $(B)/room_outdoor.asm \
           $(BUILDINGS:%=$(B)/bld_%.asm)
@@ -49,8 +51,12 @@ $(B)/bd.dsk: $(B)/bd.bin
 	$(IDSK) $@ -n
 	$(IDSK) $@ -i $< -t 1 -c 1000 -e 1000
 
+# Planned clean runs through each campaign building (tools/route.py), run by `make test`.
+tests/route_%.txt: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/route.py tools/cpcgfx.py
+	$(PY) tools/route.py $< $@
+
 # Headless runs of every tests/*.txt script; screenshots go to build/shots/.
-test: $(B)/bd.bin
+test: $(B)/bd.bin $(ROUTES)
 	@set -e; for t in tests/*.txt; do \
 	  echo "== $$t"; \
 	  $(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $$t --out $(B)/shots; \

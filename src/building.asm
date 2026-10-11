@@ -7,7 +7,7 @@
 ; Building data (generated from assets/buildings/*.txt by tools/cpcgfx.py):
 ;   db room count, start room, start x, start row
 ;   db clock seconds (BCD hi, lo), seconds per dial step, Misses still graded "good"
-;   db STR_* facade sign, STR_* owner's welcome (outdoor scene)
+;   db STR_* facade sign, STR_* owner's welcome (outdoor scene), pen 2 ink (wall colour)
 ;   per room: dw room data, db exit left, right, up, down (room index or NO_EXIT)
 
 MAX_ROOMS       equ 32          ; bld_marked is 4 bytes
@@ -58,6 +58,9 @@ building_start:
         inc hl
         ld a,(hl)
         ld (bld_welcome),a
+        inc hl
+        ld a,(hl)
+        ld (ink_table+2),a
         inc hl
         ld (bld_room_list),hl
         ld a,FRAMES_PER_SECOND
