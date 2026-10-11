@@ -142,6 +142,12 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 - **Effects are data:** steps of (frames, tone period, per-frame slide, noise period, volume + decay rate). Scenes start them with an `SC_SFX` command.
 - **Testing:** the harness records PSG writes; `psg`/`psgon` assert register values, and `--wav` renders a session through a simple AY model to listen to.
 
+### 7b. Distractions
+
+- **Phone calls (`src/phone.asm`):** the building header lists up to three call times (seconds into the inspection, counted by the clock). When one is due and Thanos is walking, `PS_PHONE` locks input while the clock runs. A 7-row panel (top of the screen, or bottom when he's on the top floor) shows Tasha's 32×32 face — talking is an 8×8 open-mouth patch drawn over it, so the portrait is 272 bytes — her two lines, and two answers (Up/Down, Fire). Right: a short reply and +50. Wrong or 5 s of silence: her reply plus one of three rants. Six scripts (question, two answers, two replies, which answer is listed first) rotate through the campaign. Cells under the panel are redrawn from the room map afterwards.
+- **The nephew (`src/nephew.asm`):** an optional `nephew <xmin> <xmax> <feet row>` line in a room puts Bambis on that floor (room data: after the hazard list). He steps every 9 frames and turns at the ends. Within a cell of Thanos on the same floor → `PS_SELFIE`: caption, two white flashes (the background-pen FX the vignettes use), a second caption; ~4 s. Once per visit. Sprites are redrawn together when close so neither wipes the other.
+- Both are switched off in tests written before them (`calls_enabled` / `nephew_enabled`, poked like `boot_campaign`) and tested in `tests/phone.txt` and `tests/nephew.txt`.
+
 ### 8. Localization (English / Greek)
 
 - **Two supported languages: English (default) and Greek.** Language is a single global flag, checked wherever a string is printed; no separate code paths otherwise.

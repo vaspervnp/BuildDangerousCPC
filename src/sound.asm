@@ -462,6 +462,10 @@ sfx_ring:       db 2 : dw 45 : db 0, 0, #0c     ; brrring...
                 db 2 : dw 45 : db 0, 0, #0c
                 db 2 : dw 38 : db 0, 0, #0c
                 db 0
+sfx_click:      db 1 : dw 0 : db 0, 1, #0f      ; camera shutter
+                db 2 : dw 0 : db 0, 0, #00
+                db 2 : dw 0 : db 0, 3, #0c
+                db 0
 sfx_hangup:     db 2 : dw 0 : db 0, 1, #0c      ; click
                 db 4 : dw 0 : db 0, 0, #00
                 db 2 : dw 0 : db 0, 1, #0a

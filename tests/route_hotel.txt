@@ -2,6 +2,7 @@
 ; A clean run: every hazard set off, every room signed off, out through the exit.
 ; 6 rooms, 13 hazards; estimated 5120 frames (102 s of a 270 s clock).
 poke calls_enabled 0              ; Tasha's calls are tested in tests/phone.txt
+poke nephew_enabled 0             ; and the nephew in tests/nephew.txt
 pokew campaign_single+1 bld_hotel
 pokew boot_campaign campaign_single
 run 5

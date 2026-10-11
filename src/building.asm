@@ -157,6 +157,7 @@ room_change:
         call caption_reset
         call hud_draw_room_status
         call hud_draw_numbers
+        call nephew_init
         ld de,(pl_x)
         ld (old_xy),de
         call player_draw

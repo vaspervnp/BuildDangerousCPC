@@ -54,6 +54,8 @@ AF_OWNER_SHRUG  equ 11
 AF_GRANDMA      equ 12              ; townsfolk: idle, cheer
 AF_MAN          equ 14
 AF_KID          equ 16
+AF_NEPHEW       equ 18              ; Bambis (nephew.asm): walk A, walk B, selfie
+AF_NEPHEW_SELFIE equ 20
 AF_VIGNETTE     equ 64
 AF_UPSIDE_DOWN  equ AF_VIGNETTE+VF_UPSIDE_DOWN
 

@@ -105,3 +105,16 @@ call_happy:     defs 1              ; answered right
 call_q:         defs 6              ; up to 3 pairs of lines still to say
 call_qlen:      defs 1
 call_qpos:      defs 1
+npc_on:         defs 1              ; nephew.asm: is he in this room
+npc_x:          defs 1              ; npc_x/npc_y adjacent, like pl_x/pl_y
+npc_y:          defs 1
+npc_min:        defs 1
+npc_max:        defs 1
+npc_dir:        defs 1              ; 0 right, 1 left
+npc_wait:       defs 1
+npc_done:       defs 1              ; had his selfie this visit
+npc_anim:       defs 1
+npc_pose:       defs 1              ; 1: phone up
+selfie_step:    defs 1
+selfie_timer:   defs 1
+selfie_index:   defs 1

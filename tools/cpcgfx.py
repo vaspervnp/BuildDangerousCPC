@@ -165,11 +165,16 @@ def convert_portrait(src, dst, patch, size=32):
 
 def load_room(src):
     """Room text -> (grid of chars, room data bytes): RLE tiles (count, tile)... 0, then
-    hazard count and (x, row, type, state) per hazard."""
+    hazard count and (x, row, type, state) per hazard, then the owner's nephew: 0, or 1 and
+    (x, top row, xmin, xmax) - he paces xmin..xmax on one floor.
+
+      hazard <type> <x> <row>          (row within the room, 0-22)
+      nephew <xmin> <xmax> <feet row>  (the row his feet are on, e.g. 20 on the ground floor)"""
     lines = open(src, encoding='utf-8').read().split('\n')
     lines = [l for l in lines if not l.startswith(';')]
     hazard_lines = [l for l in lines if l.startswith('hazard ')]
-    lines = [l for l in lines if not l.startswith('hazard ')]
+    nephew_lines = [l for l in lines if l.startswith('nephew ')]
+    lines = [l for l in lines if not l.startswith(('hazard ', 'nephew '))]
     while lines and lines[-1] == '':
         lines.pop()
     if len(lines) != ROOM_H:
@@ -204,6 +209,24 @@ def load_room(src):
             sys.exit(f"{src}: hazard position out of range or duplicated: {l!r}")
         seen.add((x, y))
         out += bytes((x, y + HUD_ROWS, HAZARD_TYPES.index(parts[1]), 0))
+
+    if len(nephew_lines) > 1:
+        sys.exit(f"{src}: one nephew per room")
+    if not nephew_lines:
+        out.append(0)
+        return lines, out
+    try:
+        xmin, xmax, feet = (int(v) for v in nephew_lines[0].split()[1:])
+    except ValueError:
+        sys.exit(f"{src}: bad nephew line {nephew_lines[0]!r} (nephew <xmin> <xmax> <feet row>)")
+    if not (0 <= xmin < xmax <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
+        sys.exit(f"{src}: nephew out of range: {nephew_lines[0]!r}")
+    for x in range(xmin, xmax + 2):
+        if lines[feet + 1][x] not in SOLID_CHARS + '/\\uUnN':
+            sys.exit(f"{src}: nephew: no floor under column {x}")
+        if lines[feet][x] in SOLID_CHARS or lines[feet - 1][x] in SOLID_CHARS:
+            sys.exit(f"{src}: nephew: column {x} is blocked")
+    out += bytes((1, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
     return lines, out
 
 

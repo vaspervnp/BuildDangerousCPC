@@ -48,21 +48,21 @@ class Building:
         self.hazards = [self._hazards(d) for d in self.data]
 
     @staticmethod
-    def _hazards(data):
+    def _hazard_list(data):
+        """Offset of the hazard count in room data (after the RLE runs)."""
         i = 0
         while data[i]:          # RLE runs (count, tile) end with a 0 count
             i += 2
-        i += 1
-        count = data[i]
-        out = []
-        for j in range(count):
-            x, row, t, _ = data[i + 1 + 4 * j:i + 5 + 4 * j]
-            out.append((x, row, HAZARD_TYPES[t]))
-        return out
+        return i + 1
+
+    def _hazards(self, data):
+        i = self._hazard_list(data)
+        return [(data[i + 1 + 4 * j], data[i + 2 + 4 * j], HAZARD_TYPES[data[i + 3 + 4 * j]])
+                for j in range(data[i])]
 
     def hazard_state_offset(self, room, j):
         """Offset of hazard j's state byte in the room's data."""
-        return len(self.data[room]) - 4 * len(self.hazards[room]) + 4 * j + 3
+        return self._hazard_list(self.data[room]) + 1 + 4 * j + 3
 
     def cell(self, r, x, y):
         if not (HUD_ROWS <= y < MAP_H and 0 <= x < MAP_W):
@@ -319,6 +319,7 @@ def main(argv):
            f"; {len(b.names)} rooms, {n_haz} hazards; estimated {frames} frames "
            f"({frames / 50:.0f} s of a {b.clock} s clock).",
            "poke calls_enabled 0              ; Tasha's calls are tested in tests/phone.txt",
+           "poke nephew_enabled 0             ; and the nephew in tests/nephew.txt",
            f"pokew campaign_single+1 {b.label}",
            "pokew boot_campaign campaign_single",
            "run 5",

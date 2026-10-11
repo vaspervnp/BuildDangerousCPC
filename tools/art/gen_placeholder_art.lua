@@ -472,8 +472,33 @@ gen.people = function()
     "....KKK.KKK.....",
   }
   local kidCheer = edit(kid, { [10] = "..O.WBWBWBW.O...", [11] = "...BWBWBWBWB....", [12] = ".....BWBWB......" })
+  -- Bambis, the owner's nephew: influencer, cap backwards, shades, phone always out
+  local nephew = {
+    "......KKKK......",
+    ".....KBBBBK.....",
+    "....KBBBBBBKKK..",
+    "....KOOOOOOK....",
+    "....KKKKKKKK....",
+    "....KOKKKKOK....",
+    "....KOOWWOOK....",
+    ".....KOOOOK.....",
+    "...KKWWWWWWKK...",
+    "..KWWWWBBWWWWK..",
+    "..KWKWWBBWWKWK..",
+    "..KOKWWWWWWKOK..",
+    "....KWWWWWWK....",
+    "....KKKKKKKK....",
+    "....KKK..KKK....",
+    "...WWWW..WWWW...",
+  }
+  local nephewStep = edit(nephew, { [15] = ".....KKKKKK.....", [16] = ".....WWWWWWW...." })
+  local nephewSelfie = edit(nephew, { [1] = "......KKKK..KKK.", [2] = ".....KBBBBK.KWK.",
+    [3] = "....KBBBBBBKKWK.", [4] = "....KOOOOOOK.KK.", [5] = "....KKKKKKKK.OK.",
+    [6] = "....KOKKKKOK.OK.", [7] = "....KOOWWOOK.OK.", [8] = ".....KOOOOK..OK.",
+    [9] = "...KKWWWWWWKKOK.", [10] = "..KWWWWBBWWWWK..", [11] = "..KWKWWBBWWWWK..",
+    [12] = "..KOKWWWWWWWWK.." })
   saveStrip("people", cells({ owner, ownerTalk, ownerCut, ownerShrug, grandma, grandmaCheer,
-    man, manCheer, kid, kidCheer }), 16, 16)
+    man, manCheer, kid, kidCheer, nephew, nephewStep, nephewSelfie }), 16, 16)
 end
 
 ------------------------------------------------------------------ hazard tells (8x8, masked)

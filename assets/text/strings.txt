@@ -131,3 +131,9 @@ CALL6_YES1 | Love you. Don't get | Σ' αγαπώ. Μη γίνεις πάλι
 CALL6_YES2 | flattened again. The rug! | πίτα. Το χαλί, ξέρεις!
 CALL6_NO1 | You said that yesterday. | Το ίδιο είπες και χθες.
 CALL6_NO2 | And the day before. No milk! | Και προχθές. Γάλα, Θάνο!
+NEPHEW_HI1 | Bambis: Selfie with the inspector! | Μπάμπης: Σέλφι με τον επιθεωρητή!
+NEPHEW_BYE1 | Like and subscribe, Mr Thanos! | Κάνε λάικ και σάμπσκραϊμπ, κύριε!
+NEPHEW_HI2 | Bambis: Say hi to my 12 followers! | Μπάμπης: Πες γεια στους 12 φόλοουερς!
+NEPHEW_BYE2 | Flash was off. One more! ...Done. | Δεν είχε φλας. Άλλη μία! ...Τέλεια.
+NEPHEW_HI3 | Bambis: Uncle says you're too slow. | Μπάμπης: Ο θείος λέει ότι αργείς.
+NEPHEW_BYE3 | Now you're content! Bye! | Τώρα είσαι περιεχόμενο! Γεια!

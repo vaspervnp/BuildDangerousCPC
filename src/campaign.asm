@@ -103,6 +103,7 @@ campaign_start:
         ld (evidence),a
         ld (call_count),a       ; Tasha's calls start from the first script
         ld (rant_index),a
+        ld (selfie_index),a
         ld hl,score
         ld (hl),a
         inc hl

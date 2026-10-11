@@ -47,6 +47,13 @@ Each is a short (1–2 second) animated gag, not a death — Thanos always gets 
 
 Each hazard has a matching "tell" — a visual detail slightly wrong in that room — that the player can learn to recognise (a floor grille with scratch marks, a wire with no conduit, a sign hung crooked over a hole, etc.).
 
+## Distractions (they cost time, never health)
+
+Nothing physical — just people, eating the clock while the crowd waits outside.
+
+- **Tasha (Τασία), his wife, phones** two or three times per building. He has to take it: her face pops up in a window in the corner of the building, and she wants something — is he coming to dinner, the tap is dripping, does he know what day it is, her mother wants a word, is he wearing the blue shirt, can he pick up milk. Two possible answers. The right one ("Yes dear. Eight. Sharp.") wraps the call up fast and scores a little; the wrong one ("Time is relative, dear.") — or saying nothing — gets a longer reply and a rant ("I gave you the best 300 years of my life, Thanos!"). Six calls go round through the campaign.
+- **Bambis (Μπάμπης), the owner's nephew**, an influencer, paces a floor in some rooms. Walk into him and it's a selfie for his twelve followers: two camera flashes and "like and subscribe" while Thanos stands there. One selfie per visit to a room; with good timing (or a few steps up a staircase while he passes underneath) he can be dodged.
+
 ## The Buildings (campaign order, rising difficulty)
 
 1. **Sunny Vale Apartments** — tutorial building. Small, few floors, one or two hazard types per room, generous clock. Teaches movement, inspecting, and the energy/clock pressure.

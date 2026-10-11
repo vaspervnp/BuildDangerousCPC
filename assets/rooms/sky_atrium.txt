@@ -25,3 +25,4 @@
 hazard drown 22 18
 hazard electric 34 11
 hazard bite 36 6
+nephew 18 34 20

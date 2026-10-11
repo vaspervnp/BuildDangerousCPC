@@ -5,6 +5,7 @@
 ; Score is BCD: score+2 holds the last two digits (#50 = 80).
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
+poke nephew_enabled 0             ; no selfies either (tests/nephew.txt)
 pokew boot_campaign campaign_test
 run 5
 expect game_state 4

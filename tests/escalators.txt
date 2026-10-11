@@ -3,6 +3,7 @@
 ; foot x 16. Once on, they carry him: no keys held, 3 frames a step (stairs take 5).
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
+poke nephew_enabled 0             ; no selfies either (tests/nephew.txt)
 pokew campaign_single+1 bld_mall
 pokew boot_campaign campaign_single
 run 5

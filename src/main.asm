@@ -48,6 +48,7 @@ main_loop:
         call scene_finish
         jr main_loop
 .play:  call player_update
+        call nephew_update
         call hud_update
         call play_update
         jr main_loop
@@ -76,6 +77,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "campaign.asm"
         include "sound.asm"
         include "phone.asm"
+        include "nephew.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

@@ -327,6 +327,9 @@ phone_end:
         djnz .row
         ld a,PS_WALK
         ld (pl_state),a
+        ld a,(npc_on)
+        or a
+        call nz,nephew_draw
         ld de,(pl_x)
         call restore_2x2
         jp player_draw
