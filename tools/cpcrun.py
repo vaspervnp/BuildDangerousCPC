@@ -12,6 +12,7 @@ Script lines (';' starts a comment):
   shot <name>                   save <out>/<name>.png
   expect <addr> <value>         assert byte at addr == value (decimal or #hex)
   poke <addr> <value>           write a byte
+  pokew <addr> <value>          write a word; value may be a symbol (e.g. a building to boot)
 
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
@@ -228,11 +229,21 @@ def main():
             path = os.path.join(args.out, st[1] + '.png')
             cpc.screenshot(path)
             print(f"shot {path}")
-        elif cmd in ('expect', 'poke'):
-            value = int(st[2][1:], 16) if st[2].startswith('#') else int(st[2])
+        elif cmd in ('expect', 'poke', 'pokew'):
+            v = st[2]
+            if v.startswith('#'):
+                value = int(v[1:], 16)
+            elif v.lstrip('-').isdigit():
+                value = int(v)
+            else:
+                value = cpc.resolve(v, syms)
             addr = cpc.resolve(st[1], syms)
             if cmd == 'poke':
                 cpc.poke(addr, value)
+                continue
+            if cmd == 'pokew':
+                cpc.poke(addr, value & 0xFF)
+                cpc.poke(addr + 1, value >> 8)
                 continue
             got = cpc.peek(addr)
             ok = got == value

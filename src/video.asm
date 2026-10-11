@@ -195,15 +195,11 @@ set_border:
         out (c),a
         ret
 
-; Lightning flash: A bit 0 set turns pen 0 white, clear restores it. Trashes BC,F.
-set_flash:
-        ld bc,#7f00             ; select pen 0
+; In: A = hardware ink for pen 0 (the background). Trashes BC.
+set_pen0:
+        ld bc,#7f00
         out (c),c
-        rra
-        ld a,INK_BLACK
-        jr nc,.set
-        ld a,INK_BRWHITE
-.set:   out (c),a
+        out (c),a
         ret
 
 row_scr:

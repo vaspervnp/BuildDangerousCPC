@@ -14,6 +14,10 @@ building_test:
         db 1
         dw room_test
 
+building_gallery:               ; one of every hazard type except electric
+        db 1
+        dw room_gallery
+
 ; In: HL = building.
 building_start:
         ld a,(hl)

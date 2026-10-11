@@ -3,7 +3,19 @@
 ; Triggering an armed hazard is the only way to disarm it: it always plays the
 ; type's vignette and always costs energy.
 
-HZ_ELECTRIC     equ 0           ; type ids follow HAZARD_TYPES in tools/cpcgfx.py
+; Type ids follow HAZARD_TYPES in tools/cpcgfx.py.
+HZ_ELECTRIC     equ 0
+HZ_BITE         equ 1
+HZ_DROWN        equ 2
+HZ_HEAD         equ 3
+HZ_CUT          equ 4
+HZ_IMPALE       equ 5
+HZ_SQUASH       equ 6
+HZ_FIRE         equ 7
+HZ_ICE          equ 8
+HZ_POISON       equ 9
+HZ_SUCK         equ 10
+HZ_CATAPULT     equ 11
 
 HZ_ARMED        equ 0
 HZ_DISARMED     equ 1
@@ -14,8 +26,7 @@ HZ_TYPE         equ 2
 HZ_STATE        equ 3
 HZ_SIZE         equ 4
 
-; Sprites in build/hazards.bin: per hazard the armed tell, then its disarmed look.
-HSPR_SOCKET     equ 0
+; Sprites in build/hazards.bin: per type its armed tell (type*2), then its disarmed look.
 
 ; Reach: Thanos can set off a hazard within one column of his body and anywhere
 ; from 4 rows above his head down to his feet, i.e. the whole storey he is on.
@@ -32,7 +43,31 @@ HZT_SIZE        equ 5
 
 hz_types:
         dw vig_electric
-        db HSPR_SOCKET, STR_CAP_ZAP, 1
+        db HZ_ELECTRIC*2, STR_CAP_ZAP, 1
+        dw vig_bite
+        db HZ_BITE*2, STR_CAP_BITE, 1
+        dw vig_drown
+        db HZ_DROWN*2, STR_CAP_DROWN, 1
+        dw vig_head
+        db HZ_HEAD*2, STR_CAP_HEAD, 1
+        dw vig_cut
+        db HZ_CUT*2, STR_CAP_CUT, 1
+        dw vig_impale
+        db HZ_IMPALE*2, STR_CAP_IMPALE, 1
+        dw vig_squash
+        db HZ_SQUASH*2, STR_CAP_SQUASH, 1
+        dw vig_fire
+        db HZ_FIRE*2, STR_CAP_FIRE, 1
+        dw vig_ice
+        db HZ_ICE*2, STR_CAP_ICE, 1
+        dw vig_poison
+        db HZ_POISON*2, STR_CAP_POISON, 1
+        dw vig_suck
+        db HZ_SUCK*2, STR_CAP_SUCK, 1
+        dw vig_catapult
+        db HZ_CATAPULT*2, STR_CAP_CATAPULT, 1
+hz_types_end:
+        assert hz_types_end-hz_types == 12*HZT_SIZE, "hz_types must have one entry per HZ_* type"
 
 ; In: A = hazard type. Out: HL = its hz_types entry. Trashes AF.
 hz_type_entry:

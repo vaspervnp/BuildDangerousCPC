@@ -16,7 +16,7 @@ start:
         xor a
         ld (lang),a             ; English until L is pressed in the menu
         ld (keys),a
-        ld hl,building_test
+        ld hl,(boot_building)
         call building_start
         call hud_init
         call player_init
@@ -28,6 +28,8 @@ main_loop:
         call player_update
         call hud_update
         jr main_loop
+
+boot_building:  dw building_test   ; the test harness pokes this to boot other buildings
 
         include "video.asm"
         include "input.asm"
@@ -48,6 +50,7 @@ thanos_gfx:     incbin "build/thanos.bin"
 vignette_gfx:   incbin "build/vignettes.bin"
 hazard_gfx:     incbin "build/hazards.bin"
 room_test:      incbin "build/room_test.bin"
+room_gallery:   incbin "build/room_gallery.bin"
 
 ; ---------------------------------------------------------------- variables
         include "vars.asm"

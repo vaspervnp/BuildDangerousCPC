@@ -4,7 +4,7 @@ PY   ?= python3
 B    := build
 
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
-          $(B)/hazards.bin $(B)/room_test.bin $(B)/strings.asm
+          $(B)/hazards.bin $(B)/room_test.bin $(B)/room_gallery.bin $(B)/strings.asm
 SRC    := $(wildcard src/*.asm)
 
 all: $(B)/bd.dsk

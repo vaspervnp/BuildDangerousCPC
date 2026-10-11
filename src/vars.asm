@@ -28,6 +28,7 @@ caption_col:    defs 1
 vig_ptr:        defs 2
 vig_timer:      defs 1
 vig_hazard:     defs 2
+vig_row:        defs 1          ; row the last vignette frame was drawn at
 
 bld_rooms:      defs 1
 bld_room_list:  defs 2

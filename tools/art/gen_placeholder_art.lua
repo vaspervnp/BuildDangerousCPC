@@ -187,15 +187,171 @@ gen.vignettes = function()
     "....KKKKKKKKKK..",
     "....KKKKKKKKK...",
   }, body, legsApart)
-  saveStrip("vignettes", cells({ zapA, zapB, zapC }), 16, 16)
+
+  -- Frame-building helpers. Rows are 1-based; overlays use '.' for "keep the base pixel".
+  local std, stdT = concat(head, legsApart), concat(head, legsTogether)
+  local E16 = string.rep(".", 16)
+  local function over(base, ov)
+    local t = {}
+    for i = 1, 16 do
+      local b, o = base[i], ov[i]
+      if o then
+        assert(#o == 16, "overlay row " .. i .. " has " .. #o .. " columns")
+        local s = {}
+        for x = 1, 16 do
+          local c = o:sub(x, x)
+          s[x] = (c == ".") and b:sub(x, x) or c
+        end
+        b = table.concat(s)
+      end
+      t[i] = b
+    end
+    return t
+  end
+  local function keep(base, list) -- keep only these rows, standing on the bottom edge
+    local t, pad = {}, 16 - #list
+    for i = 1, pad do t[i] = E16 end
+    for i, r in ipairs(list) do t[pad + i] = base[r] end
+    return t
+  end
+  local function shiftx(row, n)
+    if n >= 0 then return (string.rep(".", n) .. row):sub(1, 16) end
+    return (row .. string.rep(".", -n)):sub(1 - n, 16 - n)
+  end
+  local function shiftRows(base, from, to, n)
+    local t = {}
+    for i = 1, 16 do t[i] = (i >= from and i <= to) and shiftx(base[i], n) or base[i] end
+    return t
+  end
+  local function up(base, n) -- move the whole frame up n rows (negative = down)
+    local t = {}
+    for i = 1, 16 do t[i] = base[i + n] or E16 end
+    return t
+  end
+  local function flipv(base)
+    local t = {}
+    for i = 1, 16 do t[i] = base[17 - i] end
+    return t
+  end
+  local function recolor(base, map)
+    local t = {}
+    for i = 1, 16 do t[i] = (base[i]:gsub(".", function(c) return map[c] or c end)) end
+    return t
+  end
+  local function framed(base)
+    local ov = {}
+    for i = 1, 16 do ov[i] = (i == 1 or i == 16) and string.rep("W", 16) or ("W" .. string.rep(".", 14) .. "W") end
+    return over(base, ov)
+  end
+  local walls = {}
+  for i = 1, 16 do walls[i] = "WW............WW" end
+  local wind = { [12] = "W.W.W.W.W.W.W.W.", [14] = ".W.W.W.W.W.W.W.W", [16] = "W.W.W.W.W.W.W.W." }
+
+  -- bitten: the "guard ferret" hangs off his ankle
+  local biteA = over(std, { [15] = "OOOWK...........", [16] = "O.O............." })
+  local biteB = over(stdT, { [13] = "OOW.............", [14] = "O..O............" })
+  local biteC = over(std, { [15] = "....WWW........." })                    -- bandaged
+  -- drowned: room floods (palette), bubbles, a rubber duck he did not bring
+  local drownA = over(std, { [1] = "..W.............", [3] = ".W..............", [5] = "W..............." })
+  local drownB = over(up(std, -2), { [1] = ".......OO.......", [2] = "......OOOOW....." })
+  local drownC = over(std, { [11] = "..B.............", [13] = "..B............B", [16] = "B.............B." })
+  -- hit on the head: lamp lands on the hat, accordion squash, stars
+  local headA = over(std, { [1] = "....OOOOOOO.....", [2] = "...OOOOOOOOO...." })
+  local headB = over(keep(std, { 1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 15, 16 }),
+                     { [5] = "....OOOOOOO.....", [6] = "...OOOOOOOOO...." })
+  local headC = over(std, { [1] = "W.W.........W.W.", [2] = ".W...........W..", [3] = "W.W.........W.W." })
+  -- cut in half: doors slam, top half slides off, taped back together
+  local cutA = over(std, walls)
+  local cutB = shiftRows(shiftRows(std, 1, 12, 2), 13, 16, -1)
+  local cutC = over(std, { [13] = "...WWWWWWWWWW..." })
+  -- impaled: sits on the "cushion", leaps, plaster on the seat
+  local impA = over(keep(std, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16 }), { [16] = "...W.W.W.W.W...." })
+  local impB = over(stdT, { [1] = "W.............W.", [2] = "W.............W.", [4] = "W.............W." })
+  local impC = over(std, { [12] = "..WW............", [13] = "..WW............" })
+  -- squashed: walls close in, pancake, springs back
+  local sqA = over(std, walls)
+  local sqB = keep(std, { 1, 4, 6, 8, 10, 12, 14, 16 })
+  local sqC = over(std, { [11] = "..W..........W..", [12] = ".W............W.", [13] = "..W..........W.." })
+  -- incinerated: fireball, then a walking briquette with one unimpressed eye
+  local fireA = {
+    ".....OOOOOO.....",
+    "...OOOOOOOOOO...",
+    "..OOOWWWWWWOOO..",
+    ".OOWWWWWWWWWWOO.",
+    ".OOWWWWWWWWWWOO.",
+    "OOWWWWWWWWWWWWOO",
+    "OOWWWWKKWWWWWWOO",
+    "OOWWWWWWWWWWWWOO",
+    "OOWWWWWWWWWWWWOO",
+    "OOWWWWWWWWWWWWOO",
+    ".OOWWWWWWWWWWOO.",
+    ".OOWWWWWWWWWWOO.",
+    "..OOOWWWWWWOOO..",
+    "...OOOOOOOOOO...",
+    ".....OOOOOO.....",
+    E16,
+  }
+  local briquette = recolor(std, { O = "K", B = "K", W = "K" })
+  local fireB = over(briquette, { [7] = ".........W......", [9] = "....O...........", [12] = "......O.....O..." })
+  local fireC = over(fireB, { [1] = "...W.....W......", [2] = "..W.....W......." })
+  -- frozen: ice block, cracks, shards
+  local iceA = framed(recolor(std, { ["."] = "B" }))
+  local iceB = over(iceA, { [3] = "..K.....K.......", [4] = "...K...K........", [5] = "....K.K.....K...",
+                            [6] = ".....K.....K....", [10] = "........K....K..", [11] = ".......K......K." })
+  local iceC = over(std, { [3] = "W..............W", [6] = ".W............W.", [10] = "W..............W", [14] = ".W............W." })
+  -- poisoned: wobble left, wobble right, deflate
+  local poiA = shiftRows(std, 1, 9, -1)
+  local poiB = shiftRows(std, 1, 9, 1)
+  local poiC = keep(std, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16 })
+  -- sucked up: lifted, only the legs left, spat out upside down (also used for falling)
+  local suckA = over(up(std, 2), wind)
+  local suckB = {}
+  for i = 1, 16 do suckB[i] = E16 end
+  suckB[1], suckB[2] = std[15], std[16]
+  suckB = over(suckB, wind)
+  local suckC = flipv(std)
+  -- catapulted: crouch, launch (arms up, speed lines), land with plaster and feathers
+  local catA = keep(std, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16 })
+  local catB = over(stdT, { [2] = "O.............O.", [3] = "B.............B.", [4] = "B.............B.",
+                            [15] = "..W..........W..", [16] = "..W..........W.." })
+  local catD = over(std, { [1] = "..W.........W...", [2] = "...W.......W....", [5] = "W..............W" })
+
+  saveStrip("vignettes", cells({
+    zapA, zapB, zapC, biteA, biteB, biteC, drownA, drownB, drownC, headA, headB, headC,
+    cutA, cutB, cutC, impA, impB, impC, sqA, sqB, sqC, fireA, fireB, fireC,
+    iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD,
+  }), 16, 16)
 end
 
 ------------------------------------------------------------------ hazard tells (8x8, masked)
--- Order must match HSPR_* in src/hazards.asm: each hazard has its armed tell, then disarmed.
+-- Order must match HAZARD_TYPES in tools/cpcgfx.py / HZ_* in src/hazards.asm:
+-- per hazard type its armed tell (sprite type*2), then its disarmed look (type*2+1).
 gen.hazards = function()
   saveStrip("hazards", cells({
-    { "......W.",".WWWWWOW",".WKWKWO.",".WWWWWO.",".WKWKW.O",".WWWWW.O",".......O","......OO" }, -- socket, live wire
-    { "........",".WWWWW..",".WOWOW..",".WWOWW..",".WOWOW..",".WWWWW..","........","........" }, -- socket, taped
+    { "......W.",".WWWWWOW",".WKWKWO.",".WWWWWO.",".WKWKW.O",".WWWWW.O",".......O","......OO" }, -- electric: socket, live wire
+    { "........",".WWWWW..",".WOWOW..",".WWOWW..",".WOWOW..",".WWWWW..","........","........" }, --   taped
+    { "........","WWWWWWWW","WKWKWKWK","WOWKWOWK","WKWKWKWK","WWWWWWWW","........","........" }, -- bite: grille, eyes inside
+    { "........","WWWWWWWW","WKWKWKWK","WKWOOKWK","WKWOOKWK","WWWWWWWW","........","........" }, --   padlocked
+    { "........","BBBBBBBB","BBBOOBBB","BBBOOBBB","BBBBBBBB","....B...","........","....B..." }, -- drown: pipe valve, dripping
+    { "........","BBBBBBBB","BBWOOWBB","BBWOOWBB","BBBBBBBB","........","........","........" }, --   taped
+    { "...O....","....O...","...O....","..OOO...",".OOOOO..","OOOOOOO.","..WWW...","........" }, -- head: lamp on a frayed cord
+    { "...B....","...B....","...B....","..OOO...",".OOOOO..","OOOOOOO.","..WWW...","........" }, --   cord fixed
+    { "........",".WWWWW..",".WKKKW..",".WKOKW..",".WKKKW..",".WWWWW..","...O....","........" }, -- cut: door sensor, sparking
+    { "........",".WWWWW..",".WKKKW..",".WKBKW..",".WKKKW..",".WWWWW..","........","........" }, --   reset
+    { "........","........","........","........",".OOOOOO.","OWOWOWOO","OOOOOOOO","........" }, -- impale: stapled cushion
+    { "........","........","........","........",".OOOOOO.","OOOOOOOO","OOOOOOOO","........" }, --   just a cushion
+    { "........","WWWWWWWW","WKWKKWKW","WWWWWWWW","WKKWKWKW","WWWWWWWW","...K....","...K...." }, -- squash: "NOT A COMPACTOR"
+    { "........","WWWWWWWW","WOOOOOOW","WWWWWWWW","WOOOOOOW","WWWWWWWW","...K....","...K...." }, --   struck out
+    { ".W......","..W.....",".W......","........","...B....","..BWB...","..BBB...","OOOOOOO." }, -- fire: gas wisp, pilot light
+    { "........","........","........","........","........","...K....","........","OOOOOOO." }, --   off
+    { "BBBBBBBB","BWBBBBBB","BWWWWWBB","BWBKBWBB","BWWWWWBB","BWBBBBBB","BBBBBBBB","BBBBBBBB" }, -- ice: cracked freezer handle
+    { "BBBBBBBB","BWBBBBBB","BWWWWWBB","BWOOOWBB","BWWWWWBB","BWBBBBBB","BBBBBBBB","BBBBBBBB" }, --   taped
+    { "........",".OOOOO..",".OKKKO..",".OOOOO..",".OKKKO..",".OOOOO..","...B....","..BBB..." }, -- poison: leaking drum
+    { "........",".OOOOO..",".OKKKO..",".OOOOO..",".OKKKO..",".OOOOO..","........","........" }, --   sealed
+    { "WWWWWWWW","WKKKKKKW","WKKKKKKW","WKKKKKKW","WKKKKKKW","WWWWWWWW","W.W.W...","........" }, -- suck: vent, no grille
+    { "WWWWWWWW","WKWKWKWW","WKWKWKWW","WKWKWKWW","WKWKWKWW","WWWWWWWW","........","........" }, --   grille back on
+    { "...O....","...W....","..O.O...","...O....","...O....","...O....","WWWWWWWW","BBBBBBBB" }, -- catapult: frayed cable
+    { "...O....","...O....","...O....","...O....","...O....","...O....","WWWWWWWW","BBBBBBBB" }, --   new cable
   }), 8, 8)
 end
 

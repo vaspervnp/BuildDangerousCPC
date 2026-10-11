@@ -1,0 +1,178 @@
+; Milestone 4: every new hazard type, in the gallery room (one of each).
+; Hazard i's state is at *room_hazards+4+4*i. Energy is topped up before each trap
+; so eleven hits don't run it out.
+
+pokew boot_building building_gallery
+run 30
+expect *room_hazards+0 11
+shot gal_boot
+
+; --- bite
+run 20 right
+expect pl_x 7
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_bite
+run 110
+expect pl_state 0
+expect *room_hazards+4 1
+
+; --- drown
+run 30 right
+expect pl_x 13
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_drown
+run 110
+expect pl_state 0
+expect *room_hazards+8 1
+
+; --- head
+run 30 right
+expect pl_x 19
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_head
+run 110
+expect pl_state 0
+expect *room_hazards+12 1
+
+; --- cut
+run 30 right
+expect pl_x 25
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_cut
+run 110
+expect pl_state 0
+expect *room_hazards+16 1
+
+; --- ice
+run 25 right
+expect pl_x 30
+run 60 up
+expect pl_y 14
+run 20 right
+expect pl_x 34
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_ice
+run 110
+expect pl_state 0
+expect *room_hazards+20 1
+
+; --- fire
+run 55 left
+expect pl_x 23
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_fire
+run 110
+expect pl_state 0
+expect *room_hazards+24 1
+
+; --- squash
+run 25 left
+expect pl_x 18
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_squash
+run 110
+expect pl_state 0
+expect *room_hazards+28 1
+
+; --- impale
+run 30 left
+expect pl_x 12
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_impale
+run 110
+expect pl_state 0
+expect *room_hazards+32 1
+
+; --- poison
+run 20 left
+expect pl_x 8
+run 60 up
+expect pl_y 7
+run 25 right
+expect pl_x 13
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_poison
+run 110
+expect pl_state 0
+expect *room_hazards+36 1
+
+; --- suck
+run 30 right
+expect pl_x 19
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_suck
+run 110
+expect pl_state 0
+expect *room_hazards+40 1
+
+; --- catapult
+run 30 right
+expect pl_x 25
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 7
+run 8
+shot gal_catapult
+run 12
+shot gal_catapult_airborne
+run 98
+expect pl_state 0
+expect *room_hazards+44 1
+
+; every hazard disarmed: clean sign-off
+run 1 mark
+run 3
+expect bld_marked 1
+expect miss_tally 0

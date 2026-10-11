@@ -75,22 +75,25 @@ Building:
 
 ### 2. Hazard / Trap Table (12 types)
 
-| ID | Trap | Tell (8×8 object) | Vignette (uses 16×16 Thanos sheet + FX) |
-|---|---|---|---|
-| 0 | Bitten | scratched grille tile | leg-shake, 3 frames |
-| 1 | Electrocuted | bare wire behind switch | spark flash + hair-stand, 3 frames |
-| 2 | Drowned | damp patch under closet door | flood splash + duck pop-up, 4 frames |
-| 3 | Hit on head | zip-tie glint on fixture above | squash-and-pop, 3 frames |
-| 4 | Cut in half | mistimed lift-door icon | split/rejoin, 4 frames |
-| 5 | Impaled | stapled cushion seam | yelp + patch overlay, 2 frames |
-| 6 | Squashed | mislabeled door icon | accordion-squash, 3 frames |
-| 7 | Incinerated | gas-leak wisp near pilot light | fireball + soot palette-swap, 4 frames |
-| 8 | Frozen | frost crack on freezer handle | ice-block + shatter, 4 frames |
-| 9 | Poisoned | drip under "cleaning supplies" sign | green palette-swap + wobble, 3 frames |
-| 10 | Sucked up | missing vent grille | stretch-into-duct, 3 frames |
-| 11 | Catapulted | frayed cable glint | launch-up + fall-back, 4 frames |
+As built (milestone 4). Ids are the order of `HAZARD_TYPES` in `tools/cpcgfx.py`; room files name them.
 
-- Each vignette is **short (2–4 frames, <1s at 50Hz)** and built by overlaying small FX sprites (spark, splash, soot, ice) on the existing Thanos 16×16 sheet rather than drawing full new character frames per trap — this is the main art-cost control for having 12 distinct gags.
+| ID | Room-file name | Trap | Tell (8×8, armed → disarmed) | Vignette (FX = background recolour) |
+|---|---|---|---|---|
+| 0 | `electric` | Electrocuted | socket with a live wire → taped | lit up / X-ray ×3 with white flashes, singed |
+| 1 | `bite` | Bitten | floor grille, eyes inside → padlocked | ferret on the ankle, leg-shake ×3, bandaged |
+| 2 | `drown` | Drowned | dripping pipe valve → taped | room floods (blue), bubbles, bobbing with a duck, dripping |
+| 3 | `head` | Hit on head | ceiling lamp on a frayed cord → fixed | lamp lands, accordion (grey impact), stars |
+| 4 | `cut` | Cut in half | sparking door sensor → reset | doors slam (grey), two halves, taped |
+| 5 | `impale` | Impaled | stapled cushion → plain | sits, leaps up two rows, plaster |
+| 6 | `squash` | Squashed | "NOT A COMPACTOR" sign → struck out | walls close, pancake (grey), springs back |
+| 7 | `fire` | Incinerated | gas wisp over a pilot light → off | fireball with red/white flashes, briquette, smoking briquette |
+| 8 | `ice` | Frozen | cracked freezer handle → taped | ice block (icy background), cracks, shards |
+| 9 | `poison` | Poisoned | leaking drum → sealed | room fills with gas (green), wobble ×2, deflated |
+| 10 | `suck` | Sucked up | vent with no grille → grille back | lifted, legs only, gone, spat out upside down |
+| 11 | `catapult` | Catapulted | frayed cable → new cable | crouch, launched up through every floor above, falls back upside down, plaster and feathers |
+
+- **Vignette scripts** are data: each step is `frame, hold, fx, dy` (4 bytes). `fx` recolours pen 0 — the background — for the step (flash, fire, flood, gas, ice, impact dust), which turns the whole room into part of the gag for zero extra art. `dy` moves the frame up or down whole rows from where Thanos stands (clamped below the HUD), so a trap can throw him through the floors above. `VF_NONE` draws nothing (he is in the vent / above the roof).
+- Frames are full 16×16 (128 bytes): 36 frames for all 12 traps, 4.6K, inside the 4–6K budget. Frames are shared where a pose recurs (the upside-down frame serves both "spat out of the vent" and "falling back from the roof").
 - A one-line deadpan caption string prints in the HUD band on trigger, pulled from a small string table (shared, not per-room) to keep text data minimal.
 - **Triggering a hazard is how it gets disarmed — there is no clean/silent disarm.** Pressing Fire while on/adjacent to an armed hazard's tile always plays its vignette, always costs a small fixed energy amount, and always sets that hazard's state to `disarmed` in the same action. There's no success/fail roll on the interaction itself — the "fail state" in this game is a **Miss** (see below), not a fumbled disarm.
 

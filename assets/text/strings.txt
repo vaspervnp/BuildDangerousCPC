@@ -6,3 +6,14 @@ MARK_MISS | Miss! The crowd will find it first. | Αστοχία! Το κοιν�
 MARK_ALREADY | Already signed off. | Έχει ήδη υπογραφεί.
 EXIT_LOCKED | Can't leave. Rooms still unchecked. | Δεν φεύγω. Υπάρχουν ανέλεγκτα δωμάτια.
 EXIT_DONE | Inspection complete. | Η επιθεώρηση ολοκληρώθηκε.
+CAP_BITE | Bitten by a guard ferret. Noted. | Δάγκωμα από κουνάβι-φύλακα. Σημειώθηκε.
+CAP_DROWN | Flooded. I did not bring the duck. | Πλημμύρα. Την πάπια δεν την έφερα εγώ.
+CAP_HEAD | One zip tie. One head. On file. | Ένα δεματικό. Ένα κεφάλι. Στο αρχείο.
+CAP_CUT | Doors: in a hurry. Me: in halves. | Πόρτες: βιαστικές. Εγώ: στα δύο.
+CAP_IMPALE | Soft landing. Soft for whom? | Μαλακή προσγείωση. Για ποιον;
+CAP_SQUASH | The sign lied. I am now flat. | Η πινακίδα έλεγε ψέματα. Είμαι επίπεδος.
+CAP_FIRE | Gas leak meets pilot light. Medium-well. | Διαρροή γκαζιού. Ψημένος μέτρια.
+CAP_ICE | Freezer handle: decorative. Me: frozen. | Καταψύκτης χωρίς χερούλι. Πάγωσα.
+CAP_POISON | 'Cleaning supplies'. I feel cleansed. | 'Καθαριστικά'. Νιώθω πολύ καθαρός.
+CAP_SUCK | Vent with no grille. It inhaled me. | Αεραγωγός χωρίς σχάρα. Με ρούφηξε.
+CAP_CATAPULT | Cable snapped. Saw the roof. Both sides. | Κόπηκε το συρματόσχοινο. Είδα τη στέγη.
