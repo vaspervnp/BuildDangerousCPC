@@ -98,6 +98,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "build/bld_mall.asm"
         include "build/bld_hotel.asm"
         include "build/bld_hospital.asm"
+        include "build/bld_hardknock.asm"
         include "build/bld_skyscraper.asm"
         include "build/room_outdoor.asm"
         include "build/title.asm"

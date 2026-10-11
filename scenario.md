@@ -60,7 +60,8 @@ Nothing physical — just people, eating the clock while the crowd waits outside
 2. **Big Box Mall** — wide floors, escalators (they carry Thanos on their own — up or down, never the wrong way), one of every trap type, first appearance of timed/moving hazards (e.g. the guillotine elevator doors).
 3. **Grand Hotel** — tall, vertical play (stairs/lift shafts matter), introduces fire and water hazards together, tighter clock.
 4. **Mega Hospital** — chemical and biohazard themed, escalators between the wards, fast hazards, crowded rooms, decoy "fake" hazards that look dangerous but are safe (bluffing the player's pattern sense).
-5. **The Skyscraper** (finale) — every hazard type appears at least once, the owner is visibly impatient on the outside-scene clock, and the twist lands here (see below).
+5. **Hard Knock Hotel & Casino** — a rock-themed casino-hotel: slot machines and escalators on the casino floor, card tables, a stage with amp stacks (the pyrotechnics are a trap), signed guitars on every wall, the rock-star suite, a rooftop pool. One of every trap, neon walls.
+6. **The Skyscraper** (finale) — every hazard type appears at least once, the owner is visibly impatient on the outside-scene clock, and the twist lands here (see below).
 
 ## The Twist
 
@@ -74,7 +75,7 @@ The owner of the Skyscraper isn't just cheap — he's deliberately under-buildin
 - Visual comedy over violence — every hazard is a slapstick beat, not gore. Think Looney Tunes physics on 8-bit hardware.
 - Thanos's face never changes. The joke is that nothing fazes him; the energy bar is the only thing that visibly reacts.
 - Dry, deadpan one-line text captions on each hit ("Filed under: dog bite. Again.") rather than voice or long cutscenes — keeps it readable and cheap to produce.
-- Outdoor ribbon-cutting scene reused as a template across all five buildings (owner sprite/name/dialogue swapped), keeping asset cost low while giving each level a bookend.
+- Outdoor ribbon-cutting scene reused as a template across all six buildings (owner sprite/name/dialogue swapped), keeping asset cost low while giving each level a bookend.
 
 ## Win / Lose per Building
 

@@ -10,6 +10,7 @@ run 1 fire                      ; title: start
 run 3
 run 1 fire                      ; skip the outdoor intro
 until game_state 0 -
+run 1                           ; let go of Fire (a trap may be in reach already)
 shot route_hotel_hotel_lobby
 goto 0 17 21 right
 run 1 fire                      ; head at 19,17

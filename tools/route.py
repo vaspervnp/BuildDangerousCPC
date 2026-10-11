@@ -332,7 +332,8 @@ def main(argv):
            "run 1 fire                      ; title: start",
            "run 3",
            "run 1 fire                      ; skip the outdoor intro",
-           "until game_state 0 -"]
+           "until game_state 0 -",
+           "run 1                           ; let go of Fire (a trap may be in reach already)"]
     out += body
     out += ["run 1",
             "run 1 up                        ; out through the door",

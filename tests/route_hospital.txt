@@ -10,6 +10,7 @@ run 1 fire                      ; title: start
 run 3
 run 1 fire                      ; skip the outdoor intro
 until game_state 0 -
+run 1                           ; let go of Fire (a trap may be in reach already)
 shot route_hospital_hosp_er
 goto 0 10 21 right
 run 1 fire                      ; electric at 12,21

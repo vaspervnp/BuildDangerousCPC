@@ -30,10 +30,12 @@ ROOM_LEGEND = {
     '/': 43, '\\': 44,                         # stairs rising right / left
     'u': 45, 'U': 46, 'n': 47, 'N': 48,         # escalators: up rising right / left, down ...
     'T': 49, 'Z': 50, 'I': 51,                  # title logo: bricks, barrier stripes, girder
+    '$': 52, 'G': 53, 'A': 54,                  # Hard Knock: slot machine, guitar, amp
 }
 
 # Building palettes: hardware ink for pen 2 (walls, windows... and Thanos's suit).
-PALETTES = {'skyblue': 0x57, 'green': 0x56, 'mauve': 0x5D, 'cyan': 0x5B, 'paleblue': 0x5F}
+PALETTES = {'skyblue': 0x57, 'green': 0x56, 'mauve': 0x5D, 'cyan': 0x5B, 'paleblue': 0x5F,
+            'magenta': 0x4D}
 ROOM_W, ROOM_H = 40, 23
 HUD_ROWS = 2
 
@@ -280,7 +282,8 @@ def parse_building(src):
       misses_ok <n>          Misses still graded "good" (default 2)
       sign <STRING_ID>       name lit up on the facade in the outdoor scene
       welcome <STRING_ID>    the owner's first line
-      palette <name>         wall colour (pen 2): skyblue (default), green, mauve, cyan, paleblue
+      palette <name>         wall colour (pen 2): skyblue (default), green, mauve, cyan, paleblue,
+                             magenta
       calls <n>              Tasha phones n times (1-3, default 2), at random times: the
                              first 20-51 s into the inspection, then every 30-61 s
 

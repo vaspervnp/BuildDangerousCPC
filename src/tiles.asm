@@ -35,7 +35,10 @@ TILE_ESC_DN_L   equ 48
 TILE_TITLE_BRICK equ 49         ; title logo materials (assets/title.txt)
 TILE_BARRIER    equ 50
 TILE_GIRDER     equ 51
-TILE_COUNT      equ 52
+TILE_SLOT       equ 52          ; Hard Knock decor: slot machine, guitar on the wall, amp
+TILE_GUITAR     equ 53
+TILE_AMP        equ 54
+TILE_COUNT      equ 55
 
 TILEF_SOLID     equ 1
 TILEF_CLIMB     equ 2           ; ladder
@@ -74,5 +77,6 @@ tile_flags:
         db TILEF_STAIR_R+TILEF_ESC_DOWN
         db TILEF_STAIR_L+TILEF_ESC_DOWN
         ds 3,0                  ; title logo materials
+        ds 3,0                  ; Hard Knock decor
 tile_flags_end:
         assert tile_flags_end-tile_flags == TILE_COUNT, "one tile_flags entry per tile"

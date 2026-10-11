@@ -3,8 +3,8 @@ IDSK ?= iDSK
 PY   ?= python3
 B    := build
 
-BUILDINGS := sunnyvale test gallery mall hotel hospital skyscraper
-CAMPAIGN  := sunnyvale mall hotel hospital skyscraper
+BUILDINGS := sunnyvale test gallery mall hotel hospital hardknock skyscraper
+CAMPAIGN  := sunnyvale mall hotel hospital hardknock skyscraper
 ROUTES    := $(CAMPAIGN:%=tests/route_%.txt)
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
           $(B)/hazards.bin $(B)/people.bin $(B)/tasha.bin $(B)/strings.asm $(B)/room_outdoor.asm $(B)/title.asm \

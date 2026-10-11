@@ -50,6 +50,8 @@ BLD_HOTEL_SIGN | Grand Hotel | Ξενοδοχείο Γκραντ
 BLD_HOTEL_WELCOME | Welcome to the Grand Hotel. Check in! | Καλώς ήρθατε στο Ξενοδοχείο Γκραντ!
 BLD_HOSP_SIGN | Mega Hospital | Μέγα Νοσοκομείο
 BLD_HOSP_WELCOME | Welcome to Mega Hospital. Get well soon! | Καλώς ήρθατε! Περαστικά σας!
+BLD_HK_SIGN | Hard Knock Casino | Καζίνο Hard Knock
+BLD_HK_WELCOME | Welcome to Hard Knock! Let's rock! | Καλώς ήρθατε στο Hard Knock! Ροκ!
 BLD_SKY_SIGN | The Skyscraper | Ο Ουρανοξύστης
 BLD_SKY_WELCOME | Welcome to my tower. Nothing to see! | Ο πύργος μου. Τίποτα ύποπτο εδώ!
 CAP_EVIDENCE | An insurance claim. Dated opening day! | Ασφαλιστήριο για τη μέρα των εγκαινίων!
