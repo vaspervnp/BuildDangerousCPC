@@ -17,6 +17,8 @@ pl_anim:        defs 1
 pl_climb:       defs 1
 pl_wait:        defs 1
 pl_onladder:    defs 1
+pl_stair:       defs 1          ; tile flags of the step he stands on mid-flight, else 0
+pl_stepped:     defs 1          ; 1: this step was along a flight (walking pose, not climbing)
 old_xy:         defs 2
 
 game_state:     defs 1          ; GS_*

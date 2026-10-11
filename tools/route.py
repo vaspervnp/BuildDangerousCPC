@@ -18,11 +18,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cpcgfx import HAZARD_TYPES, HUD_ROWS, parse_building  # noqa: E402
 
 MAP_W, MAP_H = 40, 25
-SOLID, CLIMB = '=#', '[]'
 EXIT_DOOR = 'x'
 
+# Tile flags (src/tiles.asm) by room character; out of the play area is solid.
+SOLID, CLIMB, STAIR_R, STAIR_L, ESC_UP, ESC_DOWN = 1, 2, 4, 8, 16, 32
+FLAGS = {'=': SOLID, '#': SOLID, '[': CLIMB, ']': CLIMB, '/': STAIR_R, '\\': STAIR_L,
+         'u': STAIR_R | ESC_UP, 'U': STAIR_L | ESC_UP, 'n': STAIR_R | ESC_DOWN, 'N': STAIR_L | ESC_DOWN}
+
 # Costs in frames (game-loop iterations): a step is STEP_DELAY+1, a fall row FALL_DELAY+1.
-STEP, FALL = 5, 2
+STEP, FALL, ESC = 5, 2, 3
 VIGNETTE = 160              # rough length of a trap vignette, for the time estimate only
 
 KEYS = ('up', 'down', 'left', 'right')
@@ -65,60 +69,141 @@ class Building:
             return '#'
         return self.grids[r][y - HUD_ROWS][x]
 
-    def solid(self, r, x, y):
-        return self.cell(r, x, y) in SOLID
-
-    def climb(self, r, x, y):
-        return self.cell(r, x, y) in CLIMB
+    def flags(self, r, x, y):
+        return FLAGS.get(self.cell(r, x, y), 0)
 
     # ---- player.asm, cell by cell
     def on_ladder(self, s):
         r, x, y = s
-        return self.climb(r, x, y + 1) and self.climb(r, x + 1, y + 1)
+        return self.flags(r, x, y + 1) & self.flags(r, x + 1, y + 1) & CLIMB
 
-    def supported(self, s):
+    def support(self, s):
+        """What holds him up at a step frame: 'floor', 'stair' (mid-flight: input moves),
+        'escalator' (carried), or None (falls)."""
         r, x, y = s
-        return (self.on_ladder(s) or (self.climb(r, x, y + 2) and self.climb(r, x + 1, y + 2))
-                or self.solid(r, x, y + 2) or self.solid(r, x + 1, y + 2))
+        if self.on_ladder(s):
+            return 'floor'
+        b, c = self.flags(r, x, y + 2), self.flags(r, x + 1, y + 2)
+        if b & c & CLIMB or (b | c) & SOLID:
+            return 'floor'
+        f = b if b & STAIR_R else c if c & STAIR_L else 0
+        if not f:
+            return None
+        return 'escalator' if f & (ESC_UP | ESC_DOWN) else 'stair'
 
-    def move(self, s, key):
-        """One step with key held. Returns (new state, frames) or None if blocked."""
+    def stair_flags(self, s):
+        """pl_stair: the step's flags when mid-flight."""
+        r, x, y = s
+        b, c = self.flags(r, x, y + 2), self.flags(r, x + 1, y + 2)
+        if b & c & CLIMB or (b | c) & SOLID or self.on_ladder(s):
+            return 0
+        return b if b & STAIR_R else c if c & STAIR_L else 0
+
+    def stair_up(self, s):
+        r, x, y = s
+        f = self.flags(r, x + 1, y + 1)
+        if f & STAIR_R:
+            dx = 1
+        else:
+            f = self.flags(r, x, y + 1)
+            if not f & STAIR_L:
+                return None
+            dx = -1
+        if f & ESC_DOWN:
+            return None
+        if y == HUD_ROWS:
+            ex = self.exits[r]
+            return ((ex['up'], x + 2 * dx, MAP_H - 2), True) if 'up' in ex else None
+        return (r, x + dx, y - 1), False
+
+    def stair_down(self, s):
         r, x, y = s
         ex = self.exits[r]
-        if key == 'up':
-            if not self.on_ladder(s):
+        if y == MAP_H - 2:
+            f = self.flags(r, x + 1, y + 1)
+            if f & STAIR_R:
+                dx = -2
+            else:
+                f = self.flags(r, x, y + 1)
+                if not f & STAIR_L:
+                    return None
+                dx = 2
+            if f & ESC_UP or 'down' not in ex:
                 return None
+            return (ex['down'], x + dx, HUD_ROWS), True
+        f = self.flags(r, x, y + 2)
+        if f & STAIR_R:
+            dx = -1
+        else:
+            f = self.flags(r, x + 1, y + 2)
+            if not f & STAIR_L:
+                return None
+            dx = 1
+        if f & ESC_UP:
+            return None
+        return (r, x + dx, y + 1), False
+
+    def move(self, s, key):
+        """One step with key held, from a state standing on something.
+        Returns (new state, changed room) or None if blocked."""
+        r, x, y = s
+        ex = self.exits[r]
+        st = self.stair_flags(s)
+        if key == 'up':
+            m = self.stair_up(s)
+            if m or not self.on_ladder(s):
+                return m
             if y == HUD_ROWS:
                 return ((ex['up'], x, MAP_H - 2), True) if 'up' in ex else None
-            if self.solid(r, x, y - 1) or self.solid(r, x + 1, y - 1):
+            if (self.flags(r, x, y - 1) | self.flags(r, x + 1, y - 1)) & SOLID:
                 return None
             return (r, x, y - 1), False
         if key == 'down':
+            m = self.stair_down(s)
+            if m:
+                return m
             if y == MAP_H - 2:
                 return ((ex['down'], x, HUD_ROWS), True) if self.on_ladder(s) and 'down' in ex else None
-            if not (self.climb(r, x, y + 2) and self.climb(r, x + 1, y + 2)):
+            if not self.flags(r, x, y + 2) & self.flags(r, x + 1, y + 2) & CLIMB:
                 return None
             return (r, x, y + 1), False
         if key == 'left':
+            if st & STAIR_R:
+                return self.stair_down(s)
+            if st & STAIR_L:
+                return self.stair_up(s)
             if x == 0:
                 return ((ex['left'], MAP_W - 2, y), True) if 'left' in ex else None
-            if self.solid(r, x - 1, y) or self.solid(r, x - 1, y + 1):
+            if (self.flags(r, x - 1, y) | self.flags(r, x - 1, y + 1)) & SOLID:
                 return None
             return (r, x - 1, y), False
+        if st & STAIR_R:
+            return self.stair_up(s)
+        if st & STAIR_L:
+            return self.stair_down(s)
         if x == MAP_W - 2:
             return ((ex['right'], 0, y), True) if 'right' in ex else None
-        if self.solid(r, x + 2, y) or self.solid(r, x + 2, y + 1):
+        if (self.flags(r, x + 2, y) | self.flags(r, x + 2, y + 1)) & SOLID:
             return None
         return (r, x + 1, y), False
 
     def settle(self, s):
-        """Fall until supported. Returns (state, frames)."""
+        """Falls and escalator rides until he stands on something. Returns (state, frames)."""
         frames = 0
-        r, x, y = s
-        while not self.supported((r, x, y)):
-            y += 1
-            frames += FALL
-        return (r, x, y), frames
+        for _ in range(200):
+            how = self.support(s)
+            if how in ('floor', 'stair'):
+                return s, frames
+            if how is None:
+                s = (s[0], s[1], s[2] + 1)
+                frames += FALL
+                continue
+            m = self.stair_up(s) if self.stair_flags(s) & ESC_UP else self.stair_down(s)
+            if not m:
+                return s, frames            # stuck at a broken escalator: the planner avoids it
+            s = m[0]
+            frames += ESC + (13 if m[1] else 0)
+        sys.exit(f"{self.src}: stuck falling or riding at {s}")
 
     def neighbours(self, s):
         for key in KEYS:

@@ -26,10 +26,20 @@ TILE_MOON       equ 29
 TILE_RIBBON     equ 30
 TILE_RIBBON_CUT equ 31
 ; 32-42: building decor and decoys (see ROOM_LEGEND in tools/cpcgfx.py); never solid
-TILE_COUNT      equ 43
+TILE_STAIR_R    equ 43          ; one step of a flight rising to the right
+TILE_STAIR_L    equ 44          ; ... rising to the left
+TILE_ESC_UP_R   equ 45          ; escalator steps: carry him up / down by themselves
+TILE_ESC_UP_L   equ 46
+TILE_ESC_DN_R   equ 47
+TILE_ESC_DN_L   equ 48
+TILE_COUNT      equ 49
 
 TILEF_SOLID     equ 1
-TILEF_CLIMB     equ 2
+TILEF_CLIMB     equ 2           ; ladder
+TILEF_STAIR_R   equ 4           ; a step of a flight: holds him up from above, never blocks
+TILEF_STAIR_L   equ 8
+TILEF_ESC_UP    equ 16          ; with a STAIR_* bit: an escalator running up
+TILEF_ESC_DOWN  equ 32          ; ... or down
 
 tile_flags:
         db 0                    ; BLACK
@@ -54,5 +64,11 @@ tile_flags:
         ds 9,0                  ; DIAL_0..8
         ds 4,0                  ; STAR, MOON, RIBBON, RIBBON_CUT
         ds 11,0                 ; decor and decoys
+        db TILEF_STAIR_R        ; STAIR_R
+        db TILEF_STAIR_L        ; STAIR_L
+        db TILEF_STAIR_R+TILEF_ESC_UP
+        db TILEF_STAIR_L+TILEF_ESC_UP
+        db TILEF_STAIR_R+TILEF_ESC_DOWN
+        db TILEF_STAIR_L+TILEF_ESC_DOWN
 tile_flags_end:
         assert tile_flags_end-tile_flags == TILE_COUNT, "one tile_flags entry per tile"

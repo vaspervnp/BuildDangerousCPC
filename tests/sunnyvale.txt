@@ -1,9 +1,11 @@
-; Milestone 5: a clean run through Sunny Vale Apartments (4 rooms, 8 traps).
+; A clean run through Sunny Vale Apartments (4 rooms, 8 traps), the whole flow from the
+; title to the ending.
 ;   room 2 sv_upper_w   room 3 sv_upper_e
 ;   room 0 sv_lobby     room 1 sv_east
 ; Each room's hazards: state of hazard i at *room_hazards+4+4*i. Energy 16 = 8 hats.
-; Covers walking off both side edges, climbing up and down through ceilings/floors,
-; hazards staying disarmed when a room is revisited, and the exit gate.
+; Covers stairs (up and down, left/right along a flight, through a ceiling both ways),
+; walking off both side edges, hazards staying disarmed when a room is revisited, and the
+; exit. goto fails the test if Thanos doesn't get to exactly that room/x/y.
 
 pokew boot_campaign campaign_single   ; Sunny Vale alone: the campaign would go on to the mall
 run 5                           ; title screen
@@ -23,22 +25,23 @@ expect pl_y 21
 expect energy 16
 shot sv_lobby
 
-; --- lobby: two live sockets
-run 35 right
-expect pl_x 12
-run 5
+; --- lobby: two live sockets, a flight of stairs between them
+goto 0 12 21 right
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+4 1
-run 40 right
-expect pl_x 20
-run 60 up
+goto 0 17 21 right              ; the foot of the flight
+goto 0 18 20 up                 ; one step up is one step along
+goto 0 21 17 right              ; on a flight, right goes up it...
+goto 0 19 19 left               ; ...and left down
+shot sv_stairs
+goto 0 24 14 up                 ; the top: standing on the 1st floor
+run 10 up                       ; no more flight: up does nothing
+expect pl_x 24
 expect pl_y 14
-run 60 right
-expect pl_x 32
-run 5
+goto 0 32 14 right
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+8 1
 run 1 mark
 run 3
@@ -46,124 +49,78 @@ expect bld_marked 1
 expect miss_tally 0
 
 ; --- off the right edge into the east wing, same floor
-run 35 right
-expect cur_room 1
-expect pl_x 0
-expect pl_y 14
+goto 1 0 14 right
 run 20
 shot sv_east
-run 85 right                    ; leaking pipe
-expect pl_x 17
-run 5
+goto 1 17 14 right              ; leaking pipe
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+8 1
-run 45 left
-expect pl_x 8
-run 60 down
-expect pl_y 21
-run 75 right                    ; ferret grille
-expect pl_x 23
-run 5
+goto 1 7 14 left
+goto 1 14 21 down               ; down a flight rising left
+goto 1 23 21 right              ; ferret grille
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+4 1
 run 1 mark
 run 3
 expect bld_marked 3
 
 ; --- up through the east wing's ceiling into the upper floors
-run 75 left
-expect pl_x 8
-run 60 up
-expect pl_y 14
-run 100 right
-expect pl_x 28
-run 60 up
-expect pl_y 7
-run 30 right
-expect pl_x 34
-run 30 up
-expect cur_room 3
-expect pl_y 23
-run 15 up
-expect pl_y 21
+goto 1 14 21 left
+goto 1 7 14 up
+goto 1 23 14 right
+goto 1 30 7 up
+goto 1 34 7 right
+goto 3 25 21 up                 ; the flight carries on in the room above
 run 20
 shot sv_upper_e
-run 65 left                     ; leaking drum
-expect pl_x 21
-run 5
+goto 3 21 21 left               ; leaking drum
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+4 1
-run 45 left
-expect pl_x 12
-run 60 up
-expect pl_y 14
-run 70 right
-expect pl_x 26
-run 60 up
-expect pl_y 7
-run 30 right                    ; gas stove
-expect pl_x 32
-run 5
+goto 3 29 21 right
+goto 3 36 14 up
+goto 3 26 14 left
+goto 3 19 7 up
+goto 3 32 7 right               ; gas stove
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+8 1
 run 1 mark
 run 3
 expect bld_marked 11
 
 ; --- off the left edge into the upper west room
-run 165 left
-expect cur_room 2
-expect pl_x 38
-expect pl_y 7
+goto 2 38 7 left
 run 20
 shot sv_upper_w
-run 160 left
-expect pl_x 6
-run 60 down
-expect pl_y 14
-run 35 right                    ; live socket (the one at col 22 is safe)
-expect pl_x 13
-run 5
-run 1 fire
-run 70
+goto 2 5 7 left
+goto 2 12 14 down
+run 1 fire                      ; live socket (the one at col 22 is safe)
+until pl_state 0 -
 expect *room_hazards+8 1
-run 85 right
-expect pl_x 30
-run 60 down
-expect pl_y 21
-run 45 left                     ; lamp on a frayed cord
-expect pl_x 21
-run 5
+goto 2 30 14 right
+goto 2 23 21 down
+goto 2 21 21 left               ; lamp on a frayed cord
 run 1 fire
-run 70
+until pl_state 0 -
 expect *room_hazards+4 1
 run 1 mark
 run 3
 expect bld_marked 15
 
 ; --- down through the floor into the lobby; its sockets are still disarmed
-run 55 left
-expect pl_x 10
-run 60 down
-expect cur_room 0
-expect pl_y 7
+goto 2 16 21 left
+goto 0 7 7 down
 expect *room_hazards+4 1
 expect *room_hazards+8 1
-run 100 right
-expect pl_x 30
-run 60 down
-expect pl_y 14
-run 50 left
-expect pl_x 20
-run 60 down
-expect pl_y 21
-run 85 left
-expect pl_x 3
-run 5
+goto 0 23 7 right
+goto 0 30 14 down
+goto 0 24 14 left
+goto 0 17 21 down
+goto 0 3 21 left
+run 1
 run 1 up                        ; all four rooms signed off: out
 run 3
 expect pl_state 2
@@ -172,13 +129,14 @@ expect miss_tally 0
 expect game_state 3             ; outro: ribbon cut, crowd cheers
 run 160
 shot sv_outro
-run 150
-expect game_state 1             ; results panel
+until game_state 1 - 400        ; results panel
 shot sv_done
-run 1 fire                      ; Sunny Vale is the whole campaign so far: the ending
+print score 3
+run 1 fire                      ; Sunny Vale alone: the ending
 run 3
 expect game_state 5
-expect hi_score+1 #41            ; 004100 recorded as the hi-score
+expect hi_score+1 #42           ; 004240 recorded as the hi-score
+expect hi_score+2 #40
 shot sv_ending
 run 1 fire
 run 3

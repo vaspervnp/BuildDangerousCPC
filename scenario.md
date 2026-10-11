@@ -50,9 +50,9 @@ Each hazard has a matching "tell" — a visual detail slightly wrong in that roo
 ## The Buildings (campaign order, rising difficulty)
 
 1. **Sunny Vale Apartments** — tutorial building. Small, few floors, one or two hazard types per room, generous clock. Teaches movement, inspecting, and the energy/clock pressure.
-2. **Big Box Mall** — wide floors, escalators, more hazard variety, first appearance of timed/moving hazards (e.g. the guillotine elevator doors).
+2. **Big Box Mall** — wide floors, escalators (they carry Thanos on their own — up or down, never the wrong way), one of every trap type, first appearance of timed/moving hazards (e.g. the guillotine elevator doors).
 3. **Grand Hotel** — tall, vertical play (stairs/lift shafts matter), introduces fire and water hazards together, tighter clock.
-4. **Mega Hospital** — chemical and biohazard themed, fast hazards, crowded rooms, decoy "fake" hazards that look dangerous but are safe (bluffing the player's pattern sense).
+4. **Mega Hospital** — chemical and biohazard themed, escalators between the wards, fast hazards, crowded rooms, decoy "fake" hazards that look dangerous but are safe (bluffing the player's pattern sense).
 5. **The Skyscraper** (finale) — every hazard type appears at least once, the owner is visibly impatient on the outside-scene clock, and the twist lands here (see below).
 
 ## The Twist

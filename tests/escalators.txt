@@ -1,0 +1,34 @@
+; Escalators (Big Box Mall entrance, room 0): a pair rising right between the ground
+; floor (y 21) and the 1st floor (y 14). Up one: foot x 7, top x 14. Down one: top x 23,
+; foot x 16. Once on, they carry him: no keys held, 3 frames a step (stairs take 5).
+
+pokew campaign_single+1 bld_mall
+pokew boot_campaign campaign_single
+run 5
+run 1 fire                      ; title: start
+run 3
+run 1 fire                      ; skip the outdoor intro
+until game_state 0 -
+expect cur_room 0
+
+goto 0 7 21 right               ; the foot of the up escalator
+goto 0 8 20 up                  ; step on...
+until pl_y 14 - 25              ; ...and ride the other 6 steps, no keys, in under 25 frames
+expect pl_x 14
+shot esc_top
+run 1
+run 15 down                     ; can't walk down an up escalator
+expect pl_x 14
+expect pl_y 14
+
+goto 0 23 14 right              ; the top of the down escalator
+goto 0 22 15 down
+until pl_y 21 - 25
+expect pl_x 16
+run 1
+run 15 up                       ; can't walk up a down escalator
+expect pl_x 16
+expect pl_y 21
+run 15 left                     ; off the bottom, walking as normal
+expect pl_x 13
+expect pl_y 21

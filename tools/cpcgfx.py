@@ -24,6 +24,8 @@ ROOM_LEGEND = {
     'X': 15, 'x': 16, '*': 28, 'o': 29, 'r': 30,
     'h': 32, 'p': 33, 'b': 34, 'e': 35, '+': 36, 'k': 37, 'K': 38, 'C': 39,
     'g': 40, 'q': 41, 'v': 42,
+    '/': 43, '\\': 44,                         # stairs rising right / left
+    'u': 45, 'U': 46, 'n': 47, 'N': 48,         # escalators: up rising right / left, down ...
 }
 
 # Building palettes: hardware ink for pen 2 (walls, windows... and Thanos's suit).
@@ -175,6 +177,7 @@ def load_room(src):
 
 SOLID_CHARS = '=#'
 LADDER_CHARS = '[]'
+STAIR_DX = {'/': 1, '\\': -1}                 # stairs that can cross into the room above
 DIRS = ['left', 'right', 'up', 'down']
 OPPOSITE = {'left': 'right', 'right': 'left', 'up': 'down', 'down': 'up'}
 NO_EXIT = 255
@@ -244,9 +247,27 @@ def parse_building(src):
             if d == 'up':
                 below = {x for x, c in enumerate(ga[0]) if c in LADDER_CHARS}
                 above = {x for x, c in enumerate(gb[-1]) if c in LADDER_CHARS}
-                if not below or below != above:
+                if below != above:
                     sys.exit(f"{src}: ladders through {a}'s ceiling {sorted(below)} and "
                              f"{b}'s floor {sorted(above)} must line up")
+                # A flight through the ceiling skips one row each side, so it carries on
+                # two columns along: its last step here in row 0, the next ones in the room
+                # above at rows 22 and 21.
+                flights = 0
+                for x, c in enumerate(ga[0]):
+                    if c in STAIR_DX:
+                        dx = STAIR_DX[c]
+                        if not (0 <= x + 2 * dx < ROOM_W and gb[-1][x + dx] == c and gb[-2][x + 2 * dx] == c):
+                            sys.exit(f"{src}: the flight through {a}'s ceiling at column {x} "
+                                     f"must carry on in {b} at row {ROOM_H - 1} column {x + dx} "
+                                     f"and row {ROOM_H - 2} column {x + 2 * dx}")
+                        flights += 1
+                for x, c in enumerate(gb[-1]):
+                    if c in STAIR_DX and not (0 <= x - STAIR_DX[c] < ROOM_W and ga[0][x - STAIR_DX[c]] == c):
+                        sys.exit(f"{src}: the flight in {b}'s floor at column {x} doesn't come "
+                                 f"from {a}'s ceiling")
+                if not below and not flights:
+                    sys.exit(f"{src}: {a} up={b} needs a ladder or a flight of stairs between them")
     return dict(rooms=rooms, links=links, start=start, clock=clock, misses_ok=misses_ok,
                 sign=sign, welcome=welcome, palette=palette, loaded=loaded)
 
