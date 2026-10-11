@@ -62,10 +62,10 @@ building_start:
         ld a,(hl)
         ld (ink_table+2),a
         inc hl
-        ld de,bld_calls
-        ld bc,6
-        ldir
+        ld b,(hl)               ; Tasha's calls: how many; phone_schedule picks when
+        inc hl
         ld (bld_room_list),hl
+        call phone_schedule
         ld a,FRAMES_PER_SECOND
         ld (clock_frames),a
         xor a

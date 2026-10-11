@@ -119,3 +119,5 @@ selfie_step:    defs 1
 selfie_timer:   defs 1
 selfie_index:   defs 1
 paused:         defs 1              ; ESC in a building
+call_tick:      defs 1              ; halves the answer countdown
+rnd_seed:       defs 2              ; phone.asm rand

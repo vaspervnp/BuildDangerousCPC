@@ -46,7 +46,7 @@ class Building:
         name, x, y = b['start']
         self.start = (self.names.index(name), x, y)
         self.clock = b['clock']
-        self.calls = len(b['calls'])
+        self.calls = b['calls']
         self.nephews = sum(1 for d in self.data if d[self._hazard_list(d) + 1 + 4 * d[self._hazard_list(d)]])
         # hazards[room] = [(x, screen row, type name)], in list order (the order Fire tries them)
         self.hazards = [self._hazards(d) for d in self.data]

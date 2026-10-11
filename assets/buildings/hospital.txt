@@ -13,4 +13,4 @@ misses_ok 1
 sign BLD_HOSP_SIGN
 welcome BLD_HOSP_WELCOME
 palette cyan
-calls 20 55 100
+calls 3

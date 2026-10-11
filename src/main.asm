@@ -17,6 +17,8 @@ start:
         ld bc,vars_end-vars_start-1
         ld (hl),0
         ldir
+        ld hl,#ace1             ; xorshift needs a non-zero seed
+        ld (rnd_seed),hl
         call video_init         ; also pages out the ROMs, so #0038 now reads our RAM
         call sound_init
         xor a
@@ -29,6 +31,7 @@ main_loop:
         call wait_vbl
         call input_read
         call sound_update
+        call rand               ; keep the generator moving: player timing seeds it
         ld a,(game_state)
         cp GS_PLAY
         jr z,.play

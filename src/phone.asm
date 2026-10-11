@@ -1,8 +1,8 @@
 ; ---------------------------------------------------------------- Tasha's phone calls
-; A few times per building (the header's call times, in seconds into the inspection)
-; Thanos's wife phones. He has to take it: input is locked and the clock keeps running,
+; A few times per building (the header says how many; the times are random: the first
+; 20-51 s into the inspection, then every 30-61 s) Thanos's wife phones. He has to take it: input is locked and the clock keeps running,
 ; so the call is the delay. She asks something; the right answer ends the call quickly
-; (and scores), the wrong one - or five seconds of silence - gets a longer reply and a rant.
+; (and scores), the wrong one - or eight seconds of silence - gets a longer reply and a rant.
 ;
 ; The panel: 7 rows across the screen, at the top, or at the bottom when he is up there.
 ;   row P           bricks
@@ -20,7 +20,7 @@ CS_CHOOSE       equ 3           ; pick an answer: Up/Down, Fire
 CALL_RING       equ 60
 CALL_TALK       equ 48
 CALL_HOLD       equ 70
-CALL_WAIT       equ 250         ; then she notices the silence
+CALL_WAIT       equ 200         ; x2 frames = 8 s to answer, then she notices the silence
 MOUTH_FRAMES      equ 6
 PHONE_TOP       equ 2
 PHONE_BOTTOM    equ 17
@@ -59,6 +59,70 @@ call_scripts_end:
 
 rant_lines:
         db STR_RANT1A, STR_RANT1B, STR_RANT2A, STR_RANT2B, STR_RANT3A, STR_RANT3B
+
+CALL_FIRST      equ 20          ; seconds: never before this
+CALL_GAP        equ 30          ; at least this long between calls
+CALL_SPREAD     equ 31          ; plus 0..CALL_SPREAD (a mask)
+
+; In: B = number of calls (1-3). Picks this building's call times into bld_calls
+; (seconds into the inspection; 0 = no more calls). Preserves HL.
+phone_schedule:
+        push hl
+        ld hl,bld_calls
+        ld c,6
+.clear: ld (hl),0
+        inc hl
+        dec c
+        jr nz,.clear
+        ld hl,bld_calls
+        ld de,CALL_FIRST
+.next:  push hl
+        push de
+        call rand
+        ld a,l
+        pop de
+        pop hl
+        and CALL_SPREAD
+        add a,e
+        ld e,a
+        adc a,d
+        sub e
+        ld d,a                  ; DE = this call's time
+        ld (hl),e
+        inc hl
+        ld (hl),d
+        inc hl
+        ld a,e                  ; the next one comes at least CALL_GAP later
+        add a,CALL_GAP
+        ld e,a
+        adc a,d
+        sub e
+        ld d,a
+        djnz .next
+        pop hl
+        ret
+
+; 16-bit xorshift. Stirred every game loop (main.asm), so the time spent on the title
+; screen seeds it. Out: HL = A = new value (low byte in A). Trashes F.
+rand:
+        ld hl,(rnd_seed)
+        ld a,h
+        rra
+        ld a,l
+        rra
+        xor h
+        ld h,a
+        ld a,l
+        rra
+        ld a,h
+        rra
+        xor l
+        ld l,a
+        xor h
+        ld h,a
+        ld (rnd_seed),hl
+        ld a,l
+        ret
 
 ; From play_update while he is walking: is a call due?
 phone_check:
@@ -206,6 +270,10 @@ phone_choose:
 .fire:  ld a,(keys_new)
         and KEY_FIRE
         jr nz,.chosen
+        ld hl,call_tick         ; the answer clock runs at half speed
+        inc (hl)
+        bit 0,(hl)
+        ret nz
         ld hl,call_timer
         dec (hl)
         ret nz

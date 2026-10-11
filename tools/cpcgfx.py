@@ -250,13 +250,13 @@ def parse_building(src):
       sign <STRING_ID>       name lit up on the facade in the outdoor scene
       welcome <STRING_ID>    the owner's first line
       palette <name>         wall colour (pen 2): skyblue (default), green, mauve, cyan, paleblue
-      calls <s> [<s> [<s>]]  Tasha phones this many seconds into the inspection (up to 3;
-                             default 20 60)
+      calls <n>              Tasha phones n times (1-3, default 2), at random times: the
+                             first 20-51 s into the inspection, then every 30-61 s
 
     Rooms are assets/rooms/<name>.txt, indexed in the order listed."""
     rooms, links, start = [], {}, None
     clock, misses_ok, sign, welcome, palette = 300, 2, None, None, 'skyblue'
-    calls = [20, 60]
+    calls = 2
     for n, line in enumerate(open(src, encoding='utf-8'), 1):
         parts = line.split(';', 1)[0].split()
         if not parts:
@@ -278,10 +278,8 @@ def parse_building(src):
             misses_ok = int(parts[1])
         elif parts[0] == 'palette' and len(parts) == 2 and parts[1] in PALETTES:
             palette = parts[1]
-        elif parts[0] == 'calls' and 1 <= len(parts) <= 4:
-            calls = [int(v) for v in parts[1:]]
-            if calls != sorted(calls) or not all(0 < v < 1000 for v in calls):
-                sys.exit(f"{src}:{n}: calls must be increasing seconds, 1-999")
+        elif parts[0] == 'calls' and len(parts) == 2 and parts[1] in '123':
+            calls = int(parts[1])
         elif parts[0] in ('sign', 'welcome') and len(parts) == 2:
             if parts[0] == 'sign':
                 sign = parts[1]
@@ -349,8 +347,7 @@ def convert_building(src, dst, label):
            "   ; clock (BCD hi, lo), seconds per dial step, misses graded good",
            f"        db STR_{sign}, STR_{welcome}, #{PALETTES[palette]:02x}"
            "   ; outdoor scene: facade sign, owner's welcome; pen 2 ink",
-           f"        dw {', '.join(str(c) for c in (b['calls'] + [0, 0, 0])[:3])}"
-           "   ; Tasha calls at these seconds in (0 = no more)"]
+           f"        db {b['calls']}   ; Tasha phones this many times"]
     for i, r in enumerate(rooms):
         ex = [rooms.index(links[r][d]) if d in links[r] else NO_EXIT for d in DIRS]
         out.append(f"        dw {label}_{i}")
