@@ -7,6 +7,7 @@
 ; Building data (generated from assets/buildings/*.txt by tools/cpcgfx.py):
 ;   db room count, start room, start x, start row
 ;   db clock seconds (BCD hi, lo), seconds per dial step, Misses still graded "good"
+;   db STR_* facade sign, STR_* owner's welcome (outdoor scene)
 ;   per room: dw room data, db exit left, right, up, down (room index or NO_EXIT)
 
 MAX_ROOMS       equ 32          ; bld_marked is 4 bytes
@@ -22,14 +23,15 @@ EXIT_DOWN       equ 3
 ROOM_REC_SIZE   equ 6
 
 ; In: HL = building. Sets up the building from scratch (every hazard armed again, clock
-; full), places Thanos and draws the start room.
+; full) and places Thanos. Draws nothing: the outdoor intro comes first.
 building_start:
         ld a,(hl)
         ld (bld_rooms),a
         call bin_to_bcd
         ld (rooms_bcd),a
         inc hl
-        ld b,(hl)               ; start room
+        ld a,(hl)
+        ld (bld_start),a
         inc hl
         ld a,(hl)
         ld (pl_x),a
@@ -51,6 +53,12 @@ building_start:
         call bin_to_bcd
         ld (miss_ok),a
         inc hl
+        ld a,(hl)
+        ld (bld_sign),a
+        inc hl
+        ld a,(hl)
+        ld (bld_welcome),a
+        inc hl
         ld (bld_room_list),hl
         ld a,FRAMES_PER_SECOND
         ld (clock_frames),a
@@ -59,9 +67,7 @@ building_start:
         ld (miss_tally),a
         ld (bld_signed),a
         ld (signed_bcd),a
-        push bc
         call hazards_reset_all
-        pop bc
         xor a
         ld hl,bld_marked
         ld (hl),a
@@ -71,8 +77,7 @@ building_start:
         ld (hl),a
         inc hl
         ld (hl),a
-        ld a,b
-        ; fall through
+        ret
 
 ; In: A = room index. Loads and draws it (HUD rows included) and its exits.
 room_enter:

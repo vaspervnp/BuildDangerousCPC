@@ -105,6 +105,12 @@ gen.tiles = function()
     { "KKKKKKKK","KOKKKKOK","KKOKKOKK","KKKOOKKK","KKKOOKKK","KKOKKOKK","KOKKKKOK","KKKKKKKK" }, -- 18 MISS icon
   }
   for s = 0, 8 do list[#list + 1] = dial(s) end                                                     -- 19-27 DIAL_0..8
+  for _, t in ipairs({
+    { "KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKWKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK","KKKKKKKK" }, -- 28 STAR
+    { "KKWWWKKK","KWWWWKKK","WWWWKKKK","WWWWKKKK","WWWWKKKK","KWWWWKKK","KKWWWKKK","KKKKKKKK" }, -- 29 MOON
+    { "KOOOOOOK","KOOOOWOK","KOKKKKOK","WWWWWWWW","WWWWWWWW","KOKKKKOK","KOOOOOOK","KOOOOOOK" }, -- 30 RIBBON
+    { "KOOOOOOK","KOOOOWOK","KOKKKKOK","WWKOOKWW","WOKOOKOW","KOKKKKOW","KOOOOOOK","KOOOOOOK" }, -- 31 RIBBON_CUT
+  }) do list[#list + 1] = t end
   saveStrip("tiles", cells(list), 8, 8)
 end
 
@@ -350,6 +356,100 @@ gen.vignettes = function()
     cutA, cutB, cutC, impA, impB, impC, sqA, sqB, sqC, fireA, fireB, fireC,
     iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD,
   }), 16, 16)
+end
+
+------------------------------------------------------------------ outdoor scene people (16x16)
+-- Order must match AF_* in src/scene.asm (people frames start at AF_OWNER_IDLE). Frames come
+-- in pairs that scenes flip between: talk/idle, cut/shrug, idle/cheer.
+gen.people = function()
+  local function edit(base, rows)
+    local t = {}
+    for i = 1, 16 do t[i] = rows[i] or base[i] end
+    return t
+  end
+  local owner = {
+    "................",
+    ".....OOOOO......",
+    "....OOOOOOO.....",
+    "....OKOOOKO.....",
+    "....OOOOOOO.....",
+    "....OOKKKOO.....",
+    ".....OOOOO......",
+    "...KKKWOWKKK....",
+    "..KKKKWOWKKKK...",
+    "..KKKKWOWKKKK...",
+    "..OKKKWOWKKKO...",
+    "...KKKKKKKKK....",
+    "...KKKKKKKKK....",
+    "....KKK.KKK.....",
+    "....KKK.KKK.....",
+    "...KKKK.KKKK....",
+  }
+  local ownerTalk = edit(owner, { [6] = "....OOWWWOO.....", [8] = "...KKKWOWKKK..O.",
+    [9] = "..KKKKWOWKKKKK..", [11] = "..OKKKWOWKKK...." })
+  local ownerCut = edit(owner, { [8] = "...KKKWOWKKKKWW.", [9] = "..KKKKWOWKKKOWWW",
+    [10] = "..KKKKWOWKKKKWW.", [11] = "..OKKKWOWKKK...." })
+  local ownerShrug = edit(owner, { [8] = ".O.KKKWOWKKK.O..", [9] = ".KKKKKWOWKKKKK..",
+    [11] = "..KKKKWOWKKKK..." })
+  local grandma = {
+    "......WWW.......",
+    ".....WWWWW......",
+    "....WOOOOOW.....",
+    "....WOKOKOW.....",
+    ".....OOOOO......",
+    "......OOO.......",
+    "....BBBBBBB.....",
+    "...BBBBBBBBB....",
+    "...OBBBBBBBO....",
+    "....BBBBBBB.....",
+    "....BBBBBBB.....",
+    "...BBBBBBBBB....",
+    "...BBBBBBBBB....",
+    ".....O...O......",
+    ".....O...O......",
+    "....KK...KK.....",
+  }
+  local grandmaCheer = edit(grandma, { [7] = "..O.BBBBBBB.O...", [8] = "..BBBBBBBBBBB...", [9] = "....BBBBBBB....." })
+  local man = {
+    "................",
+    ".....BBBBB......",
+    "....BBBBBBBB....",
+    ".....OOOOO......",
+    ".....OKOKO......",
+    ".....OOOOO......",
+    "......OOO.......",
+    "....WWWWWWW.....",
+    "...WWWWWWWWW....",
+    "...OWWWWWWWO....",
+    "....WWWWWWW.....",
+    "....BBBBBBB.....",
+    "....BBB.BBB.....",
+    "....BBB.BBB.....",
+    "....BBB.BBB.....",
+    "...KKKK.KKKK....",
+  }
+  local manCheer = edit(man, { [8] = "..O.WWWWWWW.O...", [9] = "..WWWWWWWWWWW...", [10] = "....WWWWWWW....." })
+  local kid = {
+    "................",
+    "................",
+    "................",
+    "................",
+    "......BBBB......",
+    ".....BBBBBB.....",
+    ".....OOOOOO.....",
+    ".....OKOOKO.....",
+    ".....OOOOOO.....",
+    "....WBWBWBW.....",
+    "....WBWBWBW.....",
+    "....OBWBWBO.....",
+    ".....BBBBB......",
+    ".....BB.BB......",
+    ".....BB.BB......",
+    "....KKK.KKK.....",
+  }
+  local kidCheer = edit(kid, { [10] = "..O.WBWBWBW.O...", [11] = "...BWBWBWBWB....", [12] = ".....BWBWB......" })
+  saveStrip("people", cells({ owner, ownerTalk, ownerCut, ownerShrug, grandma, grandmaCheer,
+    man, manCheer, kid, kidCheer }), 16, 16)
 end
 
 ------------------------------------------------------------------ hazard tells (8x8, masked)

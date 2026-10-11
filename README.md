@@ -11,7 +11,7 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 
 ## Status
 
-**Milestones 1–6 done — the first building is playable end to end, with a clock, a score and endings.** The game boots into Sunny Vale Apartments: four flip-screen rooms (two wings, six floors) joined at their edges and by ladders through ceilings and floors, with 8 traps. Thanos sets off live hazards with Fire to disarm them (vignette, typed caption in English or Greek, half a hard hat of energy), signs rooms off with M / Fire 2, and can only leave through the lobby's exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. Outside, the crowd's patience runs down on a clock; the building ends in a win (graded by Misses), a soft fail (time up with half the rooms signed off), or a fail (time up with less, or energy gone), with a results panel and score. All 12 trap types exist, with placeholder art. Next up: milestone 7, the outdoor ribbon-cutting scene.
+**Milestones 1–7 done — the first building is playable end to end, bookended by the ribbon-cutting outside.** Outside, the owner of Sunny Vale Apartments gives his speech in front of the crowd and Thanos walks in. Inside: four flip-screen rooms (two wings, six floors) joined at their edges and by ladders through ceilings and floors, with 8 traps. Thanos sets off live hazards with Fire to disarm them (vignette, typed caption in English or Greek, half a hard hat of energy), signs rooms off with M / Fire 2, and can only leave through the lobby's exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. The crowd's patience runs down on a clock; the building ends in a win (graded by Misses), a soft fail (time up with half the rooms signed off), or a fail (time up with less, or energy gone). Each ending plays out outside — ribbon cut and cheering, an embarrassed postponement, the crowd filing in anyway, or Thanos thrown out of his own inspection — before the results panel. All 12 trap types exist, with placeholder art. Next up: milestone 8, the campaign (title screen with the language toggle, moving on through the buildings, the endings).
 
 | Area | Status |
 |---|---|
@@ -20,10 +20,11 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 | Engine (Z80 ASM) | Milestones 1–5 done: boot, video, tiles, masked 16×16 and 8×8 sprites, input, room RLE, movement, hazards, vignettes, multi-room buildings with edge/ladder transitions, sign-off, exit |
 | Hazards | All 12 types, each with its tell, disarmed look, vignette and EN/GR caption |
 | Mark-safe / Miss / exit gate | Done: per-room signed-off bits, Miss tally, exit door gate |
-| Tile/sprite art | Placeholder: 18 tiles, 4 Thanos frames (+4 mirrored), 36 vignette frames, 24 hazard sprites |
+| Tile/sprite art | Placeholder: 32 tiles, 10 outdoor people frames, 4 Thanos frames (+4 mirrored), 36 vignette frames, 24 hazard sprites |
 | Level data (5 buildings) | 1 of 5: Sunny Vale Apartments (4 rooms, 8 traps). Plus test buildings `test` and `gallery`. |
 | HUD | Energy (8 hats, half-hat steps), current-room checkbox, rooms signed off, Miss tally, clock dial + seconds, 6-digit score, typed caption line |
 | Outcomes | Win (clean / a few misses / barely), soft fail, two fails; results panel with bonuses; Fire restarts the building (campaign comes in milestone 8) |
+| Outdoor scene | Shared ribbon-cutting scene with per-building sign and welcome; scripted intro and one outro per ending; Fire skips |
 | Font / localization (EN/GR) | 56-glyph capitals font (Latin + Greek), EN/GR string tables, language flag; L key waits for the title menu |
 | Audio | Not started |
 
@@ -41,7 +42,7 @@ Produces `build/bd.dsk`. In an emulator (CPCEC, Caprice32, Arnold, WinAPE…) or
 make test
 ```
 
-Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 224 checks across 7 scripts, all passing; worst gameplay frame ~39% of the 50Hz budget (room switches and the results panel take several frames, behind a blanked or static screen). `tests/gallery.txt` sets off every trap type and saves a mid-gag screenshot of each; `tests/sunnyvale.txt` plays Sunny Vale from start to exit.
+Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 234 checks across 7 scripts, all passing; worst gameplay frame ~39% of the 50Hz budget (room switches and the results panel take several frames, behind a blanked or static screen). `tests/gallery.txt` sets off every trap type and saves a mid-gag screenshot of each; `tests/sunnyvale.txt` plays Sunny Vale from start to exit.
 
 ## Controls
 
@@ -80,6 +81,8 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Energy is 16 units shown as 8 hard hats**: a trap costs half a hat, a Miss two hats. With whole-hat steps the 8-trap tutorial would have emptied the bar on a perfect run.
 - **Flip-screen rooms.** Walking off a side edge or climbing a ladder off the top/bottom of the screen enters the neighbouring room; the screen is blanked (all inks black) while the new room draws, about a quarter of a second. Speeding up the full-room redraw is the first optimisation candidate if that feels slow on real hardware.
 - **Scoring:** +50 per trap disarmed, +100 per clean sign-off, −200 per Miss; winning adds seconds left ×10, energy ×25 and +500 for no Misses. Score, clock, tallies are BCD so they print without division.
+- **The opening is in the evening.** Mode 1's 4 inks keep pen 0 black (it is everyone's outline), so the outdoor scene is a night-time grand opening with the building's name lit up, rather than a raster colour split for a blue sky.
+- **Fire skips scenes**, the intro and every outro alike.
 - **Soft fail threshold is half the rooms** signed off when the clock runs out; below that the ribbon is cut with the building unchecked.
 - **Room data is generated per building** into one assembly file with the room records (data pointer + left/right/up/down neighbours) and the rooms' data, so hazard states live in RAM per building.
 
@@ -95,6 +98,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — **Milestone 4 implemented.** The other 11 traps: bitten, drowned, hit on the head, cut in half, impaled, squashed, incinerated, frozen, poisoned, sucked up, catapulted. Each has an 8×8 tell and disarmed sprite, a scripted vignette and an EN/GR caption. The vignette player gained background-recolour FX and vertical movement (the catapult throws Thanos up through the floors above). New `gallery` test room and test script; 127 checks pass. Binary is 12.8K, ~25K free below the load limit.
 - 2026-10-11 — **Milestone 5 implemented.** Buildings are defined in `assets/buildings/*.txt` and converted with their rooms into `build/bld_*.asm` (layout checks: matching edges between side-by-side rooms, ladders lining up between stacked rooms). Flip-screen transitions at all four edges, room exits per room, out-of-room cells treated as solid. First real building: Sunny Vale Apartments, 4 rooms / 6 floors / 8 traps with safe-socket decoys; the game now boots into it. Energy changed to half-hat steps. New full-playthrough test; 191 checks pass.
 - 2026-10-11 — **Milestone 6 implemented.** Outside clock (per-building `clock`, BCD seconds, 9-state dial), 6-digit BCD score with disarm/sign-off/Miss scoring and win bonuses, HUD for rooms signed off and the Miss tally, per-building `misses_ok` grading. Win / soft-fail / two fail outcomes with a results panel (EN/GR); Fire restarts the building with every hazard re-armed. New `tests/outcomes.txt`; 224 checks pass. Binary 16.1K.
+- 2026-10-11 — **Milestone 7 implemented.** Outdoor ribbon-cutting scene: shared tile room, facade sign and owner's welcome per building (`sign` / `welcome`), owner and townsfolk sprites (Aseprite), a byte-code scene engine with 6 actors. Intro (speech, Thanos walks in) and an outro per ending, then the results panel over the scene. Harness: boot no longer counts as a game loop. 234 checks pass. Binary 19.6K.
 
 ---
 

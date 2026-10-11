@@ -46,6 +46,9 @@ vig_hazard:     defs 2
 vig_row:        defs 1          ; row the last vignette frame was drawn at
 
 bld_ptr:        defs 2          ; building being played
+bld_start:      defs 1          ; room Thanos enters first
+bld_sign:       defs 1          ; STR_* lit up on the facade
+bld_welcome:    defs 1          ; STR_* the owner opens with
 bld_rooms:      defs 1
 rooms_bcd:      defs 1
 bld_signed:     defs 1          ; rooms signed off
@@ -56,6 +59,18 @@ bld_marked:     defs MAX_ROOMS/8 ; bit per room: signed off
 cur_room:       defs 1
 cur_exits:      defs 4          ; neighbours: left, right, up, down (NO_EXIT = none)
 miss_tally:     defs 1          ; BCD
+
+scene_ptr:      defs 2
+scene_wait:     defs 1
+scene_mode:     defs 1          ; SM_*
+scene_tick:     defs 1
+scene_speaker:  defs 1
+scene_hold:     defs 1
+scene_actor:    defs 1
+scene_target:   defs 1
+scene_delay:    defs 1
+scene_count:    defs 1
+actors:         defs ACTOR_COUNT*ACT_SIZE
 
 room_hazards:   defs 2          ; -> hazard list inside the current room's data
 room_map:       defs MAP_W*MAP_H

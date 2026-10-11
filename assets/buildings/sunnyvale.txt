@@ -8,3 +8,5 @@ room sv_upper_e  left=sv_upper_w  down=sv_east
 start sv_lobby 5 21
 clock 300
 misses_ok 2
+sign BLD_SV_SIGN
+welcome BLD_SV_WELCOME

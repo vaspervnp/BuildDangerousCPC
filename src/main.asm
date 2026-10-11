@@ -26,12 +26,23 @@ main_loop:
         call input_read
         ld a,(game_state)
         cp GS_PLAY
-        jr nz,.outcome
-        call player_update
+        jr z,.play
+        cp GS_RESULTS
+        jr z,.results
+        call hud_update         ; an outdoor scene: Fire skips it
+        ld a,(keys_new)
+        and KEY_FIRE
+        jr nz,.scene_end
+        call scene_update
+        jr nc,main_loop
+.scene_end:
+        call scene_finish
+        jr main_loop
+.play:  call player_update
         call hud_update
         call play_update
         jr main_loop
-.outcome:
+.results:
         call outcome_update
         jr main_loop
 
@@ -48,6 +59,7 @@ boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other b
         include "text.asm"
         include "hud.asm"
         include "outcome.asm"
+        include "scene.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings
@@ -56,6 +68,7 @@ boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other b
         include "build/bld_sunnyvale.asm"
         include "build/bld_test.asm"
         include "build/bld_gallery.asm"
+        include "build/room_outdoor.asm"
 
 ; ---------------------------------------------------------------- assets
 tiles_gfx:      incbin "build/tiles.bin"
@@ -63,6 +76,7 @@ font_gfx:       incbin "build/font.bin"
 thanos_gfx:     incbin "build/thanos.bin"
 vignette_gfx:   incbin "build/vignettes.bin"
 hazard_gfx:     incbin "build/hazards.bin"
+people_gfx:     incbin "build/people.bin"
 
 ; ---------------------------------------------------------------- variables
         include "vars.asm"

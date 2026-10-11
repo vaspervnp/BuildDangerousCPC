@@ -14,7 +14,7 @@ Personality: deadpan, weary, professionally unimpressed by physics. He's seen it
 
 ## The Hook (per building)
 
-**Outdoor scene:** the building owner is on a small stage out front, mid-speech, scissors in hand, ribbon strung across the door. A queue of excited townsfolk fidgets behind a rope. A big dial/clock ticks down — the owner's patience, and the crowd's. This is the pressure clock for the level: when it hits zero, the ribbon gets cut whether Thanos is ready or not.
+**Outdoor scene:** an evening grand opening — the building's name lit up on the facade, the owner on a small stage out front, mid-speech, scissors in hand, ribbon strung across the door. A queue of excited townsfolk fidgets on the pavement. A big dial/clock ticks down — the owner's patience, and the crowd's. This is the pressure clock for the level: when it hits zero, the ribbon gets cut whether Thanos is ready or not.
 
 **Indoor scene:** cut to Thanos stepping into the lobby. The player takes over. He has to walk every floor, spot every rigged fixture, and disable it before the clock outside runs out — all while the building actively tries to kill him.
 

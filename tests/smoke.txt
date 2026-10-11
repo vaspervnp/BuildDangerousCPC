@@ -2,6 +2,7 @@
 ; Thanos starts bottom-left (x=3, y=21). A step takes STEP_DELAY+1 = 5 frames.
 
 pokew boot_building bld_test
+run 1 fire                      ; skip the outdoor intro
 
 run 30                          ; init: clear screen + decode/draw the room
 shot boot

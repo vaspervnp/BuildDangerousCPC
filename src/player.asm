@@ -14,7 +14,7 @@ PS_WALK         equ 0
 PS_VIGNETTE     equ 1           ; a trap is going off: input locked
 PS_DONE         equ 2           ; left the building: input locked
 
-; Position comes from building_start.
+; Position comes from building_start; he is drawn when his first room is.
 player_init:
         xor a
         ld (pl_state),a
@@ -22,7 +22,7 @@ player_init:
         ld (pl_anim),a
         ld (pl_climb),a
         ld (pl_wait),a
-        jp player_draw
+        ret
 
 player_update:
         ld a,(pl_state)

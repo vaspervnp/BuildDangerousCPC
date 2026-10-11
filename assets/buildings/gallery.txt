@@ -1,3 +1,5 @@
 ; Test building: one room with one of each hazard type except electric.
 room gallery
 start gallery 3 21
+sign BLD_TEST_SIGN
+welcome BLD_TEST_WELCOME

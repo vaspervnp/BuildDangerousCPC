@@ -5,6 +5,7 @@
 ; Reach: the socket must be within one column of Thanos's 2-column body.
 
 pokew boot_building bld_test
+run 1 fire                      ; skip the outdoor intro
 
 run 30
 expect energy 16

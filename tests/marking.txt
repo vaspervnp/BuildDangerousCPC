@@ -2,6 +2,7 @@
 ; Test building = one room; exit door at col 36 on the bottom floor (x 35 or 36 reaches it).
 
 pokew boot_building bld_test
+run 1 fire                      ; skip the outdoor intro
 
 run 30
 expect bld_marked 0

@@ -5,6 +5,12 @@
 ; Covers walking off both side edges, climbing up and down through ceilings/floors,
 ; hazards staying disarmed when a room is revisited, and the exit gate.
 
+run 5                           ; the outdoor intro plays first
+expect game_state 2
+run 60
+shot sv_intro
+run 260
+expect game_state 0             ; Thanos is in
 run 30
 expect cur_room 0
 expect pl_x 5
@@ -158,5 +164,9 @@ run 3
 expect pl_state 2
 expect energy 8                 ; 8 traps at half a hat each
 expect miss_tally 0
-run 20
+expect game_state 3             ; outro: ribbon cut, crowd cheers
+run 160
+shot sv_outro
+run 150
+expect game_state 1             ; results panel
 shot sv_done

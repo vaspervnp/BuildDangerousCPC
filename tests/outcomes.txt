@@ -1,31 +1,43 @@
-; Milestone 6: every way a building can end, the results panel, and restarting.
-; Test building (one room, 3 live sockets, exit at col 36, default clock 300s).
+; Milestones 6-7: every way a building can end, its outdoor scene, the results panel,
+; and restarting. Test building (one room, 3 live sockets, exit at col 36, clock 300s).
+; game_state: 0 play, 1 results, 2 intro, 3 outro.
 ; outcome: 0 win, 1 soft fail (owner delays), 2 fail (ribbon cut), 3 fail (no energy).
 ; Score is BCD: score+2 holds the last two digits (#50 = 80).
 
 pokew boot_building bld_test
+run 5
+expect game_state 2
+run 1 fire                      ; skip the intro
 run 30
 expect game_state 0
 expect clock_hi 3
 expect clock_lo 0
 expect score+2 0
 
-; --- energy runs out: contract terminated
+; --- energy runs out: thrown out, contract terminated
 run 25 right
 expect pl_x 8
 run 5
 poke energy 1
 run 1 fire
 run 70                          ; the trap still plays out first
-expect game_state 1
+expect game_state 3
 expect outcome 3
 expect energy 0
 expect score+2 80               ; the disarm still scored 50
+run 45
+shot out_fired_scene
+run 1 fire                      ; skip the rest of the outro
+run 3
+expect game_state 1
 shot out_fired
 run 10 left                     ; nothing moves on the panel
 expect pl_x 8
 
-; --- Fire: the building starts again from scratch
+; --- Fire: the building again, from the intro
+run 1 fire
+run 3
+expect game_state 2
 run 1 fire
 run 30
 expect game_state 0
@@ -44,9 +56,14 @@ poke clock_hi 0
 poke clock_lo 2
 run 120
 expect clock_lo 0
-expect game_state 1
+expect game_state 3
 expect outcome 1
+run 1 fire
+run 3
+expect game_state 1
 shot out_delay
+run 1 fire
+run 3
 run 1 fire
 run 30
 expect game_state 0
@@ -54,13 +71,19 @@ expect bld_signed 0
 expect bld_marked 0
 expect miss_tally 0
 
-; --- time runs out with nothing signed off: the ribbon is cut
+; --- time runs out with nothing signed off: the ribbon is cut; watch the whole scene
 poke clock_hi 0
 poke clock_lo 1
 run 70
-expect game_state 1
+expect game_state 3
 expect outcome 2
+run 100
+shot out_ribbon_scene           ; the crowd files in
+run 300
+expect game_state 1
 shot out_ribbon
+run 1 fire
+run 3
 run 1 fire
 run 30
 
@@ -70,7 +93,7 @@ expect clock_hi 2
 expect clock_lo #99
 
 ; --- a win with one Miss (building allows 2): graded "a few misses"
-poke lang 1                     ; and check the panel in Greek
+poke lang 1                     ; and check the scene and panel in Greek
 run 1 mark
 run 3
 run 300 right
@@ -79,7 +102,12 @@ expect pl_x 36
 run 5
 run 1 up
 run 3
-expect game_state 1
+expect game_state 3
 expect outcome 0
 expect miss_tally 1
+run 90
+shot out_win_scene
+run 1 fire
+run 3
+expect game_state 1
 shot out_win_good

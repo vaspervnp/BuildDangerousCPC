@@ -1,15 +1,19 @@
 ; ---------------------------------------------------------------- game state and outcomes
+; GS_INTRO: the outdoor scene before the building (owner's speech, Thanos walks in).
 ; GS_PLAY: Thanos inspects. It ends one of three ways (see scenario.md):
 ;   win      - he leaves through the exit (every room signed off). Graded by Misses.
 ;   soft fail- the clock runs out with at least half the rooms signed off: the owner
 ;              delays the opening.
 ;   fail     - the clock runs out with fewer signed off (the crowd goes in), or his
 ;              energy runs out (contract terminated).
-; GS_OUTCOME: the results panel; Fire starts the building again (the campaign that
-; moves on to the next building comes later).
+; GS_OUTRO: the outdoor scene for that ending.
+; GS_RESULTS: the results panel over it; Fire starts the building again (the campaign
+; that moves on to the next building comes later).
 
 GS_PLAY         equ 0
-GS_OUTCOME      equ 1
+GS_RESULTS      equ 1
+GS_INTRO        equ 2
+GS_OUTRO        equ 3
 
 OUT_WIN         equ 0
 OUT_DELAY       equ 1
@@ -21,11 +25,10 @@ PANEL_BOTTOM    equ 18
 PANEL_LABEL_COL equ 8
 PANEL_VALUE_COL equ 28          ; 4-digit values; the score starts 2 columns earlier
 
-; Start (or restart) the current building from scratch.
+; Start (or restart) the current building from scratch, with its intro.
 game_new:
         call palette_black
         xor a
-        ld (game_state),a
         ld hl,score
         ld (hl),a
         inc hl
@@ -36,7 +39,31 @@ game_new:
         call building_start
         call hud_init
         call player_init
-        jp palette_normal
+        ld a,GS_INTRO
+        ld (game_state),a
+        ld hl,scene_intro
+        jp scene_start
+
+; The intro is over (or skipped): Thanos is through the door.
+play_begin:
+        ld a,GS_PLAY
+        ld (game_state),a
+        ld a,(bld_start)
+        jp room_change
+
+; A scene ended or was skipped with Fire.
+scene_finish:
+        ld a,(game_state)
+        cp GS_INTRO
+        jr z,play_begin
+        ; fall through: the outro is over
+
+results_show:
+        ld a,GS_RESULTS
+        ld (game_state),a
+        call caption_reset
+        call caption_clear
+        jp outcome_draw
 
 ; Once per frame while playing, after the player has moved.
 play_update:
@@ -68,13 +95,9 @@ play_update:
         ld a,OUT_RIBBON
         ; fall through
 
-; In: A = OUT_*. Adds the bonuses (wins only) and shows the panel.
+; In: A = OUT_*. Adds the bonuses (wins only), then plays that ending's outdoor scene.
 outcome_start:
         ld (outcome),a
-        ld a,GS_OUTCOME
-        ld (game_state),a
-        call caption_reset      ; hud_update stops now: don't leave half a caption
-        call caption_clear
         ld hl,bonus_time
         ld b,6
 .zero:  ld (hl),0
@@ -82,7 +105,7 @@ outcome_start:
         djnz .zero
         ld a,(outcome)
         cp OUT_WIN
-        jr nz,outcome_draw
+        jr nz,outro_start
         ld a,(clock_hi)         ; time bonus = seconds left * 10: shift the BCD a digit
         add a,a
         add a,a
@@ -135,6 +158,21 @@ outcome_start:
         ld hl,bonus_clean
         call add_bonus
         ; fall through
+
+outro_start:
+        ld a,GS_OUTRO
+        ld (game_state),a
+        ld a,(outcome)
+        add a,a
+        ld l,a
+        ld h,0
+        ld de,outro_scripts
+        add hl,de
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        jp scene_start
 
 outcome_draw:
         ld d,PANEL_TOP

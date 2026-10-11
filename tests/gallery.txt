@@ -3,6 +3,7 @@
 ; so eleven hits don't run it out.
 
 pokew boot_building bld_gallery
+run 1 fire                      ; skip the outdoor intro
 run 30
 expect *room_hazards+0 11
 shot gal_boot

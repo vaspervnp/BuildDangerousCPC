@@ -79,6 +79,7 @@ class CPC:
         self.busy = []          # (loop no, T-states of work from vsync start to next wait_vbl)
         self.frame_no = 0
         self.at_wait = False
+        self.booted = False
         self.wait_vbl = syms.get('WAIT_VBL')
         self.vsync_start_t = None
         self.last_vsync_read = 1
@@ -154,6 +155,9 @@ class CPC:
             pc = self.m.pc
             if pc == self.wait_vbl and events & z80.Z80Machine._BREAKPOINT_HIT:
                 self.at_wait = True
+                if not self.booted:     # first arrival = end of boot, not a game loop
+                    self.booted = True
+                    continue
                 loops += 1
                 if self.vsync_start_t is not None:
                     self.busy.append((self.frame_no, self.t - self.vsync_start_t))

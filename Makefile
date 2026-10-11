@@ -5,7 +5,8 @@ B    := build
 
 BUILDINGS := sunnyvale test gallery
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
-          $(B)/hazards.bin $(B)/strings.asm $(BUILDINGS:%=$(B)/bld_%.asm)
+          $(B)/hazards.bin $(B)/people.bin $(B)/strings.asm $(B)/room_outdoor.asm \
+          $(BUILDINGS:%=$(B)/bld_%.asm)
 SRC    := $(wildcard src/*.asm)
 
 all: $(B)/bd.dsk
@@ -27,6 +28,12 @@ $(B)/vignettes.bin: assets/gfx/vignettes.png tools/cpcgfx.py | $(B)
 
 $(B)/hazards.bin: assets/gfx/hazards.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py sprites8 $< $@
+
+$(B)/people.bin: assets/gfx/people.png tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py sprites $< $@
+
+$(B)/room_outdoor.asm: assets/rooms/outdoor.txt tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py room $< $@ room_outdoor
 
 $(B)/strings.asm: assets/text/strings.txt assets/gfx/font.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py text $< $@ assets/gfx/font.png

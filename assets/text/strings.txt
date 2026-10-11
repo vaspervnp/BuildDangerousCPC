@@ -31,3 +31,16 @@ LBL_ENERGY | Energy bonus | Μπόνους ενέργειας
 LBL_CLEAN | Clean sweep | Καθαρή σάρωση
 LBL_SCORE | Score | Βαθμολογία
 PRESS_FIRE | Press fire | Πατήστε fire
+INTRO_2 | Our inspector will take a quick look. | Ο επιθεωρητής θα ρίξει μια ματιά.
+INTRO_3 | A quick one. The crowd is waiting! | Γρήγορα όμως. Το κοινό περιμένει!
+OUTRO_WIN1 | All clear. Cut your ribbon. | Όλα καθαρά. Κόψτε την κορδέλα.
+OUTRO_WIN2 | The crowd cheers. For the inspector. | Το κοινό ζητωκραυγάζει τον επιθεωρητή.
+OUTRO_DELAY1 | Not yet. I'm not done in there. | Όχι ακόμα. Δεν τελείωσα εκεί μέσα.
+OUTRO_DELAY2 | Postponed. The crowd sighs. | Αναβολή. Το κοινό αναστενάζει.
+OUTRO_LATE1 | Time's up! I'm cutting it. | Τέλος χρόνου! Την κόβω.
+OUTRO_LATE2 | Someone will find the ferret. | Κάποιος θα βρει το κουνάβι.
+OUTRO_HURT1 | Our inspector has had enough. | Ο επιθεωρητής μας τα παράτησε.
+BLD_SV_SIGN | Sunny Vale Apts. | Πολυκατοικία Λιακάδα
+BLD_SV_WELCOME | Welcome to Sunny Vale Apartments! | Καλώς ήρθατε στην πολυκατοικία Λιακάδα!
+BLD_TEST_SIGN | Test building | Κτίριο δοκιμών
+BLD_TEST_WELCOME | Welcome to the test building! | Καλώς ήρθατε στο κτίριο δοκιμών!
