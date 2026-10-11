@@ -10,6 +10,7 @@
 pokew boot_campaign campaign_single   ; Sunny Vale alone: the campaign would go on to the mall
 run 5                           ; title screen
 expect game_state 4
+psgon 8                         ; the title jingle
 shot sv_title
 run 1 fire
 run 5                           ; the outdoor intro
@@ -28,6 +29,8 @@ shot sv_lobby
 ; --- lobby: two live sockets, a flight of stairs between them
 goto 0 12 21 right
 run 1 fire
+run 1
+psgon 8                         ; the trap's sound
 until pl_state 0 -
 expect *room_hazards+4 1
 goto 0 17 21 right              ; the foot of the flight
@@ -46,6 +49,7 @@ expect *room_hazards+8 1
 run 1 mark
 run 3
 expect bld_marked 1
+psgon 8                         ; the sign-off chime
 expect miss_tally 0
 
 ; --- off the right edge into the east wing, same floor

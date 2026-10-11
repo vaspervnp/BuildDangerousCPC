@@ -18,6 +18,11 @@ Script lines (';' starts a comment):
   goto <room> <x> <y> [keys] [max]    hold keys until Thanos is in that room at x, y
                                 (cur_room, pl_x, pl_y); fails after max frames (default 1000)
   print <addr> [count]          print bytes (hex), e.g. the clock left at the end of a run
+  psg <reg> <value>             assert a PSG (AY) register's current value
+  psgon <reg>                   assert a PSG volume register is non-zero (something plays)
+
+--wav <file> renders everything the PSG played to a WAV (a simple AY model: square tones,
+LFSR noise, logarithmic volumes; no envelopes, which the game doesn't use).
 
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
@@ -80,6 +85,8 @@ class CPC:
         self.ppi_a = 0xFF
         self.ppi_c = 0
         self.psg_reg = 0
+        self.psg = [0] * 16
+        self.psg_log = []       # (T-state, register, value)
         self.matrix = [0xFF] * 10
         self.busy = []          # (loop no, T-states of work from vsync start to next wait_vbl)
         self.frame_no = 0
@@ -119,6 +126,9 @@ class CPC:
                 self.ppi_c = val
                 if (val >> 6) == 3:
                     self.psg_reg = self.ppi_a & 0x0F
+                elif (val >> 6) == 2:
+                    self.psg[self.psg_reg] = self.ppi_a
+                    self.psg_log.append((self.t + SLICE_T - self.m.ticks_to_stop, self.psg_reg, self.ppi_a))
 
     def on_in(self, addr):
         if not addr & 0x0800:
@@ -204,6 +214,49 @@ class CPC:
         img.save(path)
 
 
+def render_wav(log, end_t, path, rate=22050):
+    """Play back PSG register writes through a simple AY-3-8912 model."""
+    import array
+    import wave
+    cpu_hz, ay_hz = 4_000_000, 1_000_000
+    vol = [0.0] + [2 ** ((v - 15) / 2) for v in range(1, 16)]
+    regs = [0] * 16
+    regs[7] = 0x3F
+    phase = [0.0, 0.0, 0.0]
+    noise_phase, lfsr, noise_bit = 0.0, 1, 1
+    out = array.array('h')
+    i, n_samples = 0, int(end_t / cpu_hz * rate)
+    dc = 0.0
+    for n in range(n_samples):
+        t = n * cpu_hz / rate
+        while i < len(log) and log[i][0] <= t:
+            regs[log[i][1]] = log[i][2]
+            i += 1
+        np_ = (regs[6] & 31) or 1
+        noise_phase += ay_hz / (16 * np_) / rate
+        while noise_phase >= 1:
+            noise_phase -= 1
+            bit = (lfsr ^ (lfsr >> 3)) & 1
+            lfsr = (lfsr >> 1) | (bit << 16)
+            noise_bit = lfsr & 1
+        acc = 0.0
+        for ch in range(3):
+            p = (regs[2 * ch] | (regs[2 * ch + 1] & 15) << 8) or 1
+            phase[ch] = (phase[ch] + ay_hz / (16 * p) / rate) % 1.0
+            tone_on = not (regs[7] >> ch) & 1
+            noise_on = not (regs[7] >> (3 + ch)) & 1
+            level = ((phase[ch] < 0.5) or not tone_on) and (noise_bit or not noise_on)
+            if level and (tone_on or noise_on):
+                acc += vol[regs[8 + ch] & 15]
+        dc += (acc - dc) * 0.002            # take the DC offset out
+        out.append(max(-32767, min(32767, int((acc - dc) * 12000))))
+    with wave.open(path, 'wb') as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(rate)
+        w.writeframes(out.tobytes())
+
+
 def parse_value(v, cpc, syms):
     """#hex, decimal, or a symbol (its address)."""
     if v.startswith('#'):
@@ -221,6 +274,7 @@ def main():
     ap.add_argument('--script')
     ap.add_argument('--out', default='build/shots')
     ap.add_argument('--frames', type=int, default=50, help='frames to run when no script')
+    ap.add_argument('--wav', help='render what the PSG played to this WAV file')
     args = ap.parse_args()
 
     syms = load_symbols(args.sym)
@@ -270,6 +324,12 @@ def main():
                 failures += 1
                 print(f"FAIL {' '.join(st)}: got {[cpc.peek(a) for a in addrs]} after {n} frames")
                 break               # the rest of a route makes no sense from the wrong place
+        elif cmd in ('psg', 'psgon'):
+            reg = int(st[1])
+            got = cpc.psg[reg]
+            ok = got == int(st[2]) if cmd == 'psg' else (got & 15) != 0
+            failures += not ok
+            print(f"{'ok  ' if ok else 'FAIL'} psg {reg} = {got}" + (f" (expected {st[2]})" if cmd == 'psg' else " (expected sound)"))
         elif cmd == 'print':
             addr = cpc.resolve(st[1], syms)
             count = int(st[2]) if len(st) > 2 else 1
@@ -291,6 +351,9 @@ def main():
         else:
             sys.exit(f"unknown script command: {cmd}")
 
+    if args.wav:
+        render_wav(cpc.psg_log, cpc.t, args.wav)
+        print(f"wav {args.wav}: {cpc.t / 4e6:.1f} s, {len(cpc.psg_log)} PSG writes")
     if cpc.busy:
         frame, worst = max(cpc.busy, key=lambda b: b[1])
         over = [f for f, t in cpc.busy if t > FRAME_T]

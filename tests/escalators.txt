@@ -13,7 +13,9 @@ expect cur_room 0
 
 goto 0 7 21 right               ; the foot of the up escalator
 goto 0 8 20 up                  ; step on...
-until pl_y 14 - 25              ; ...and ride the other 6 steps, no keys, in under 25 frames
+run 2
+psgon 9                         ; the escalator hums
+until pl_y 14 - 25              ; ...and ride the rest, no keys, in under 25 frames
 expect pl_x 14
 shot esc_top
 run 1

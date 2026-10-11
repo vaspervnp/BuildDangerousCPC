@@ -98,6 +98,8 @@ player_update:
         call stair_down
 .carried:
         ret nc
+        ld hl,sfx_hum
+        call sfx_play_b
         xor a
         ld (pl_climb),a
         ld a,ESC_DELAY
@@ -137,6 +139,10 @@ player_update:
         ld a,(pl_stepped)       ; ladders: the climbing pose; stairs: walking
         xor 1
 .pose:  ld (pl_climb),a
+        ld a,(pl_anim)
+        or a
+        ld hl,sfx_step
+        call z,sfx_play_b       ; a footstep every other step
         ld a,STEP_DELAY
 .walk_pose:
         push af

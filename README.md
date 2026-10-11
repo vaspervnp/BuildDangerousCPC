@@ -11,7 +11,7 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 
 ## Status
 
-**All five buildings in — the full campaign plays from title screen to ending.** The title screen offers English or Greek (L). Outside, the owner of Sunny Vale Apartments gives his speech in front of the crowd and Thanos walks in. Inside: flip-screen rooms joined at their edges and by diagonal flights of stairs (escalators in the mall and hospital) that carry on through ceilings into the rooms above. Thanos sets off live hazards with Fire to disarm them (vignette and a typed caption in English or Greek, while the clock keeps running), signs rooms off with M / Fire 2, and can only leave through the lobby's exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. The crowd's patience runs down on a clock; the building ends in a win (graded by Misses), a soft fail (time up with half the rooms signed off), or a fail (time up with less, or energy gone). Each ending plays out outside — ribbon cut and cheering, an embarrassed postponement, the crowd filing in anyway, or Thanos thrown out of his own inspection — before the results panel. After the results, the campaign moves on to the next building, or ends: "terminated", or the good ending (worded differently if Thanos found the owner's insurance papers). All 12 trap types exist, with placeholder art. The campaign: Sunny Vale Apartments (4 rooms), Big Box Mall (6), Grand Hotel (6), Mega Hospital (6, with decoys), the Skyscraper (8, with the papers under the boardroom stairs). Next up: audio, difficulty tuning from real play, polish, and a test on a real emulator/hardware.
+**All five buildings in — the full campaign plays from title screen to ending, with sound effects.** The title screen offers English or Greek (L). Outside, the owner of Sunny Vale Apartments gives his speech in front of the crowd and Thanos walks in. Inside: flip-screen rooms joined at their edges and by diagonal flights of stairs (escalators in the mall and hospital) that carry on through ceilings into the rooms above. Thanos sets off live hazards with Fire to disarm them (vignette and a typed caption in English or Greek, while the clock keeps running), signs rooms off with M / Fire 2, and can only leave through the lobby's exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. The crowd's patience runs down on a clock; the building ends in a win (graded by Misses), a soft fail (time up with half the rooms signed off), or a fail (time up with less, or energy gone). Each ending plays out outside — ribbon cut and cheering, an embarrassed postponement, the crowd filing in anyway, or Thanos thrown out of his own inspection — before the results panel. After the results, the campaign moves on to the next building, or ends: "terminated", or the good ending (worded differently if Thanos found the owner's insurance papers). All 12 trap types exist, with placeholder art. The campaign: Sunny Vale Apartments (4 rooms), Big Box Mall (6), Grand Hotel (6), Mega Hospital (6, with decoys), the Skyscraper (8, with the papers under the boardroom stairs). Next up: difficulty tuning from real play, polish, and a test on a real emulator/hardware.
 
 | Area | Status |
 |---|---|
@@ -27,7 +27,7 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 | Outdoor scene | Shared ribbon-cutting scene with per-building sign and welcome; scripted intro and one outro per ending; Fire skips |
 | Campaign | Title screen (L: English/Greek), building progression with energy refill, game over, good ending (two versions), evidence pickup, session hi-score |
 | Font / localization (EN/GR) | 56-glyph capitals font (Latin + Greek), EN/GR string tables, language flag; L key waits for the title menu |
-| Audio | Not started |
+| Audio | Sound effects done (own AY player, two voices): every trap, sign-off, Miss, exit, footsteps, escalator hum, last-30-seconds ticks, speech babble, ribbon snip, crowd, fanfare, sad trombone, title jingle. No music. |
 
 ## Building
 
@@ -69,7 +69,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 | `assets/rooms/` | Room layouts as 40×23 text grids plus `hazard <type> <x> <row>` lines; legend in `tools/cpcgfx.py`. |
 | `assets/text/strings.txt` | Every in-game string, `ID \| English \| Greek`. |
 | `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, building + room text → `build/bld_*.asm`, strings → `build/strings.asm`. |
-| `tools/cpcrun.py` | Headless CPC test harness. |
+| `tools/cpcrun.py` | Headless CPC test harness. `--wav file` renders what the AY played. |
 | `tools/route.py` | Route planner: plans a clean run through a building and writes it as a harness script. |
 | `tools/art/gen_placeholder_art.lua` | Aseprite script that created the placeholder art. Set `ONLY = { name = true }` to regenerate a single asset; re-running an asset overwrites hand edits to it. |
 | `tests/` | Harness scripts. |
@@ -95,6 +95,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Escalators** (mall, hospital) are flights that move by themselves: step on with Up (or Down at the top of a down escalator) and they carry him, keys ignored, 3 frames a step instead of 5. They come in up/down pairs; you can't walk up a down escalator. They stay within a room.
 - **Each building has its own wall colour** (pen 2): sky blue, green, mauve, cyan, pale blue. Pen 2 is also Thanos's suit, so he changes with it; the title screen resets it.
 - **Clocks come from planned runs.** `tools/route.py` measures a clean, well-routed run per building; clocks are set at about 3.5× that in the mall down to 2.5× in the Skyscraper, so a first-time player who explores has slack. To be tuned by real play.
+- **Our own sound player, not the firmware's.** The firmware is paged out, so `src/sound.asm` drives the AY directly, once per game loop after the keyboard scan (both go through the PPI). Two voices: A for events, B for footsteps/ticks/speech; C is left free. Effects are step lists (tone, slide, noise, volume decay) — about 1.5K with all the data.
 - **Room data is generated per building** into one assembly file with the room records (data pointer + left/right/up/down neighbours) and the rooms' data, so hazard states live in RAM per building.
 
 ## Log
@@ -114,6 +115,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — **Traps no longer cost energy**; only Misses do (two hats). The cost of a trap is the clock time its vignette takes. Needed for the five-building campaign to be winnable on a perfect run, and matches the original rule (energy is lost on a Miss).
 - 2026-10-11 — **The remaining four buildings.** Big Box Mall, Grand Hotel, Mega Hospital and the Skyscraper (26 new rooms), each with its own wall colour, sign and welcome line (EN/GR), and 11 new decor/decoy tiles (shelves, plants, beds, desks, chandeliers, a red cross, and grilles/drums/vents that look like traps but aren't). The papers are under the Skyscraper boardroom's stairs. `campaign_main` now runs all five. New route planner (`tools/route.py`) and harness commands `until`, `goto`, `print`.
 - 2026-10-11 — **Stairs and escalators replace ladders** in every building (feedback: stairs in buildings aren't vertical; malls and hospitals have escalators). Diagonal flights you climb with Up/Down and follow with Left/Right, flights through ceilings into the room above, self-moving up/down escalator pairs in the mall and hospital. Six new tiles. All 30 campaign rooms re-laid out; `tests/sunnyvale.txt` rewritten around the stairs, new `tests/escalators.txt`. 13 scripts pass. Binary 28.7K, ~9.7K free.
+- 2026-10-11 — **Sound effects.** A small AY player of our own (the firmware is paged out): two voices, effects as step lists. A sting per trap type matched to its vignette, a sign-off chime, Miss buzzer, locked/open exit, footsteps, escalator hum, clock ticks in the last 30 seconds, a babbling owner during the speeches, ribbon snip, crowd, fanfare, sad trombone, title jingle; scenes trigger sounds with a new `SC_SFX` command. Harness: records PSG writes, `psg`/`psgon` checks, `--wav` renders a WAV. Binary 30.2K, ~8.2K free.
 
 ---
 

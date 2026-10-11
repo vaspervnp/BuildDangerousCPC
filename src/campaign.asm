@@ -29,6 +29,9 @@ campaign_single:                ; one building, poked in by generated route test
 
 ; ---------------------------------------------------------------- title
 title_show:
+        ld hl,sfx_jingle
+        call sfx_play
+title_draw:                     ; (L redraws it in the other language, without the jingle)
         ld a,GS_TITLE
         ld (game_state),a
         ld a,INK_SKYBLUE
@@ -85,7 +88,7 @@ title_update:
         ld a,(lang)
         xor 1
         ld (lang),a
-        jp title_show
+        jp title_draw
 .start: ld a,(keys_new)
         and KEY_FIRE
         ret z
@@ -156,6 +159,8 @@ outcome_update:
 ; ---------------------------------------------------------------- endings
 gameover_show:
         call end_screen
+        ld hl,sfx_trombone
+        call sfx_play
         ld a,STR_OVER_BIG
         ld d,3
         ld c,PEN1_MASK
@@ -178,6 +183,8 @@ gameover_show:
 
 ending_show:
         call end_screen
+        ld hl,sfx_fanfare
+        call sfx_play
         ld a,STR_END_BIG
         ld d,3
         ld c,PEN1_MASK

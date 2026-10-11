@@ -23,6 +23,7 @@ SC_FRAME        equ 5
 SC_WALK         equ 6
 SC_TILE         equ 7
 SC_CHEER        equ 8
+SC_SFX          equ 9           ; db voice (0/1) : dw effect
 
 SAY_WELCOME     equ #fe             ; the building's own welcome line
 NOBODY          equ #ff
@@ -73,6 +74,7 @@ actors_init:                        ; visible, x, row, frame
 
 ; ---------------------------------------------------------------- scripts
 scene_intro:
+        db SC_SFX, 1 : dw sfx_crowd
         db SC_WAIT, 25
         db SC_SAY, ACT_OWNER, SAY_WELCOME, 40
         db SC_SAY, ACT_OWNER, STR_INTRO_2, 40
@@ -94,10 +96,13 @@ outro_win:
         db SC_WALK, ACT_THANOS, DOOR_X-3, 4
         db SC_SAY, NOBODY, STR_OUTRO_WIN1, 30
         db SC_FRAME, ACT_OWNER, AF_OWNER_CUT
+        db SC_SFX, 0 : dw sfx_snip
         db SC_TILE, DOOR_X, DOOR_ROW, TILE_RIBBON_CUT
         db SC_TILE, DOOR_X+1, DOOR_ROW, TILE_RIBBON_CUT
         db SC_WAIT, 20
         db SC_SAY, NOBODY, STR_OUTRO_WIN2, 0
+        db SC_SFX, 0 : dw sfx_fanfare
+        db SC_SFX, 1 : dw sfx_crowd
         db SC_CHEER, 10
         db SC_WAIT, 20
         db SC_END
@@ -108,12 +113,14 @@ outro_delay:
         db SC_WALK, ACT_THANOS, DOOR_X-3, 4
         db SC_SAY, NOBODY, STR_OUTRO_DELAY1, 30
         db SC_FRAME, ACT_OWNER, AF_OWNER_SHRUG
+        db SC_SFX, 0 : dw sfx_trombone
         db SC_SAY, NOBODY, STR_OUTRO_DELAY2, 40
         db SC_END
 
 outro_noenergy:                     ; thrown out of his own inspection, then as below
         db SC_WAIT, 20
         db SC_SHOW, ACT_THANOS, DOOR_X, STREET_Y, AF_UPSIDE_DOWN
+        db SC_SFX, 0 : dw sfx_thud
         db SC_WAIT, 5
         db SC_SHOW, ACT_THANOS, DOOR_X-2, STREET_Y, AF_UPSIDE_DOWN
         db SC_WAIT, 5
@@ -121,8 +128,10 @@ outro_noenergy:                     ; thrown out of his own inspection, then as 
         db SC_WAIT, 30
         db SC_SAY, ACT_OWNER, STR_OUTRO_HURT1, 20
         db SC_FRAME, ACT_OWNER, AF_OWNER_CUT
+        db SC_SFX, 0 : dw sfx_snip
         db SC_TILE, DOOR_X, DOOR_ROW, TILE_RIBBON_CUT
         db SC_TILE, DOOR_X+1, DOOR_ROW, TILE_RIBBON_CUT
+        db SC_SFX, 1 : dw sfx_crowd
         db SC_WAIT, 15
         db SC_WALK, ACT_CROWD+3, DOOR_X, 2
         db SC_HIDE, ACT_CROWD+3
@@ -132,6 +141,7 @@ outro_noenergy:                     ; thrown out of his own inspection, then as 
         db SC_HIDE, ACT_CROWD+1
         db SC_WALK, ACT_CROWD, DOOR_X, 2
         db SC_HIDE, ACT_CROWD
+        db SC_SFX, 0 : dw sfx_trombone
         db SC_SAY, NOBODY, STR_OUTRO_LATE2, 40
         db SC_END
 
@@ -139,8 +149,10 @@ outro_ribbon:                       ; time's up: the owner opens anyway, Thanos 
         db SC_WAIT, 20
         db SC_SAY, ACT_OWNER, STR_OUTRO_LATE1, 20
         db SC_FRAME, ACT_OWNER, AF_OWNER_CUT
+        db SC_SFX, 0 : dw sfx_snip
         db SC_TILE, DOOR_X, DOOR_ROW, TILE_RIBBON_CUT
         db SC_TILE, DOOR_X+1, DOOR_ROW, TILE_RIBBON_CUT
+        db SC_SFX, 1 : dw sfx_crowd
         db SC_WAIT, 15
         db SC_WALK, ACT_CROWD+3, DOOR_X, 2
         db SC_HIDE, ACT_CROWD+3
@@ -150,6 +162,7 @@ outro_ribbon:                       ; time's up: the owner opens anyway, Thanos 
         db SC_HIDE, ACT_CROWD+1
         db SC_WALK, ACT_CROWD, DOOR_X, 2
         db SC_HIDE, ACT_CROWD
+        db SC_SFX, 0 : dw sfx_trombone
         db SC_SAY, NOBODY, STR_OUTRO_LATE2, 40
         db SC_END
 
@@ -216,6 +229,7 @@ scene_update:
 
 scene_commands:
         dw cmd_wait, cmd_say, cmd_show, cmd_hide, cmd_frame, cmd_walk, cmd_tile, cmd_cheer
+        dw cmd_sfx
 
 ; Handlers get HL = operands, must leave scene_ptr past them and return carry clear.
 cmd_wait:
@@ -269,6 +283,8 @@ say_tick:
         xor 1
         ld (ix+A_FRAME),a
         call actors_draw
+        ld a,(caption_ptr)      ; a syllable per mouth movement
+        call sfx_babble
         jr scene_cont
 .said:  ld a,(scene_speaker)
         cp NOBODY
@@ -284,6 +300,22 @@ say_tick:
         xor a
         ld (scene_mode),a
         jr scene_cont
+
+cmd_sfx:
+        ld a,(hl)
+        inc hl
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        inc hl
+        ld (scene_ptr),hl
+        ex de,hl
+        or a
+        jr nz,.b
+        call sfx_play
+        jp scene_cont
+.b:     call sfx_play_b
+        jp scene_cont
 
 cmd_show:
         ld a,(hl)

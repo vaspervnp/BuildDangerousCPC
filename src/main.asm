@@ -13,6 +13,7 @@ start:
         ld (#0038),hl
         im 1
         call video_init         ; also pages out the ROMs, so #0038 now reads our RAM
+        call sound_init
         xor a
         ld (lang),a             ; English until L is pressed in the menu
         ld (keys),a
@@ -22,6 +23,7 @@ start:
 main_loop:
         call wait_vbl
         call input_read
+        call sound_update
         ld a,(game_state)
         cp GS_PLAY
         jr z,.play
@@ -67,6 +69,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "outcome.asm"
         include "scene.asm"
         include "campaign.asm"
+        include "sound.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

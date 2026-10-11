@@ -220,9 +220,12 @@ try_mark:
         call room_bit
         ld b,a
         and (hl)
+        jr z,.new
+        ld hl,sfx_already
+        call sfx_play
         ld a,STR_MARK_ALREADY
-        jp nz,caption_show
-        ld a,(hl)
+        jp caption_show
+.new:   ld a,(hl)
         or b
         ld (hl),a
         ld hl,bld_signed
@@ -237,9 +240,13 @@ try_mark:
         jr nz,.miss
         ld de,SCORE_SIGNOFF
         call score_add
+        ld hl,sfx_safe
+        call sfx_play
         ld a,STR_MARK_SAFE
         jp caption_show
-.miss:  ld a,(miss_tally)
+.miss:  ld hl,sfx_miss
+        call sfx_play
+        ld a,(miss_tally)
         cp MISS_TALLY_MAX
         jr z,.capped
         add a,1
@@ -286,11 +293,17 @@ try_exit:
         ld c,a
         call room_bit
         and (hl)
-        ld a,STR_EXIT_LOCKED
-        jp z,caption_show
+        jr z,.locked
         ld a,c
         jr .room
-.open:  ld a,PS_DONE
+.locked:
+        ld hl,sfx_locked
+        call sfx_play
+        ld a,STR_EXIT_LOCKED
+        jp caption_show
+.open:  ld hl,sfx_exit
+        call sfx_play
+        ld a,PS_DONE
         ld (pl_state),a
         ld a,STR_EXIT_DONE
         jp caption_show

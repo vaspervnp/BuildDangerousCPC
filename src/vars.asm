@@ -86,3 +86,6 @@ actors:         defs ACTOR_COUNT*ACT_SIZE
 
 room_hazards:   defs 2          ; -> hazard list inside the current room's data
 room_map:       defs MAP_W*MAP_H
+snd_voice0:     defs V_SIZE         ; sound.asm voices
+snd_voice1:     defs V_SIZE
+snd_babble:     defs 7              ; one speech syllable, built on the fly

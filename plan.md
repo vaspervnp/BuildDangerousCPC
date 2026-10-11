@@ -137,7 +137,10 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 
 ### 7. Audio
 
-- AY-3-8912 PSG via firmware sound manager (simplest, smallest code path) rather than a hand-rolled player — budget is tiny (~1–2K of SFX data), not worth a custom player for one jingle and ~6 SFX cues (step, inspect-success chime, 12 trap-hit stings sharing a handful of underlying waveforms/pitch-shifted rather than 12 fully unique cues).
+- AY-3-8912 PSG through a small player of our own (`src/sound.asm`, ~1.5K with data): the firmware is paged out, so its sound manager isn't available. The player is stepped once per game loop, after the keyboard scan (both use the PPI, so they never interleave), and rewrites the PSG registers each frame.
+- **Two voices:** channel A for events (one sting per trap type, sign-off chime, Miss buzzer, exit, ribbon snip, fanfare, sad trombone, title jingle), channel B for small things (footsteps every other step, escalator hum, clock ticks in the last 30 seconds, the owner's speech babble — a pitched blip per mouth movement). A new effect replaces its voice's current one. Channel C is free (music later, if memory allows).
+- **Effects are data:** steps of (frames, tone period, per-frame slide, noise period, volume + decay rate). Scenes start them with an `SC_SFX` command.
+- **Testing:** the harness records PSG writes; `psg`/`psgon` assert register values, and `--wav` renders a session through a simple AY model to listen to.
 
 ### 8. Localization (English / Greek)
 

@@ -170,6 +170,17 @@ vig_evidence:
 ; In: IX = hazard entry. Charges the energy, shows the caption, starts the script.
 vig_start:
         ld (vig_hazard),ix
+        ld a,(ix+HZ_TYPE)       ; its sound
+        add a,a
+        ld l,a
+        ld h,0
+        ld de,trap_sfx
+        add hl,de
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        call sfx_play
         ld a,(ix+HZ_TYPE)
         call hz_type_entry
         ld e,(hl)

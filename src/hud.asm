@@ -135,6 +135,15 @@ clock_update:
         ld a,(clock_lo)
         or b
         jr z,.empty
+        ld a,b                  ; the last 30 seconds tick
+        or a
+        jr nz,.dial_step
+        ld a,(clock_lo)
+        cp #31
+        jr nc,.dial_step
+        ld hl,sfx_tick
+        call sfx_play_b
+.dial_step:
         ld hl,dial_ctr
         dec (hl)
         jp nz,hud_draw_clock
