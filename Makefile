@@ -3,8 +3,9 @@ IDSK ?= iDSK
 PY   ?= python3
 B    := build
 
+BUILDINGS := sunnyvale test gallery
 ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
-          $(B)/hazards.bin $(B)/room_test.bin $(B)/room_gallery.bin $(B)/strings.asm
+          $(B)/hazards.bin $(B)/strings.asm $(BUILDINGS:%=$(B)/bld_%.asm)
 SRC    := $(wildcard src/*.asm)
 
 all: $(B)/bd.dsk
@@ -30,8 +31,8 @@ $(B)/hazards.bin: assets/gfx/hazards.png tools/cpcgfx.py | $(B)
 $(B)/strings.asm: assets/text/strings.txt assets/gfx/font.png tools/cpcgfx.py | $(B)
 	$(PY) tools/cpcgfx.py text $< $@ assets/gfx/font.png
 
-$(B)/room_%.bin: assets/rooms/%.txt tools/cpcgfx.py | $(B)
-	$(PY) tools/cpcgfx.py room $< $@
+$(B)/bld_%.asm: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/cpcgfx.py | $(B)
+	$(PY) tools/cpcgfx.py building $< $@ bld_$*
 
 $(B)/bd.bin: $(SRC) $(ASSETS)
 	$(RASM) src/main.asm -I. -ob $@ -os $(B)/bd.sym -s -sl

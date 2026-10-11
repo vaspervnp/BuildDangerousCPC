@@ -1,6 +1,8 @@
 ; Smoke test for the engine skeleton, using assets/rooms/test.txt.
 ; Thanos starts bottom-left (x=3, y=21). A step takes STEP_DELAY+1 = 5 frames.
 
+pokew boot_building bld_test
+
 run 30                          ; init: clear screen + decode/draw the room
 shot boot
 expect pl_x 3

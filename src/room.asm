@@ -9,15 +9,8 @@ MAP_W           equ 40
 MAP_H           equ 25
 HUD_ROWS        equ 2
 
-; In: HL = room data.
+; In: HL = room data. The HUD rows of the map are left alone (the HUD owns them).
 room_load:
-        push hl
-        ld hl,room_map
-        ld de,room_map+1
-        ld bc,MAP_W*HUD_ROWS-1
-        ld (hl),TILE_BLACK
-        ldir
-        pop hl
         ld de,room_map+MAP_W*HUD_ROWS
 .run:   ld a,(hl)
         or a
@@ -85,8 +78,17 @@ map_addr:
         inc h
         ret
 
-; In: D=row, E=col. Out: A = tile flags. Preserves BC,DE; trashes HL.
+; In: D=row, E=col. Out: A = tile flags. Anything outside the play area (HUD rows, past
+; the bottom, left of column 0, right of column 39) is solid. Preserves BC,DE; trashes HL.
 flags_at:
+        ld a,d
+        cp MAP_H
+        jr nc,.solid
+        cp HUD_ROWS
+        jr c,.solid
+        ld a,e
+        cp MAP_W
+        jr nc,.solid
         call map_addr
         ld a,(hl)
         and #7f
@@ -97,6 +99,8 @@ flags_at:
         sub l
         ld h,a
         ld a,(hl)
+        ret
+.solid: ld a,TILEF_SOLID
         ret
 
 ; Two cells side by side. In: D=row, E=col. Out: B = flags(col), A = flags(col+1).

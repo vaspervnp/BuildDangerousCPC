@@ -1,10 +1,12 @@
 ; Milestone 3, Miss path: exit gate, signing off a room that still has live hazards.
 ; Test building = one room; exit door at col 36 on the bottom floor (x 35 or 36 reaches it).
 
+pokew boot_building bld_test
+
 run 30
 expect bld_marked 0
 expect miss_tally 0
-expect energy 8
+expect energy 16
 shot mk_boot
 
 run 1 up                        ; not at the exit: nothing happens
@@ -25,14 +27,14 @@ run 1 mark                      ; 3 live sockets still in the room: Miss
 run 3
 expect bld_marked 1
 expect miss_tally 1
-expect energy 6
+expect energy 12
 run 20
 shot mk_miss
 
 run 1 mark                      ; already signed off: no second Miss, no energy
 run 3
 expect miss_tally 1
-expect energy 6
+expect energy 12
 
 run 1 up                        ; every room signed off (with a Miss): exit opens
 run 3

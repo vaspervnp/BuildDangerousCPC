@@ -1,5 +1,7 @@
 ; Milestone 3, clean path: disarm all three live sockets, sign off without a Miss, leave.
 
+pokew boot_building bld_test
+
 run 30
 run 25 right                    ; bottom floor socket (col 10)
 expect pl_x 8
@@ -31,13 +33,13 @@ run 5
 run 1 fire
 run 70
 expect *room_hazards+12 1
-expect energy 5                 ; three triggers, one hat each
+expect energy 13                ; three triggers, half a hat each
 
 run 1 mark                      ; nothing armed left: clean sign-off
 run 3
 expect bld_marked 1
 expect miss_tally 0
-expect energy 5
+expect energy 13
 run 20
 shot sw_signed_off
 

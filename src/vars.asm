@@ -34,6 +34,7 @@ bld_rooms:      defs 1
 bld_room_list:  defs 2
 bld_marked:     defs MAX_ROOMS/8 ; bit per room: signed off
 cur_room:       defs 1
+cur_exits:      defs 4          ; neighbours: left, right, up, down (NO_EXIT = none)
 miss_tally:     defs 1
 
 room_hazards:   defs 2          ; -> hazard list inside the current room's data

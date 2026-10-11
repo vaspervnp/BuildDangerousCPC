@@ -1,9 +1,11 @@
 ; ---------------------------------------------------------------- HUD band (rows 0-1)
-; Row 0: energy as hard hats. Row 1: caption line, typed out a few characters per
+; Row 0: energy as hard hats, two units per hat (a trap costs half a hat).
+; Row 1: caption line, typed out a few characters per
 ; frame (keeps every frame inside budget) and cleared after CAPTION_FRAMES.
 ; Row 1 must stay plain black (TILE_BLACK): caption_clear just zeroes it.
 
-ENERGY_MAX      equ 8
+ENERGY_MAX      equ 16          ; units; shown as ENERGY_HATS hats
+ENERGY_HATS     equ 8
 ENERGY_ROW      equ 0
 ENERGY_COL      equ 1
 ROOM_ICON_ROW   equ 0
@@ -16,13 +18,19 @@ hud_init:
         ld a,ENERGY_MAX
         ld (energy),a
         xor a
-        ld (caption_timer),a
         ld (border_timer),a
+        call caption_reset
+        call hud_draw_room_status
+        jp hud_draw_energy
+
+; Forget any caption in progress (the screen under it has been redrawn).
+caption_reset:
+        xor a
+        ld (caption_timer),a
         ld h,a
         ld l,a
         ld (caption_ptr),hl
-        call hud_draw_room_status
-        jp hud_draw_energy
+        ret
 
 ; In: B = energy to lose (stops at 0). Redraws the hats.
 energy_lose:
@@ -49,20 +57,27 @@ hud_draw_room_status:
 hud_draw_energy:
         ld d,ENERGY_ROW
         ld e,ENERGY_COL
-.hat:   ld a,(energy)
-        ld c,a
-        ld a,e
+.hat:   ld a,e                  ; units left for this hat = energy - 2*index
         sub ENERGY_COL
-        cp c                    ; hat index < energy -> full
+        add a,a
+        ld c,a
+        ld a,(energy)
+        sub c
+        jr c,.empty
+        jr z,.empty
+        dec a
+        jr z,.half
         ld a,TILE_HAT_FULL
-        jr c,.set
-        ld a,TILE_HAT_EMPTY
+        jr .set
+.half:  ld a,TILE_HAT_HALF
+        jr .set
+.empty: ld a,TILE_HAT_EMPTY
 .set:   call map_addr_keep_a
         ld (hl),a
         call draw_cell
         inc e
         ld a,e
-        cp ENERGY_COL+ENERGY_MAX
+        cp ENERGY_COL+ENERGY_HATS
         jr nz,.hat
         ret
 

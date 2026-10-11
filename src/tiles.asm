@@ -18,6 +18,7 @@ TILE_CHECK_EMPTY equ 13         ; HUD: current room not signed off yet
 TILE_CHECK_DONE equ 14
 TILE_EXIT_T     equ 15          ; building exit door
 TILE_EXIT_B     equ 16
+TILE_HAT_HALF   equ 17          ; HUD: half a hat of energy left
 
 TILEF_SOLID     equ 1
 TILEF_CLIMB     equ 2
@@ -40,3 +41,4 @@ tile_flags:
         db 0                    ; CHECK_DONE
         db 0                    ; EXIT_T
         db 0                    ; EXIT_B
+        db 0                    ; HAT_HALF

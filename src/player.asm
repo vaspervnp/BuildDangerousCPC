@@ -10,18 +10,12 @@ THANOS_WALK_R   equ 0
 THANOS_CLIMB    equ 2
 THANOS_WALK_L   equ 4
 
-START_X         equ 3
-START_Y         equ 21
-
 PS_WALK         equ 0
 PS_VIGNETTE     equ 1           ; a trap is going off: input locked
 PS_DONE         equ 2           ; left the building: input locked
 
+; Position comes from building_start.
 player_init:
-        ld a,START_X
-        ld (pl_x),a
-        ld a,START_Y
-        ld (pl_y),a
         xor a
         ld (pl_state),a
         ld (pl_dir),a
@@ -125,12 +119,24 @@ player_update:
         jp player_draw
 
 ; Each try_* moves one cell and returns carry set, or returns carry clear if blocked.
-; They preserve C (the key bits).
+; At the edge of the room they move into the neighbouring room instead, if there is one.
+; When blocked they preserve C (the key bits).
 try_up:
         ld a,(pl_onladder)
         or a
         ret z
         ld de,(pl_x)
+        ld a,d
+        cp HUD_ROWS
+        jr nz,.inside
+        ld a,(cur_exits+EXIT_UP)  ; top of the screen: up the ladder into the room above
+        cp NO_EXIT
+        ret z
+        ld b,a
+        ld a,MAP_H-2
+        ld (pl_y),a
+        jp enter_neighbour
+.inside:
         dec d                   ; row above the head must be free
         call flags_pair
         or b
@@ -143,6 +149,20 @@ try_up:
 
 try_down:
         ld de,(pl_x)
+        ld a,d
+        cp MAP_H-2
+        jr nz,.inside
+        ld a,(pl_onladder)        ; bottom of the screen: down the ladder into the room below
+        or a
+        ret z
+        ld a,(cur_exits+EXIT_DOWN)
+        cp NO_EXIT
+        ret z
+        ld b,a
+        ld a,HUD_ROWS
+        ld (pl_y),a
+        jp enter_neighbour
+.inside:
         inc d
         inc d                   ; ladder must continue under both feet
         call flags_pair
@@ -156,20 +176,44 @@ try_down:
         ret
 
 try_left:
+        ld a,1
+        ld (pl_dir),a
         ld de,(pl_x)
+        ld a,e
+        or a
+        jr nz,.inside
+        ld a,(cur_exits+EXIT_LEFT)
+        cp NO_EXIT
+        ret z
+        ld b,a
+        ld a,MAP_W-2
+        ld (pl_x),a
+        jp enter_neighbour
+.inside:
         dec e
         call flags_col
         and TILEF_SOLID
         ret nz
         ld a,e
         ld (pl_x),a
-        ld a,1
-        ld (pl_dir),a
         scf
         ret
 
 try_right:
+        xor a
+        ld (pl_dir),a
         ld de,(pl_x)
+        ld a,e
+        cp MAP_W-2
+        jr nz,.inside
+        ld a,(cur_exits+EXIT_RIGHT)
+        cp NO_EXIT
+        ret z
+        ld b,a
+        xor a
+        ld (pl_x),a
+        jp enter_neighbour
+.inside:
         inc e
         inc e
         call flags_col
@@ -178,8 +222,13 @@ try_right:
         dec e
         ld a,e
         ld (pl_x),a
-        xor a
-        ld (pl_dir),a
+        scf
+        ret
+
+; In: B = room to enter (pl_x/pl_y already set for it). Returns carry set.
+enter_neighbour:
+        ld a,b
+        call room_change
         scf
         ret
 

@@ -29,7 +29,7 @@ main_loop:
         call hud_update
         jr main_loop
 
-boot_building:  dw building_test   ; the test harness pokes this to boot other buildings
+boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other buildings
 
         include "video.asm"
         include "input.asm"
@@ -43,14 +43,19 @@ boot_building:  dw building_test   ; the test harness pokes this to boot other b
         include "hud.asm"
         include "build/strings.asm"
 
+; ---------------------------------------------------------------- buildings
+; Generated from assets/buildings/*.txt. Room data stays in RAM: hazard states are
+; written into it.
+        include "build/bld_sunnyvale.asm"
+        include "build/bld_test.asm"
+        include "build/bld_gallery.asm"
+
 ; ---------------------------------------------------------------- assets
 tiles_gfx:      incbin "build/tiles.bin"
 font_gfx:       incbin "build/font.bin"
 thanos_gfx:     incbin "build/thanos.bin"
 vignette_gfx:   incbin "build/vignettes.bin"
 hazard_gfx:     incbin "build/hazards.bin"
-room_test:      incbin "build/room_test.bin"
-room_gallery:   incbin "build/room_gallery.bin"
 
 ; ---------------------------------------------------------------- variables
         include "vars.asm"

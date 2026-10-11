@@ -2,7 +2,7 @@
 ; Hazard i's state is at *room_hazards+4+4*i. Energy is topped up before each trap
 ; so eleven hits don't run it out.
 
-pokew boot_building building_gallery
+pokew boot_building bld_gallery
 run 30
 expect *room_hazards+0 11
 shot gal_boot

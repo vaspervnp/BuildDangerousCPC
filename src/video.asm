@@ -15,20 +15,9 @@ video_init:
         ld bc,#7f8d             ; RMR: mode 1, lower + upper ROM disabled
         out (c),c
         call screen_clear
-        ld b,#7f                ; gate array again (LDIR left BC=0)
-        ld hl,ink_table
-        xor a
-.ink:   out (c),a               ; select pen A
-        ld d,(hl)
-        out (c),d
-        inc hl
-        inc a
-        cp 4
-        jr nz,.ink
-        ld a,#10                ; select border
-        out (c),a
+        call palette_normal
         ld a,INK_BLACK
-        out (c),a
+        call set_border
         ld bc,#bc0c             ; CRTC R12/R13: screen base #C000, no scroll offset
         out (c),c
         ld bc,#bd30
@@ -42,6 +31,26 @@ video_init:
 ; Pen order must match PENS in tools/cpcgfx.py
 ink_table:
         db INK_BLACK, INK_ORANGE, INK_SKYBLUE, INK_BRWHITE
+black_table:
+        db INK_BLACK, INK_BLACK, INK_BLACK, INK_BLACK
+
+palette_normal:
+        ld hl,ink_table
+        jr palette_set
+palette_black:
+        ld hl,black_table
+; In: HL = 4 hardware inks for pens 0-3. Trashes AF,BC,D,HL.
+palette_set:
+        ld b,#7f
+        xor a
+.ink:   out (c),a               ; select pen A
+        ld d,(hl)
+        out (c),d
+        inc hl
+        inc a
+        cp 4
+        jr nz,.ink
+        ret
 
 screen_clear:
         ld hl,SCREEN

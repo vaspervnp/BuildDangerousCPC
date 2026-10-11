@@ -61,12 +61,14 @@ Room data (generated from assets/rooms/<name>.txt):
     type           ; HZ_* -> hz_types: vignette script, tell sprite, caption, energy cost
     state          ; armed / disarmed, written back at runtime
   }
-  (exits[]         ; milestone 5: neighbouring rooms)
 
-Building:
-  room_count, room pointers[]
+Building (generated from assets/buildings/<name>.txt together with its rooms):
+  room_count, start room, start x, start row
+  per room: room data pointer, exits left/right/up/down (room index or none)
   bld_marked       ; RAM bitfield, one "signed off" bit per room (max 32)
 ```
+
+- **Transitions:** walking off the left/right edge enters the side neighbour on the same row; climbing a ladder off the top/bottom row enters the room above/below at the same column. The converter refuses buildings whose neighbouring edges (solid vs open, row by row) or ladder columns don't line up.
 
 - Tile maps are RLE-compressed (buildings reuse a handful of tile types: floor, wall, door, stairs, carpet, pipe-run, etc.) and decompressed into a 40×25 working map on room entry, not held fully expanded for every room simultaneously. Map cells that hold a hazard have bit 7 set, so redraws know to overlay its 8×8 tell.
 - Room data lives in RAM and hazard states are written straight back into it, so a room remembers what was disarmed when Thanos comes back. Restarting a building will need to reset states to armed.
@@ -116,7 +118,7 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 
 ### 5. Energy, Scoring, and the Outside Clock
 
-- **Energy:** 8-segment bar (8×8 icon strip in HUD band). Each hazard trigger = −1 segment (small, fixed); each Miss = a larger deduction (e.g. −2 or −3 segments, tuned per building); collectible "hard hat" pickups (rare, 8×8, placed like hazards but safe) restore +1.
+- **Energy:** 16 units shown as 8 hard hats in the HUD band (full / half / empty). Each hazard trigger = −1 unit (half a hat); each Miss = −4 units (two hats); collectible "hard hat" pickups (rare, 8×8, placed like hazards but safe) restore +1.
 - **Outside clock:** a frame counter started on building entry, decremented every N frames (tuned per building — tighter in later buildings), rendered as a shrinking dial in the HUD band using the same 8×8 tile trick (8-9 tile states = a clean "pie" animation with no need for rotation routines). Running out before every room is marked forces the soft-fail/fail outcome (see scenario.md) rather than blocking play outright.
 - **Miss tolerance (grading, not gating):** each building defines a miss-tally threshold (e.g. ≤2 misses = clean/good grade) used only to pick the end-of-building flavour and bonus — stored as one byte per building in the campaign table. It does **not** affect whether the player is allowed to exit; the exit gate above is unconditional once all rooms are marked.
 - **Scoring:** running score in a 3-byte BCD or packed-decimal counter (simplifies HUD printing via firmware-style digit lookup rather than division routines). Small `+` per hazard actually found and disarmed, larger `−` per Miss (mirrors the energy cost), and a building-complete bonus (time remaining + energy remaining + a flat "clean sweep" bonus if miss tally is zero).

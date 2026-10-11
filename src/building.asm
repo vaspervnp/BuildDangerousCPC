@@ -1,27 +1,37 @@
 ; ---------------------------------------------------------------- building
-; A building is a list of rooms. Each room has one "signed off" bit in bld_marked.
-; Signing off a room that still holds an armed hazard is a Miss: it costs more energy
-; than any trap and goes on the tally, but the room still counts as signed off.
-; The exit opens once every room has been signed off, Misses included.
+; A building is a set of rooms joined at their edges. Each room has one "signed off"
+; bit in bld_marked. Signing off a room that still holds an armed hazard is a Miss: it
+; costs more energy than any trap and goes on the tally, but the room still counts as
+; signed off. The exit opens once every room has been signed off, Misses included.
+;
+; Building data (generated from assets/buildings/*.txt by tools/cpcgfx.py):
+;   db room count, start room, start x, start row
+;   per room: dw room data, db exit left, right, up, down (room index or NO_EXIT)
 
 MAX_ROOMS       equ 32          ; bld_marked is 4 bytes
-MISS_COST       equ 2
+MISS_COST       equ 4           ; two hats; a trap costs half a hat
 MISS_TALLY_MAX  equ 99
 MISS_BORDER_FRAMES equ 12
 
-; db room count, then dw room data per room
-building_test:
-        db 1
-        dw room_test
+NO_EXIT         equ #ff
+EXIT_LEFT       equ 0
+EXIT_RIGHT      equ 1
+EXIT_UP         equ 2
+EXIT_DOWN       equ 3
+ROOM_REC_SIZE   equ 6
 
-building_gallery:               ; one of every hazard type except electric
-        db 1
-        dw room_gallery
-
-; In: HL = building.
+; In: HL = building. Sets up the building, places Thanos and draws the start room.
 building_start:
         ld a,(hl)
         ld (bld_rooms),a
+        inc hl
+        ld b,(hl)               ; start room
+        inc hl
+        ld a,(hl)
+        ld (pl_x),a
+        inc hl
+        ld a,(hl)
+        ld (pl_y),a
         inc hl
         ld (bld_room_list),hl
         xor a
@@ -34,24 +44,46 @@ building_start:
         ld (hl),a
         inc hl
         ld (hl),a
-        ; fall through: enter room 0
+        ld a,b
+        ; fall through
 
-; In: A = room index. Loads and draws it.
+; In: A = room index. Loads and draws it (HUD rows included) and its exits.
 room_enter:
         ld (cur_room),a
-        add a,a
-        ld hl,(bld_room_list)
-        add a,l
-        ld l,a
-        adc a,h
-        sub l
-        ld h,a
-        ld a,(hl)
+        ld l,a                  ; HL = room list + index*6
+        ld h,0
+        add hl,hl
+        ld e,l
+        ld d,h
+        add hl,hl
+        add hl,de
+        ld de,(bld_room_list)
+        add hl,de
+        ld e,(hl)
         inc hl
-        ld h,(hl)
-        ld l,a
+        ld d,(hl)
+        inc hl
+        push de
+        ld de,cur_exits
+        ld bc,4
+        ldir
+        pop hl
         call room_load
         jp room_draw
+
+; Walk/climb off the edge into a neighbouring room. pl_x/pl_y must already hold the
+; position in the new room. In: A = room index. The screen is blanked while it redraws.
+room_change:
+        push af
+        call palette_black
+        pop af
+        call room_enter
+        call caption_reset
+        call hud_draw_room_status
+        ld de,(pl_x)
+        ld (old_xy),de
+        call player_draw
+        jp palette_normal
 
 ; In: A = room index. Out: HL = its byte in bld_marked, A = its bit. Preserves C,DE.
 room_bit:

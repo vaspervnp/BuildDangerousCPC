@@ -11,18 +11,18 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 
 ## Status
 
-**Milestones 1–4 done — the core loop and all 12 traps are in.** Thanos walks a side-view building, sets off live hazards with Fire to disarm them (vignette, typed caption in English or Greek, one hard hat of energy), signs rooms off with M / Fire 2, and can only leave through the exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. All 12 trap types now exist (milestone 4), with placeholder art; buildings are still single test rooms. Next up: milestone 5, room transitions and the first full building (Sunny Vale Apartments).
+**Milestones 1–5 done — the first building is playable end to end.** The game boots into Sunny Vale Apartments: four flip-screen rooms (two wings, six floors) joined at their edges and by ladders through ceilings and floors, with 8 traps. Thanos sets off live hazards with Fire to disarm them (vignette, typed caption in English or Greek, half a hard hat of energy), signs rooms off with M / Fire 2, and can only leave through the lobby's exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. All 12 trap types exist, with placeholder art. Next up: milestone 6, the HUD (outside clock, score, miss tally) and win/lose outcomes.
 
 | Area | Status |
 |---|---|
 | Scenario / narrative | Drafted |
 | Technical plan | Drafted |
-| Engine (Z80 ASM) | Milestones 1–3 done: boot, video, tiles, masked 16×16 and 8×8 sprites, input, room RLE, movement, hazards, vignettes, building/rooms, sign-off, exit |
+| Engine (Z80 ASM) | Milestones 1–5 done: boot, video, tiles, masked 16×16 and 8×8 sprites, input, room RLE, movement, hazards, vignettes, multi-room buildings with edge/ladder transitions, sign-off, exit |
 | Hazards | All 12 types, each with its tell, disarmed look, vignette and EN/GR caption |
 | Mark-safe / Miss / exit gate | Done: per-room signed-off bits, Miss tally, exit door gate |
-| Tile/sprite art | Placeholder: 17 tiles, 4 Thanos frames (+4 mirrored), 36 vignette frames, 24 hazard sprites |
-| Level data (5 buildings) | Test rooms only: `test` (3 live + 3 safe sockets, exit door) and `gallery` (one of each other trap) |
-| HUD | Energy hats, current-room checkbox, typed caption line; clock/score/miss-tally display not started |
+| Tile/sprite art | Placeholder: 18 tiles, 4 Thanos frames (+4 mirrored), 36 vignette frames, 24 hazard sprites |
+| Level data (5 buildings) | 1 of 5: Sunny Vale Apartments (4 rooms, 8 traps). Plus test buildings `test` and `gallery`. |
+| HUD | Energy (8 hats, half-hat steps), current-room checkbox, typed caption line; clock/score/miss-tally display not started |
 | Font / localization (EN/GR) | 56-glyph capitals font (Latin + Greek), EN/GR string tables, language flag; L key waits for the title menu |
 | Audio | Not started |
 
@@ -40,7 +40,7 @@ Produces `build/bd.dsk`. In an emulator (CPCEC, Caprice32, Arnold, WinAPE…) or
 make test
 ```
 
-Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 127 checks across 5 scripts, all passing; worst frame ~34% of the 50Hz budget. `tests/gallery.txt` sets off every trap type and saves a mid-gag screenshot of each.
+Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 191 checks across 6 scripts, all passing; worst gameplay frame ~35% of the 50Hz budget. `tests/gallery.txt` sets off every trap type and saves a mid-gag screenshot of each; `tests/sunnyvale.txt` plays Sunny Vale from start to exit.
 
 ## Controls
 
@@ -58,9 +58,10 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 |---|---|
 | `src/` | Z80 source (rasm). `main.asm` includes everything else. |
 | `assets/gfx/` | `.aseprite` sources (edit these) and their `.png` exports (what the build reads). |
+| `assets/buildings/` | Buildings: which rooms, how they connect (`left=`/`right=`/`up=`/`down=`), start position. The converter checks that neighbours' edges and ladders line up. |
 | `assets/rooms/` | Room layouts as 40×23 text grids plus `hazard <type> <x> <row>` lines; legend in `tools/cpcgfx.py`. |
 | `assets/text/strings.txt` | Every in-game string, `ID \| English \| Greek`. |
-| `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, room text → RLE + hazard list, strings → `build/strings.asm`. |
+| `tools/cpcgfx.py` | PNG → CPC Mode 1 tiles / masked sprites, building + room text → `build/bld_*.asm`, strings → `build/strings.asm`. |
 | `tools/cpcrun.py` | Headless CPC test harness. |
 | `tools/art/gen_placeholder_art.lua` | Aseprite script that created the placeholder art. Set `ONLY = { name = true }` to regenerate a single asset; re-running an asset overwrites hand edits to it. |
 | `tests/` | Harness scripts. |
@@ -74,7 +75,10 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Signed-off flags are one bit per room in a building-wide bitfield** (`bld_marked`), not stored in room data. A room's outcome (clean or Miss) is fixed the first time it is signed off; pressing M again only says it is already signed off.
 - **Leaving = Up at the exit door**, like entering any door, so it can't happen by walking past it.
 - **Vignettes are full 16×16 frames** (128 bytes each) rather than FX overlays on the walk frames: 36 frames for all 12 traps, 4.6K. The cheap "big" effects come from recolouring the background pen for a step (flood, gas, fire, ice, impact) and from moving the frame up through the floors, not from extra art.
-- **Tests can boot any building** by poking `boot_building` before the first frame (`pokew boot_building building_gallery`).
+- **Tests can boot any building** by poking `boot_building` before the first frame (`pokew boot_building bld_gallery`). The game boots Sunny Vale.
+- **Energy is 16 units shown as 8 hard hats**: a trap costs half a hat, a Miss two hats. With whole-hat steps the 8-trap tutorial would have emptied the bar on a perfect run.
+- **Flip-screen rooms.** Walking off a side edge or climbing a ladder off the top/bottom of the screen enters the neighbouring room; the screen is blanked (all inks black) while the new room draws, about a quarter of a second. Speeding up the full-room redraw is the first optimisation candidate if that feels slow on real hardware.
+- **Room data is generated per building** into one assembly file with the room records (data pointer + left/right/up/down neighbours) and the rooms' data, so hazard states live in RAM per building.
 
 ## Log
 
@@ -86,6 +90,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — **Milestone 2 implemented.** Hazard list in room data (state written back into it, so rooms remember what was disarmed), 8×8 masked tell sprites, reach test on Fire, data-driven vignette player (frames, hold times, screen-flash FX), electrocution vignette, energy hats in the HUD, custom Latin+Greek font, EN/GR string tables generated from `assets/text/strings.txt`, typed caption line. Harness now counts game-loop iterations (deterministic tests), supports `poke`, and pointer-relative addresses. Fixed a frame overrun (109% → 33%) by typing captions out over several frames.
 - 2026-10-11 — **Milestone 3 implemented.** Building structure (room list, entering a room by index), signed-off bitfield, M / Fire 2 to sign off, Miss detection (any armed hazard left → −2 energy, tally +1, orange border flash), exit door tile with the all-rooms-signed-off gate, HUD checkbox for the current room. Two new test scripts (Miss path and clean sweep); 65 checks pass.
 - 2026-10-11 — **Milestone 4 implemented.** The other 11 traps: bitten, drowned, hit on the head, cut in half, impaled, squashed, incinerated, frozen, poisoned, sucked up, catapulted. Each has an 8×8 tell and disarmed sprite, a scripted vignette and an EN/GR caption. The vignette player gained background-recolour FX and vertical movement (the catapult throws Thanos up through the floors above). New `gallery` test room and test script; 127 checks pass. Binary is 12.8K, ~25K free below the load limit.
+- 2026-10-11 — **Milestone 5 implemented.** Buildings are defined in `assets/buildings/*.txt` and converted with their rooms into `build/bld_*.asm` (layout checks: matching edges between side-by-side rooms, ladders lining up between stacked rooms). Flip-screen transitions at all four edges, room exits per room, out-of-room cells treated as solid. First real building: Sunny Vale Apartments, 4 rooms / 6 floors / 8 traps with safe-socket decoys; the game now boots into it. Energy changed to half-hat steps. New full-playthrough test; 191 checks pass.
 
 ---
 

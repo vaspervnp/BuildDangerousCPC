@@ -1,0 +1,162 @@
+; Milestone 5: a clean run through Sunny Vale Apartments (4 rooms, 8 traps).
+;   room 2 sv_upper_w   room 3 sv_upper_e
+;   room 0 sv_lobby     room 1 sv_east
+; Each room's hazards: state of hazard i at *room_hazards+4+4*i. Energy 16 = 8 hats.
+; Covers walking off both side edges, climbing up and down through ceilings/floors,
+; hazards staying disarmed when a room is revisited, and the exit gate.
+
+run 30
+expect cur_room 0
+expect pl_x 5
+expect pl_y 21
+expect energy 16
+shot sv_lobby
+
+; --- lobby: two live sockets
+run 35 right
+expect pl_x 12
+run 5
+run 1 fire
+run 70
+expect *room_hazards+4 1
+run 40 right
+expect pl_x 20
+run 60 up
+expect pl_y 14
+run 60 right
+expect pl_x 32
+run 5
+run 1 fire
+run 70
+expect *room_hazards+8 1
+run 1 mark
+run 3
+expect bld_marked 1
+expect miss_tally 0
+
+; --- off the right edge into the east wing, same floor
+run 35 right
+expect cur_room 1
+expect pl_x 0
+expect pl_y 14
+run 20
+shot sv_east
+run 85 right                    ; leaking pipe
+expect pl_x 17
+run 5
+run 1 fire
+run 70
+expect *room_hazards+8 1
+run 45 left
+expect pl_x 8
+run 60 down
+expect pl_y 21
+run 75 right                    ; ferret grille
+expect pl_x 23
+run 5
+run 1 fire
+run 70
+expect *room_hazards+4 1
+run 1 mark
+run 3
+expect bld_marked 3
+
+; --- up through the east wing's ceiling into the upper floors
+run 75 left
+expect pl_x 8
+run 60 up
+expect pl_y 14
+run 100 right
+expect pl_x 28
+run 60 up
+expect pl_y 7
+run 30 right
+expect pl_x 34
+run 30 up
+expect cur_room 3
+expect pl_y 23
+run 15 up
+expect pl_y 21
+run 20
+shot sv_upper_e
+run 65 left                     ; leaking drum
+expect pl_x 21
+run 5
+run 1 fire
+run 70
+expect *room_hazards+4 1
+run 45 left
+expect pl_x 12
+run 60 up
+expect pl_y 14
+run 70 right
+expect pl_x 26
+run 60 up
+expect pl_y 7
+run 30 right                    ; gas stove
+expect pl_x 32
+run 5
+run 1 fire
+run 70
+expect *room_hazards+8 1
+run 1 mark
+run 3
+expect bld_marked 11
+
+; --- off the left edge into the upper west room
+run 165 left
+expect cur_room 2
+expect pl_x 38
+expect pl_y 7
+run 20
+shot sv_upper_w
+run 160 left
+expect pl_x 6
+run 60 down
+expect pl_y 14
+run 35 right                    ; live socket (the one at col 22 is safe)
+expect pl_x 13
+run 5
+run 1 fire
+run 70
+expect *room_hazards+8 1
+run 85 right
+expect pl_x 30
+run 60 down
+expect pl_y 21
+run 45 left                     ; lamp on a frayed cord
+expect pl_x 21
+run 5
+run 1 fire
+run 70
+expect *room_hazards+4 1
+run 1 mark
+run 3
+expect bld_marked 15
+
+; --- down through the floor into the lobby; its sockets are still disarmed
+run 55 left
+expect pl_x 10
+run 60 down
+expect cur_room 0
+expect pl_y 7
+expect *room_hazards+4 1
+expect *room_hazards+8 1
+run 100 right
+expect pl_x 30
+run 60 down
+expect pl_y 14
+run 50 left
+expect pl_x 20
+run 60 down
+expect pl_y 21
+run 85 left
+expect pl_x 3
+run 5
+run 1 up                        ; all four rooms signed off: out
+run 3
+expect pl_state 2
+expect energy 8                 ; 8 traps at half a hat each
+expect miss_tally 0
+run 20
+shot sv_done
