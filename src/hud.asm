@@ -33,12 +33,12 @@ SCORE_DISARM    equ #0050       ; BCD
 SCORE_SIGNOFF   equ #0100
 SCORE_MISS      equ #0200       ; taken off
 SCORE_CLEAN_SWEEP equ #0500
+SCORE_EVIDENCE  equ #0500
 CAPTION_FRAMES  equ 150         ; 3 seconds
 CAPTION_CPF     equ 2           ; characters typed per frame
 
+; Energy is not reset here: it carries over through the campaign.
 hud_init:
-        ld a,ENERGY_MAX
-        ld (energy),a
         xor a
         ld (border_timer),a
         ld a,INK_BLACK

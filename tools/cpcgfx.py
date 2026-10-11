@@ -28,7 +28,7 @@ HUD_ROWS = 2
 
 # Hazard type names used in room files -> HZ_* in src/hazards.asm.
 HAZARD_TYPES = ['electric', 'bite', 'drown', 'head', 'cut', 'impale', 'squash', 'fire', 'ice',
-                'poison', 'suck', 'catapult']
+                'poison', 'suck', 'catapult', 'evidence']
 
 # Glyph order of assets/gfx/font.png (see FONT in tools/art/gen_placeholder_art.lua).
 FONT_CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?:;-'/ΓΔΘΛΞΠΣΦΨΩ"

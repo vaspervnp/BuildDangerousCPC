@@ -1,7 +1,9 @@
 ; Smoke test for the engine skeleton, using assets/rooms/test.txt.
 ; Thanos starts bottom-left (x=3, y=21). A step takes STEP_DELAY+1 = 5 frames.
 
-pokew boot_building bld_test
+pokew boot_campaign campaign_test
+run 1 fire                      ; title: start
+run 3
 run 1 fire                      ; skip the outdoor intro
 
 run 30                          ; init: clear screen + decode/draw the room

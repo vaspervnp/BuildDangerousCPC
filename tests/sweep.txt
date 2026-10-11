@@ -1,6 +1,8 @@
 ; Milestone 3, clean path: disarm all three live sockets, sign off without a Miss, leave.
 
-pokew boot_building bld_test
+pokew boot_campaign campaign_test
+run 1 fire                      ; title: start
+run 3
 run 1 fire                      ; skip the outdoor intro
 
 run 30

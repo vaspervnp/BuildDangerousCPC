@@ -152,3 +152,133 @@ print_char:
         pop de
         pop hl
         ret
+
+; ---------------------------------------------------------------- double-size text
+; Each font pixel becomes 2x2: a glyph covers 2x2 cells. Used by the title and end screens.
+
+; In: HL = string, D = top row, C = pen mask. Centres it (each glyph is 2 cells wide).
+print_big_centered:
+        push hl
+        ld e,0
+.len:   ld a,(hl)
+        cp #ff
+        jr z,.got
+        inc hl
+        inc e
+        jr .len
+.got:   ld a,MAP_W/2
+        sub e
+        ld e,a
+        pop hl
+.char:  ld a,(hl)
+        cp #ff
+        ret z
+        call print_big_char
+        inc hl
+        inc e
+        inc e
+        jr .char
+
+; In: A = glyph, D = top row, E = left column, C = pen mask. Preserves BC,DE,HL.
+print_big_char:
+        push hl
+        push de
+        push bc
+        ld b,a
+        ld a,c
+        ld (big_pen),a
+        ld l,b
+        ld h,0
+        add hl,hl
+        add hl,hl
+        add hl,hl
+        add hl,hl
+        ld bc,font_gfx
+        add hl,bc
+        ld (big_src),hl
+        call cell_addr
+        ld (big_top),hl
+        inc d
+        call cell_addr
+        ld (big_bottom),hl
+        ld b,0                  ; glyph row 0-7 -> screen lines 2b and 2b+1
+.row:   ld hl,(big_src)
+        ld a,(hl)
+        ld (big_left),a
+        inc hl
+        ld a,(hl)
+        ld (big_right),a
+        inc hl
+        ld (big_src),hl
+        ld a,b
+        cp 4
+        ld hl,(big_top)
+        jr c,.half
+        ld hl,(big_bottom)
+.half:  ld a,b
+        add a,a
+        and 7
+        add a,a
+        add a,a
+        add a,a
+        add a,h                 ; + line * #800
+        ld h,a
+        call .line
+        ld a,h
+        add a,#08
+        ld h,a
+        call .line
+        inc b
+        ld a,b
+        cp 8
+        jr nz,.row
+        pop bc
+        pop de
+        pop hl
+        ret
+.line:  push hl
+        ld a,(big_left)
+        call big_pixels_01
+        ld (hl),a
+        inc hl
+        ld a,(big_left)
+        call big_pixels_23
+        ld (hl),a
+        inc hl
+        ld a,(big_right)
+        call big_pixels_01
+        ld (hl),a
+        inc hl
+        ld a,(big_right)
+        call big_pixels_23
+        ld (hl),a
+        pop hl
+        ret
+
+; In: A = a pen-3 font byte (4 pixels). Out: A = one screen byte holding its first (01) or
+; last (23) two pixels doubled, in big_pen.
+big_pixels_01:
+        rlca
+        rlca
+        jr big_widen
+big_pixels_23:
+        rrca
+        rrca
+        rrca
+        rrca
+big_widen:
+        and 3
+        push hl
+        ld hl,widen_table
+        add a,l
+        ld l,a
+        adc a,h
+        sub l
+        ld h,a
+        ld a,(big_pen)
+        and (hl)
+        pop hl
+        ret
+
+widen_table:                    ; 2 pixels (bit 1 = left) -> 4 pixels, pen 3
+        db #00, #33, #cc, #ff

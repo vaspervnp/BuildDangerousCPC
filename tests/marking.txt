@@ -1,7 +1,9 @@
 ; Milestone 3, Miss path: exit gate, signing off a room that still has live hazards.
 ; Test building = one room; exit door at col 36 on the bottom floor (x 35 or 36 reaches it).
 
-pokew boot_building bld_test
+pokew boot_campaign campaign_test
+run 1 fire                      ; title: start
+run 3
 run 1 fire                      ; skip the outdoor intro
 
 run 30

@@ -44,3 +44,23 @@ BLD_SV_SIGN | Sunny Vale Apts. | Πολυκατοικία Λιακάδα
 BLD_SV_WELCOME | Welcome to Sunny Vale Apartments! | Καλώς ήρθατε στην πολυκατοικία Λιακάδα!
 BLD_TEST_SIGN | Test building | Κτίριο δοκιμών
 BLD_TEST_WELCOME | Welcome to the test building! | Καλώς ήρθατε στο κτίριο δοκιμών!
+CAP_EVIDENCE | An insurance claim. Dated opening day! | Ασφαλιστήριο για τη μέρα των εγκαινίων!
+TITLE_1 | Build | Build
+TITLE_2 | Dangerous | Dangerous
+TITLE_TAG | Immortal. Unimpressed. On duty. | Αθάνατος. Ασυγκίνητος. Σε υπηρεσία.
+TITLE_START | Press fire to start | Πατήστε fire για να ξεκινήσετε
+TITLE_LANG | L: Ελληνικά | L: English
+TITLE_KEYS1 | Move: cursor keys or Q A O P | Κίνηση: βελάκια ή Q A O P
+TITLE_KEYS2 | Space: trap   M: sign off | Space: παγίδα   M: υπογραφή
+TITLE_KEYS3 | Up at the exit door: leave | Πάνω στην έξοδο: αποχώρηση
+LBL_HISCORE | Hi-score | Ρεκόρ
+LBL_FINAL | Final score | Τελικό σκορ
+OVER_BIG | Terminated | Απόλυση
+OVER_1 | The contract has been terminated. | Η σύμβαση καταγγέλθηκε.
+OVER_2 | He is immortal. He'll apply again. | Είναι αθάνατος. Θα ξανακάνει αίτηση.
+END_BIG | The end | Τέλος
+END_EVIDENCE1 | He serves a demolition order. | Επιδίδει διαταγή κατεδάφισης.
+END_EVIDENCE2 | The insurance scam is over. | Η απάτη με την ασφάλεια τελείωσε.
+END_EVIDENCE3 | The crowd cheers the inspector. | Το κοινό ζητωκραυγάζει τον επιθεωρητή.
+END_PLAIN1 | Every building is open. And safe. | Όλα τα κτίρια άνοιξαν. Και είναι ασφαλή.
+END_PLAIN2 | Nobody asked about the paperwork. | Κανείς δεν ρώτησε για τα χαρτιά.

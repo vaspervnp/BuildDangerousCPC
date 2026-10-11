@@ -7,8 +7,7 @@
 ;   fail     - the clock runs out with fewer signed off (the crowd goes in), or his
 ;              energy runs out (contract terminated).
 ; GS_OUTRO: the outdoor scene for that ending.
-; GS_RESULTS: the results panel over it; Fire starts the building again (the campaign
-; that moves on to the next building comes later).
+; GS_RESULTS: the results panel over it; Fire moves the campaign on (campaign.asm).
 
 GS_PLAY         equ 0
 GS_RESULTS      equ 1
@@ -25,16 +24,9 @@ PANEL_BOTTOM    equ 18
 PANEL_LABEL_COL equ 8
 PANEL_VALUE_COL equ 28          ; 4-digit values; the score starts 2 columns earlier
 
-; Start (or restart) the current building from scratch, with its intro.
-game_new:
+; Start building bld_ptr from scratch, with its intro. Score and energy carry over.
+building_new:
         call palette_black
-        xor a
-        ld hl,score
-        ld (hl),a
-        inc hl
-        ld (hl),a
-        inc hl
-        ld (hl),a
         ld hl,(bld_ptr)
         call building_start
         call hud_init
@@ -307,8 +299,3 @@ outcome_texts:
         db STR_OUT_TIMEUP, STR_OUT_RIBBON
         db STR_OUT_FIRED, STR_OUT_NOENERGY
 
-outcome_update:
-        ld a,(keys_new)
-        and KEY_FIRE
-        ret z
-        jp game_new

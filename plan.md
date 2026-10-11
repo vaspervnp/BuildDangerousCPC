@@ -124,7 +124,8 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 - **Miss tolerance (grading, not gating):** each building defines a miss-tally threshold (`misses_ok`, default 2) used only to pick the win verdict: no Misses = clean sweep, up to the threshold = "a few misses", more = "passed, barely" — stored in the building header. It does **not** affect whether the player is allowed to exit; the exit gate above is unconditional once all rooms are marked.
 - **Scoring:** 6-digit BCD score. +50 per hazard disarmed, +100 per clean sign-off, −200 per Miss (never below 0). Winning adds seconds left ×10, energy units ×25, and +500 for a clean sweep; the results panel itemises them.
 - **HUD row:** hats · current-room checkbox and rooms signed off / total · Miss icon and tally · clock dial and seconds · score. Icons are map tiles (survive room redraws); numbers are printed and reprinted after a redraw.
-- **Outcomes:** a results panel over the middle of the screen (title, verdict, Misses, bonuses, score). For now Fire restarts the building (hazards re-armed, clock and score reset); with the campaign it will move on to the outdoor scene and the next building.
+- **Outcomes:** a results panel over the middle of the screen (title, verdict, Misses, bonuses, score), over that ending's outdoor scene.
+- **Campaign:** a list of buildings. A win or a soft fail moves on (energy carries over, +6 units, capped); a fail is game over. Winning the last building is the good ending, worded differently if Thanos picked up the evidence (`evidence` objects in a room: no energy cost, +500, never count as a live trap for sign-off). A soft fail on the last building ends like a fail. Session hi-score on the title and end screens.
 
 ### 6. Rendering / Sprite Engine
 
@@ -165,8 +166,8 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 5. **Room transitions + one full building (Sunny Vale Apartments):** multi-room traversal, exits, first full playable slice — exercises #2 and #3 together across a real room set.
 6. **HUD systems:** energy bar, outside clock dial, score, miss-tally display, building win/soft-fail/fail outcomes.
 7. **Outdoor ribbon-cutting template:** reusable bookend scene, wired to the per-building clock and win/fail state.
-8. **Remaining 4 buildings:** content-only work once the engine is proven — room data, hazard placement, owner sprite/name swaps.
-9. **Campaign glue:** title screen (with L-to-toggle-language, default English), building select/progression, twist/evidence pickup in building 5, good/bad ending screens — all text routed through the custom font + EN/GR string tables from the start, not bolted on after.
+8. **Campaign glue** (done before the buildings, so each new building slots into a working campaign): title screen (with L-to-toggle-language, default English), building progression, evidence pickup for the twist, game-over and ending screens — all text routed through the custom font + EN/GR string tables.
+9. **Remaining 4 buildings:** content-only work once the engine is proven — room data, hazard placement, sign/welcome strings, the evidence placed in the Skyscraper.
 10. **Audio pass, difficulty tuning (clock speeds, miss tolerances), polish, real-hardware test pass.**
 
 ## Key Risks & Mitigations

@@ -56,6 +56,7 @@ VF_UPSIDE_DOWN  equ 32              ; spat out / falling back down
 VF_CAT_A        equ 33              ; crouch
 VF_CAT_B        equ 34              ; launched
 VF_CAT_D        equ 35              ; landed, plaster and feathers
+VF_READ         equ 36              ; reading the owner's papers
 
 vig_electric:
         db VF_ZAP_A, 3, FX_FLASH, 0
@@ -162,6 +163,10 @@ vig_catapult:                       ; up through every floor above, then back do
         db VF_CAT_D, 30, FX_NONE, 0
         db VIG_END
 
+vig_evidence:
+        db VF_READ, 50, FX_NONE, 0
+        db VIG_END
+
 ; In: IX = hazard entry. Charges the energy, shows the caption, starts the script.
 vig_start:
         ld (vig_hazard),ix
@@ -251,7 +256,12 @@ vig_update:
         ld d,(ix+HZ_ROW)
         call draw_cell
         ld de,SCORE_DISARM
-        call score_add
+        ld a,(ix+HZ_TYPE)
+        cp HZ_EVIDENCE
+        jr nz,.score
+        ld (evidence),a         ; non-zero: found
+        ld de,SCORE_EVIDENCE
+.score: call score_add
         ld a,PS_WALK
         ld (pl_state),a
         jp player_draw

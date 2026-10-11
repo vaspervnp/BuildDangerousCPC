@@ -33,3 +33,4 @@ hazard impale 13 13
 hazard poison 14 6
 hazard suck 20 4
 hazard catapult 26 6
+hazard evidence 36 6

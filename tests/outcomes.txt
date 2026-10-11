@@ -1,20 +1,25 @@
-; Milestones 6-7: every way a building can end, its outdoor scene, the results panel,
-; and restarting. Test building (one room, 3 live sockets, exit at col 36, clock 300s).
-; game_state: 0 play, 1 results, 2 intro, 3 outro.
+; Milestones 6-8: every way a building can end, its outdoor scene, the results panel,
+; and where the campaign goes next. campaign_test = the test building twice.
+; game_state: 0 play, 1 results, 2 intro, 3 outro, 4 title, 5 game over / ending.
 ; outcome: 0 win, 1 soft fail (owner delays), 2 fail (ribbon cut), 3 fail (no energy).
 ; Score is BCD: score+2 holds the last two digits (#50 = 80).
 
-pokew boot_building bld_test
+pokew boot_campaign campaign_test
 run 5
+expect game_state 4
+run 1 fire                      ; title: start
+run 3
 expect game_state 2
+expect camp_index 0
 run 1 fire                      ; skip the intro
 run 30
 expect game_state 0
+expect energy 16
 expect clock_hi 3
 expect clock_lo 0
 expect score+2 0
 
-; --- energy runs out: thrown out, contract terminated
+; --- energy runs out: thrown out, game over
 run 25 right
 expect pl_x 8
 run 5
@@ -33,25 +38,30 @@ expect game_state 1
 shot out_fired
 run 10 left                     ; nothing moves on the panel
 expect pl_x 8
+run 1 fire
+run 3
+expect game_state 5             ; terminated
+expect hi_score+2 80
+shot out_gameover
+run 1 fire
+run 3
+expect game_state 4             ; back to the title
 
-; --- Fire: the building again, from the intro
+; --- a new campaign: a soft fail in building 1 moves on to building 2
 run 1 fire
 run 3
 expect game_state 2
+expect score+2 0
+expect energy 16
 run 1 fire
 run 30
 expect game_state 0
-expect energy 16
-expect pl_x 3
 expect *room_hazards+4 0        ; re-armed
-expect score+2 0
-expect clock_hi 3
-
-; --- time runs out with the only room signed off (with a Miss): soft fail
 run 1 mark
 run 3
 expect bld_signed 1
 expect miss_tally 1
+expect energy 12
 poke clock_hi 0
 poke clock_lo 2
 run 120
@@ -64,14 +74,16 @@ expect game_state 1
 shot out_delay
 run 1 fire
 run 3
+expect game_state 2             ; building 2's intro
+expect camp_index 1
+expect energy 16                ; 12 + a 3-hat refill, capped
 run 1 fire
 run 30
 expect game_state 0
 expect bld_signed 0
-expect bld_marked 0
 expect miss_tally 0
 
-; --- time runs out with nothing signed off: the ribbon is cut; watch the whole scene
+; --- building 2: time runs out with nothing signed off; watch the whole scene
 poke clock_hi 0
 poke clock_lo 1
 run 70
@@ -84,16 +96,22 @@ expect game_state 1
 shot out_ribbon
 run 1 fire
 run 3
+expect game_state 5             ; the ribbon was cut: game over
+run 1 fire
+run 3
+expect game_state 4
+
+; --- a new campaign; the clock ticks once a second
+run 1 fire
+run 3
 run 1 fire
 run 30
-
-; --- the clock ticks once a second
 run 50
 expect clock_hi 2
 expect clock_lo #99
 
-; --- a win with one Miss (building allows 2): graded "a few misses"
-poke lang 1                     ; and check the scene and panel in Greek
+; --- win both buildings, in Greek; one Miss each (allowed 2): the ending
+poke lang 1
 run 1 mark
 run 3
 run 300 right
@@ -111,3 +129,29 @@ run 1 fire
 run 3
 expect game_state 1
 shot out_win_good
+run 1 fire
+run 3
+expect game_state 2
+expect camp_index 1
+run 1 fire
+run 30
+run 1 mark
+run 3
+run 300 right
+run 5 left
+run 5
+run 1 up
+run 3
+expect game_state 3
+expect outcome 0
+run 1 fire
+run 3
+expect game_state 1
+run 1 fire
+run 3
+expect game_state 5             ; the ending; no papers found in these buildings
+expect evidence 0
+shot out_ending
+run 1 fire
+run 3
+expect game_state 4

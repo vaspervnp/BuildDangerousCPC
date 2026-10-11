@@ -350,11 +350,14 @@ gen.vignettes = function()
   local catB = over(stdT, { [2] = "O.............O.", [3] = "B.............B.", [4] = "B.............B.",
                             [15] = "..W..........W..", [16] = "..W..........W.." })
   local catD = over(std, { [1] = "..W.........W...", [2] = "...W.......W....", [5] = "W..............W" })
+  -- evidence: reading the owner's insurance papers, held up in front of his face
+  local read = over(std, { [5] = "........WWWWWW..", [6] = "........WKKKKW..", [7] = "........WWWWWW..",
+                           [8] = "........WKKKWW..", [9] = "........WWWWWW..", [10] = "........OWWWWO.." })
 
   saveStrip("vignettes", cells({
     zapA, zapB, zapC, biteA, biteB, biteC, drownA, drownB, drownC, headA, headB, headC,
     cutA, cutB, cutC, impA, impB, impC, sqA, sqB, sqC, fireA, fireB, fireC,
-    iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD,
+    iceA, iceB, iceC, poiA, poiB, poiC, suckA, suckB, suckC, catA, catB, catD, read,
   }), 16, 16)
 end
 
@@ -481,6 +484,8 @@ gen.hazards = function()
     { "WWWWWWWW","WKWKWKWW","WKWKWKWW","WKWKWKWW","WKWKWKWW","WWWWWWWW","........","........" }, --   grille back on
     { "...O....","...W....","..O.O...","...O....","...O....","...O....","WWWWWWWW","BBBBBBBB" }, -- catapult: frayed cable
     { "...O....","...O....","...O....","...O....","...O....","...O....","WWWWWWWW","BBBBBBBB" }, --   new cable
+    { "........","........",".OOOOOO.",".WWWWWO.",".WKKWWO.",".WWWWWO.",".OOOOOO.","........" }, -- evidence: folder
+    { "........","........","........","........","........","........","........","........" }, --   taken
   }), 8, 8)
 end
 

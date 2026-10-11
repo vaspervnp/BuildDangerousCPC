@@ -2,10 +2,12 @@
 ; Hazard i's state is at *room_hazards+4+4*i. Energy is topped up before each trap
 ; so eleven hits don't run it out.
 
-pokew boot_building bld_gallery
+pokew boot_campaign campaign_gallery
+run 1 fire                      ; title: start
+run 3
 run 1 fire                      ; skip the outdoor intro
 run 30
-expect *room_hazards+0 11
+expect *room_hazards+0 12
 shot gal_boot
 
 ; --- bite
@@ -171,6 +173,20 @@ shot gal_catapult_airborne
 run 98
 expect pl_state 0
 expect *room_hazards+44 1
+
+; --- the owner's papers: no energy, no Miss if left, +500
+run 50 right
+expect pl_x 35
+run 5
+poke energy 8
+run 1 fire
+expect pl_state 1
+expect energy 8
+run 70
+expect pl_state 0
+expect *room_hazards+48 1
+expect evidence 12
+shot gal_evidence_taken
 
 ; every hazard disarmed: clean sign-off
 run 1 mark

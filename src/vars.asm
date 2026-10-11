@@ -20,6 +20,16 @@ pl_onladder:    defs 1
 old_xy:         defs 2
 
 game_state:     defs 1          ; GS_*
+camp_ptr:       defs 2          ; campaign being played
+camp_index:     defs 1          ; its current building
+evidence:       defs 1          ; non-zero once the owner's papers are found
+hi_score:       defs 3          ; BCD, this session
+big_pen:        defs 1          ; double-size text
+big_src:        defs 2
+big_top:        defs 2
+big_bottom:     defs 2
+big_left:       defs 1
+big_right:      defs 1
 outcome:        defs 1          ; OUT_*
 score:          defs 3          ; BCD, most significant byte first
 bonus_time:     defs 2          ; BCD, high byte first (these three are cleared together)

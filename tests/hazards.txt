@@ -4,7 +4,9 @@
 ;   #1 live socket col 24 row 14 (middle floor)   state at *room_hazards+8
 ; Reach: the socket must be within one column of Thanos's 2-column body.
 
-pokew boot_building bld_test
+pokew boot_campaign campaign_test
+run 1 fire                      ; title: start
+run 3
 run 1 fire                      ; skip the outdoor intro
 
 run 30

@@ -5,7 +5,11 @@
 ; Covers walking off both side edges, climbing up and down through ceilings/floors,
 ; hazards staying disarmed when a room is revisited, and the exit gate.
 
-run 5                           ; the outdoor intro plays first
+run 5                           ; title screen
+expect game_state 4
+shot sv_title
+run 1 fire
+run 5                           ; the outdoor intro
 expect game_state 2
 run 60
 shot sv_intro
@@ -170,3 +174,11 @@ shot sv_outro
 run 150
 expect game_state 1             ; results panel
 shot sv_done
+run 1 fire                      ; Sunny Vale is the whole campaign so far: the ending
+run 3
+expect game_state 5
+expect hi_score+1 #39            ; 003900 recorded as the hi-score
+shot sv_ending
+run 1 fire
+run 3
+expect game_state 4

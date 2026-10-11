@@ -16,9 +16,7 @@ start:
         xor a
         ld (lang),a             ; English until L is pressed in the menu
         ld (keys),a
-        ld hl,(boot_building)
-        ld (bld_ptr),hl
-        call game_new
+        call title_show
         ei
 
 main_loop:
@@ -29,6 +27,10 @@ main_loop:
         jr z,.play
         cp GS_RESULTS
         jr z,.results
+        cp GS_TITLE
+        jr z,.title
+        cp GS_END
+        jr z,.end
         call hud_update         ; an outdoor scene: Fire skips it
         ld a,(keys_new)
         and KEY_FIRE
@@ -45,8 +47,12 @@ main_loop:
 .results:
         call outcome_update
         jr main_loop
+.title: call title_update
+        jr main_loop
+.end:   call end_update
+        jr main_loop
 
-boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other buildings
+boot_campaign:  dw campaign_main   ; the test harness pokes this to play other campaigns
 
         include "video.asm"
         include "input.asm"
@@ -60,6 +66,7 @@ boot_building:  dw bld_sunnyvale   ; the test harness pokes this to boot other b
         include "hud.asm"
         include "outcome.asm"
         include "scene.asm"
+        include "campaign.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

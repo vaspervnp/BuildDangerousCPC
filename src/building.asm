@@ -183,7 +183,8 @@ room_is_marked:
         and (hl)
         ret
 
-; Out: NZ if any hazard in the current room is still armed. Trashes AF,B,HL.
+; Out: NZ if any trap in the current room is still armed (evidence doesn't count).
+; Trashes AF,B,HL.
 room_any_armed:
         ld hl,(room_hazards)
         ld b,(hl)
@@ -192,13 +193,15 @@ room_any_armed:
         ret z
         inc hl
         inc hl
-        inc hl
-        inc hl                  ; -> state of the first hazard
+        inc hl                  ; -> type of the first hazard
 .loop:  ld a,(hl)
+        inc hl
+        cp HZ_EVIDENCE
+        jr z,.next
+        ld a,(hl)
         cp HZ_ARMED
         jr z,.armed
-        inc hl
-        inc hl
+.next:  inc hl
         inc hl
         inc hl
         djnz .loop

@@ -57,9 +57,9 @@ Each hazard has a matching "tell" — a visual detail slightly wrong in that roo
 
 ## The Twist
 
-The owner of the Skyscraper isn't just cheap — he's deliberately under-building to fail the structure after the opening, for the insurance payout, timed to a packed lobby. Thanos finds the paperwork taped under a stairwell (a one-off "evidence" pickup, not a new mechanic) partway through the floor. The ending branches on how the inspection actually went, not on a separate confrontation scene:
+The owner of the Skyscraper isn't just cheap — he's deliberately under-building to fail the structure after the opening, for the insurance payout, timed to a packed lobby. Thanos can find the paperwork taped under a stairwell (an "evidence" pickup: Fire on it like a trap, but it costs nothing and never counts as a live hazard when signing off). The ending branches on how the inspection actually went, not on a separate confrontation scene:
 
-- **Good ending:** every room marked safe, energy held, clock beaten — Thanos walks back out, hands the owner a condemnation notice instead of letting him cut the ribbon, and the crowd cheers for the inspector instead. A zero-Miss clean sweep gets its own extra beat of applause.
+- **Good ending:** every room marked safe, energy held, clock beaten — Thanos walks back out. If he found the paperwork, he serves the owner a demolition order instead of letting him cut the ribbon, the insurance scam is over, and the crowd cheers for the inspector. If he didn't, every building opens safely and nobody asks about the paperwork. A zero-Miss clean sweep gets its own extra beat of applause.
 - **Bad ending:** clock runs out or energy zeroes — the ribbon gets cut on schedule, the crowd files in, and the last image is Thanos's inspection contract getting stamped "TERMINATED" while chaos starts behind him. Deadpan narration, not gore — this is a comedy.
 
 ## Tone & Presentation

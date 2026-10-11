@@ -16,6 +16,8 @@ HZ_ICE          equ 8
 HZ_POISON       equ 9
 HZ_SUCK         equ 10
 HZ_CATAPULT     equ 11
+HZ_EVIDENCE     equ 12          ; not a trap: the owner's papers. Never counts as live.
+HZ_TYPE_COUNT   equ 13
 
 HZ_ARMED        equ 0
 HZ_DISARMED     equ 1
@@ -66,8 +68,10 @@ hz_types:
         db HZ_SUCK*2, STR_CAP_SUCK, 1
         dw vig_catapult
         db HZ_CATAPULT*2, STR_CAP_CATAPULT, 1
+        dw vig_evidence
+        db HZ_EVIDENCE*2, STR_CAP_EVIDENCE, 0
 hz_types_end:
-        assert hz_types_end-hz_types == 12*HZT_SIZE, "hz_types must have one entry per HZ_* type"
+        assert hz_types_end-hz_types == HZ_TYPE_COUNT*HZT_SIZE, "hz_types must have one entry per HZ_* type"
 
 ; In: A = hazard type. Out: HL = its hz_types entry. Trashes AF.
 hz_type_entry:
