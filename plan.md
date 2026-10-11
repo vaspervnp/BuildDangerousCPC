@@ -23,8 +23,9 @@
 | Trap vignette animation frames | ~4–6K | short 3–5 frame comic-hit sequences, reusing 16×16 Thanos sprite sheet with overlays |
 | Level/room data (compact) | ~2–4K | tile maps + hazard placement tables for ~5 buildings × ~6 rooms each |
 | Sound data (AY PSG) | ~1–2K | SFX table + 1 short jingle |
+| Text / string tables (EN + GR) + custom font | ~2–3K | all captions, menus, and dialogue duplicated per language; custom 8×8 font needed for Greek glyphs (see Localization) |
 | Stack + variables + buffers | ~2K | |
-| **Total** | **~45–50K** | fits inside the ~48K non-screen budget with headroom |
+| **Total** | **~48–53K** | tight against the ~48K non-screen budget — localization is the main thing to watch; trim caption count/length first if over |
 
 Keeping both sprite classes small (8×8 and 16×16 only, no 32×32 anywhere) is what makes this budget work — it's the single biggest lever against running out of RAM on this hardware.
 
@@ -106,12 +107,20 @@ States: IDLE_WALK, INSPECTING, TRIGGERED(trap_id), DISARM_SUCCESS, TRANSITION(ro
 
 - AY-3-8912 PSG via firmware sound manager (simplest, smallest code path) rather than a hand-rolled player — budget is tiny (~1–2K of SFX data), not worth a custom player for one jingle and ~6 SFX cues (step, inspect-success chime, 12 trap-hit stings sharing a handful of underlying waveforms/pitch-shifted rather than 12 fully unique cues).
 
+### 7. Localization (English / Greek)
+
+- **Two supported languages: English (default) and Greek.** Language is a single global flag, checked wherever a string is printed; no separate code paths otherwise.
+- **Toggle:** pressing **L** from the main menu flips the current language and immediately redraws menu text in the new language. Flag persists for the rest of the session (no save/EEPROM on this hardware); game always boots to English until L is pressed.
+- **Font:** the CPC firmware font has no Greek glyphs, so the game needs its **own 8×8 font bitmap** covering basic Latin + Greek letters (accepting monotonic Greek, i.e. no tonos/accent glyphs, to keep the character set — and the font table — small). This replaces firmware text output entirely; the game never calls the firmware VDU text routines.
+- **String tables:** every piece of in-game text (HUD trap captions, menu labels, owner dialogue lines, ending text) is stored as **two parallel tables** (EN/GR) indexed by the same string ID, so the print routine is just "look up ID in the active-language table." Caption text is kept short (the deadpan one-liners already fit this) to keep both tables small — this is the main lever if the localization row in the memory budget runs over.
+- **Authoring:** strings authored in one source file/spreadsheet with EN and GR columns side by side, packed into the two tables by the same conversion script that builds tile/sprite data — avoids hand-editing two separate binary tables.
+
 ## Content Pipeline
 
 1. **Tiles & sprites:** authored in Aseprite (or similar) at native 8×8 / 16×16, exported as indexed 4-colour PNGs, converted to CPC-packed binary via a small conversion script (Python) that also pre-generates the 1-bit masks for sprite blitting.
 2. **Rooms:** authored in a simple tile-map editor (or a spreadsheet/CSV → packer script, given the small per-building room count) producing the RLE-packed room data + hazard tables described above.
 3. **Assembly:** Z80 source built with a modern cross-assembler (e.g. sjasmplus or rasm), targeting a .dsk image for emulator testing (CPCEC / Caprice32 / Arnold) before any real-hardware pass.
-4. **Strings/captions:** single text table, since the whole game is deadpan one-liners rather than branching dialogue — keeps text data and the string-printing routine both minimal.
+4. **Strings/captions:** authored once with EN + GR columns (see Localization), packed into two parallel text tables — kept short since the whole game is deadpan one-liners rather than branching dialogue, which keeps both tables and the string-printing routine minimal.
 
 ## Build Order / Milestones
 
@@ -122,7 +131,7 @@ States: IDLE_WALK, INSPECTING, TRIGGERED(trap_id), DISARM_SUCCESS, TRANSITION(ro
 5. **HUD systems:** energy bar, outside clock dial, score, pass-threshold check, building win/soft-fail/fail outcomes.
 6. **Outdoor ribbon-cutting template:** reusable bookend scene, wired to the per-building clock and win/fail state.
 7. **Remaining 4 buildings:** content-only work once the engine is proven — room data, hazard placement, owner sprite/name swaps.
-8. **Campaign glue:** title screen, building select/progression, twist/evidence pickup in building 5, good/bad ending screens.
+8. **Campaign glue:** title screen (with L-to-toggle-language, default English), building select/progression, twist/evidence pickup in building 5, good/bad ending screens — all text routed through the custom font + EN/GR string tables from the start, not bolted on after.
 9. **Audio pass, difficulty tuning (clock speeds, pass thresholds), polish, real-hardware test pass.**
 
 ## Key Risks & Mitigations
@@ -130,3 +139,4 @@ States: IDLE_WALK, INSPECTING, TRIGGERED(trap_id), DISARM_SUCCESS, TRANSITION(ro
 - **RAM pressure from 12 distinct vignettes:** mitigated by sharing the base Thanos 16×16 sheet across all vignettes and differentiating via small FX overlays + palette swaps rather than fully unique animations per trap.
 - **Screen-RAM/mode tradeoff:** Mode 1's fixed 16K cost is unavoidable; deliberately avoided scrolling and double-buffering (both common RAM sinks) in favour of static per-room screens and save/restore sprite drawing.
 - **Content volume (5 buildings × ~6 rooms × up to 6 hazards):** kept authorable by hand (not procedural) because the core loop depends on hand-tuned, fair "tells" — but this means level-data authoring time, not engine complexity, is the long pole; budget schedule accordingly.
+- **Dual-language text doubling RAM use:** mitigated by a custom compact font (Latin + monotonic Greek, no accented glyphs), short deadpan captions, and a shared string-ID scheme so adding Greek never means adding new code paths — only data. If the combined EN+GR tables push the total budget over, shorten captions before cutting a hazard type or building.
