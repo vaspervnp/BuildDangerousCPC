@@ -1,0 +1,37 @@
+; Smoke test for the engine skeleton, using assets/rooms/test.txt.
+; Thanos starts bottom-left (x=3, y=21). A step takes STEP_DELAY+1 = 5 frames.
+
+run 30                          ; init: clear screen + decode/draw the room
+shot boot
+expect pl_x 3
+expect pl_y 21
+
+run 300 right                   ; walk into the right wall: furthest x is 37
+expect pl_x 37
+shot bottom_right
+
+run 35 left                     ; 7 steps back onto the ladder at cols 30-31
+expect pl_x 30
+run 3
+
+run 60 up                       ; climb 7 rows to the middle floor, then stop at the top
+expect pl_y 14
+shot climbed_middle
+
+run 200 left                    ; walk across the middle floor, through the upper ladder
+expect pl_x 1
+expect pl_y 14
+
+run 35 right                    ; 7 steps to the upper ladder at cols 8-9
+expect pl_x 8
+run 60 up
+expect pl_y 7
+shot top_floor
+
+run 15 down                     ; 3 rows down the shaft...
+expect pl_y 10
+run 5 right                     ; ...step off sideways and fall to the middle floor
+run 30
+expect pl_x 9
+expect pl_y 14
+shot fell

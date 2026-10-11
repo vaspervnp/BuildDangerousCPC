@@ -32,7 +32,8 @@ Keeping both sprite classes small (8×8 and 16×16 only, no 32×32 anywhere) is 
 ## Screen Layout (in-building gameplay)
 
 - **Play area:** full 320×200 Mode 1 framebuffer, no separate HUD strip reserved — HUD is drawn as a thin overlay band (e.g. top 16 rows: energy icons + room clock) composited over the tile background, since a dedicated status panel would eat too much of the already-small visible area on this resolution.
-- **Room size:** one screen = one room (40×25 tiles of 8×8 = 320×200). No scrolling engine required — rooms are connected via doorways/stairs that cut to the adjacent room's static screen. This avoids writing/debugging a smooth-scroll engine on top of everything else, which is the right tradeoff for a 64K one-dev-team scope.
+- **View:** side-view cross-section of the building. Floors are horizontal slabs, ladders/stairwells join floors; Thanos walks left/right, climbs with up/down, and falls when nothing is under his feet. Suits the vertical gags (falling fixtures, catapulted through the roof, rising water).
+- **Room size:** one screen = one room (40×25 tiles of 8×8 = 320×200; the top 2 tile rows are the HUD band, so room data is 40×23). No scrolling engine required — rooms are connected via doorways/stairs that cut to the adjacent room's static screen. This avoids writing/debugging a smooth-scroll engine on top of everything else, which is the right tradeoff for a 64K one-dev-team scope.
 - **Outdoor ribbon-cutting scene:** a separate, simpler static screen template (owner + stage + crowd + countdown dial), reused across all 5 buildings with swapped owner sprite/name and dialogue string only.
 
 ## Controls
@@ -138,7 +139,8 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 3. **Rooms:** authored as tile-map + hazard-placement data (spreadsheet/CSV → packer script, given the small per-building room count), producing the RLE-packed room data + hazard tables described above.
 4. **Assembly — rasm.** Z80 source built with rasm, which also drives the overall build (assemble → produce binaries → hand off to iDSK). Chosen over alternatives since it's the toolchain already set up for this project.
 5. **Disk image — iDSK.** Final CPC `.dsk` image assembled with iDSK from rasm's output binaries (loader + code + packed asset blobs), for loading in emulators (CPCEC / Caprice32 / Arnold) during development and on real hardware for test passes.
-6. **Strings/captions:** authored once with EN + GR columns (see Localization), packed into two parallel text tables — kept short since the whole game is deadpan one-liners rather than branching dialogue, which keeps both tables and the string-printing routine minimal.
+6. **Headless testing — `tools/cpcrun.py`.** No emulator is required for day-to-day work: the harness runs the binary on the `z80` Python package, emulating only what the game touches (Gate Array inks/mode, CRTC base address, PPI/PSG keyboard matrix, VSYNC). Scripts in `tests/` hold keys for N frames, assert variables via the rasm symbol file, save screenshots, and report per-frame CPU use. Real-emulator and real-hardware passes still happen at milestone boundaries.
+7. **Strings/captions:** authored once with EN + GR columns (see Localization), packed into two parallel text tables — kept short since the whole game is deadpan one-liners rather than branching dialogue, which keeps both tables and the string-printing routine minimal.
 
 ## Build Order / Milestones
 
