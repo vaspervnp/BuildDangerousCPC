@@ -2,6 +2,7 @@
 """Loading screen: a full-colour 16:10 picture -> Amstrad CPC Mode 0 (160x200, 16 inks).
 
   loadscreen.py IN.png|jpg SCREEN.BIN LOADER.BAS [--preview OUT.png] [--dither ordered|fs]
+                [--crop x0,y0,x1,y1] [--inks a,b,...] [--saturation f] [--contrast f]
 
 Scales to 160x200 (Mode 0 pixels are twice as wide), picks the 16 of the CPC's 27 colours
 that fit the picture best (black always kept for pen 0, the border), dithers with
@@ -122,13 +123,17 @@ def main():
     ap.add_argument('--dither', choices=('ordered', 'fs'), default='ordered')
     ap.add_argument('--saturation', type=float, default=1.35)
     ap.add_argument('--contrast', type=float, default=1.15)
+    ap.add_argument('--crop', help='x0,y0,x1,y1: use this part of the picture (it is then '
+                                   'stretched to 16:10, so get close)')
     ap.add_argument('--inks', help='the 16 firmware colours to use (comma-separated), '
                                    'instead of picking them; 0 first')
     args = ap.parse_args()
     im = Image.open(args.src).convert('RGB')
+    if args.crop:
+        im = im.crop(tuple(int(v) for v in args.crop.split(',')))
     w, h = im.size
-    if abs(w / h - 1.6) > 0.03:
-        raise SystemExit(f"{args.src}: expected a 16:10 picture (320x200, 1024x640...), got {im.size}")
+    if abs(w / h - 1.6) > 0.1:
+        raise SystemExit(f"{args.src}: {w}x{h} is too far from 16:10 to stretch; --crop it")
     half = im.resize((160, 200), Image.LANCZOS)     # Mode 0: half the width, same height
     # the CPC's inks are saturated: lift a dark, hazy picture towards them
     half = ImageEnhance.Color(half).enhance(args.saturation)
