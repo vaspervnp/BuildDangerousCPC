@@ -115,12 +115,14 @@ States: IDLE_WALK, INSPECTING, TRIGGERED(trap_id), DISARM_SUCCESS, TRANSITION(ro
 - **String tables:** every piece of in-game text (HUD trap captions, menu labels, owner dialogue lines, ending text) is stored as **two parallel tables** (EN/GR) indexed by the same string ID, so the print routine is just "look up ID in the active-language table." Caption text is kept short (the deadpan one-liners already fit this) to keep both tables small — this is the main lever if the localization row in the memory budget runs over.
 - **Authoring:** strings authored in one source file/spreadsheet with EN and GR columns side by side, packed into the two tables by the same conversion script that builds tile/sprite data — avoids hand-editing two separate binary tables.
 
-## Content Pipeline
+## Content Pipeline (confirmed tooling)
 
-1. **Tiles & sprites:** authored in Aseprite (or similar) at native 8×8 / 16×16, exported as indexed 4-colour PNGs, converted to CPC-packed binary via a small conversion script (Python) that also pre-generates the 1-bit masks for sprite blitting.
-2. **Rooms:** authored in a simple tile-map editor (or a spreadsheet/CSV → packer script, given the small per-building room count) producing the RLE-packed room data + hazard tables described above.
-3. **Assembly:** Z80 source built with a modern cross-assembler (e.g. sjasmplus or rasm), targeting a .dsk image for emulator testing (CPCEC / Caprice32 / Arnold) before any real-hardware pass.
-4. **Strings/captions:** authored once with EN + GR columns (see Localization), packed into two parallel text tables — kept short since the whole game is deadpan one-liners rather than branching dialogue, which keeps both tables and the string-printing routine minimal.
+1. **Tiles & sprites — Aseprite (via its MCP tool).** All 8×8 tile and hazard-tell art plus 16×16 character sprites authored directly in Aseprite at native resolution, locked to a 4-colour indexed palette per Mode 1. Aseprite's own export (indexed PNG / raw pixel data) feeds a small packer step that converts to CPC-native pixel format (2 bits/pixel, left-to-right nibble packing) and pre-generates the 1-bit masks used by the masked blit. Driving Aseprite through MCP from inside this session means sprite sheets can be built and iterated on directly as part of the normal workflow, rather than as a separate manual art pass.
+2. **Reference art — Blender (via its MCP tool), optional.** Not part of the runtime pipeline (this is a 2D tile/sprite game, no 3D assets ship), but useful as a posing/reference aid for the trickier trap vignettes (e.g. the mid-air "cut in half" or "catapulted" poses) — render a quick reference pose in Blender, then hand-trace it down to 16×16 pixel art in Aseprite. Used only when a pose is hard to eyeball directly at 16×16.
+3. **Rooms:** authored as tile-map + hazard-placement data (spreadsheet/CSV → packer script, given the small per-building room count), producing the RLE-packed room data + hazard tables described above.
+4. **Assembly — rasm.** Z80 source built with rasm, which also drives the overall build (assemble → produce binaries → hand off to iDSK). Chosen over alternatives since it's the toolchain already set up for this project.
+5. **Disk image — iDSK.** Final CPC `.dsk` image assembled with iDSK from rasm's output binaries (loader + code + packed asset blobs), for loading in emulators (CPCEC / Caprice32 / Arnold) during development and on real hardware for test passes.
+6. **Strings/captions:** authored once with EN + GR columns (see Localization), packed into two parallel text tables — kept short since the whole game is deadpan one-liners rather than branching dialogue, which keeps both tables and the string-printing routine minimal.
 
 ## Build Order / Milestones
 
