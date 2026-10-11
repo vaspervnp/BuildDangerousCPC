@@ -16,9 +16,8 @@ start:
         xor a
         ld (lang),a             ; English until L is pressed in the menu
         ld (keys),a
-        ld hl,room_test
-        call room_load
-        call room_draw
+        ld hl,building_test
+        call building_start
         call hud_init
         call player_init
         ei
@@ -34,6 +33,7 @@ main_loop:
         include "input.asm"
         include "tiles.asm"
         include "room.asm"
+        include "building.asm"
         include "hazards.asm"
         include "vignette.asm"
         include "player.asm"

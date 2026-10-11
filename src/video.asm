@@ -188,6 +188,13 @@ blit_masked8:
         jr nz,.line
         ret
 
+; In: A = hardware ink for the border. Trashes BC.
+set_border:
+        ld bc,#7f10
+        out (c),c
+        out (c),a
+        ret
+
 ; Lightning flash: A bit 0 set turns pen 0 white, clear restores it. Trashes BC,F.
 set_flash:
         ld bc,#7f00             ; select pen 0

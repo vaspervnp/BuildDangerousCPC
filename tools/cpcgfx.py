@@ -20,6 +20,7 @@ PENS = [(0, 0, 0), (255, 128, 0), (0, 128, 255), (255, 255, 255)]
 # Room text legend -> tile id; must match TILE_* in src/tiles.asm.
 ROOM_LEGEND = {
     ' ': 0, '.': 1, '=': 2, '#': 3, '[': 4, ']': 5, 'w': 6, 'D': 7, 'd': 8, 'L': 9, 's': 10,
+    'X': 15, 'x': 16,
 }
 ROOM_W, ROOM_H = 40, 23
 HUD_ROWS = 2

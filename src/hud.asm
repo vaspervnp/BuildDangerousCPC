@@ -6,6 +6,8 @@
 ENERGY_MAX      equ 8
 ENERGY_ROW      equ 0
 ENERGY_COL      equ 1
+ROOM_ICON_ROW   equ 0
+ROOM_ICON_COL   equ 11
 CAPTION_ROW     equ 1
 CAPTION_FRAMES  equ 150         ; 3 seconds
 CAPTION_CPF     equ 2           ; characters typed per frame
@@ -15,10 +17,33 @@ hud_init:
         ld (energy),a
         xor a
         ld (caption_timer),a
+        ld (border_timer),a
         ld h,a
         ld l,a
         ld (caption_ptr),hl
+        call hud_draw_room_status
         jp hud_draw_energy
+
+; In: B = energy to lose (stops at 0). Redraws the hats.
+energy_lose:
+        ld a,(energy)
+        sub b
+        jr nc,.set
+        xor a
+.set:   ld (energy),a
+        jp hud_draw_energy
+
+; Checkbox for the current room: empty until it has been signed off.
+hud_draw_room_status:
+        call room_is_marked
+        ld a,TILE_CHECK_EMPTY
+        jr z,.set
+        ld a,TILE_CHECK_DONE
+.set:   ld d,ROOM_ICON_ROW
+        ld e,ROOM_ICON_COL
+        call map_addr_keep_a
+        ld (hl),a
+        jp draw_cell
 
 ; Hats are written into the HUD rows of the room map, so redraws keep them.
 hud_draw_energy:
@@ -79,6 +104,15 @@ caption_clear:
         ret
 
 hud_update:
+        ld a,(border_timer)
+        or a
+        jr z,.caption
+        dec a
+        ld (border_timer),a
+        jr nz,.caption
+        ld a,INK_BLACK
+        call set_border
+.caption:
         ld hl,(caption_ptr)
         ld a,h
         or l

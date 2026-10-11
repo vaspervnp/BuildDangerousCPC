@@ -20,6 +20,7 @@ pl_onladder:    defs 1
 old_xy:         defs 2
 
 energy:         defs 1
+border_timer:   defs 1
 caption_timer:  defs 1
 caption_ptr:    defs 2          ; next character to type, 0 when done
 caption_col:    defs 1
@@ -27,6 +28,12 @@ caption_col:    defs 1
 vig_ptr:        defs 2
 vig_timer:      defs 1
 vig_hazard:     defs 2
+
+bld_rooms:      defs 1
+bld_room_list:  defs 2
+bld_marked:     defs MAX_ROOMS/8 ; bit per room: signed off
+cur_room:       defs 1
+miss_tally:     defs 1
 
 room_hazards:   defs 2          ; -> hazard list inside the current room's data
 room_map:       defs MAP_W*MAP_H

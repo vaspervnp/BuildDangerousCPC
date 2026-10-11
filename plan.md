@@ -41,6 +41,7 @@ Keeping both sprite classes small (8×8 and 16×16 only, no 32×32 anywhere) is 
 - **Joystick/directions:** 4-way movement, tile-aligned.
 - **Fire:** on an armed hazard's tile, triggers that hazard — disarm + vignette + fixed energy cost (see Core Systems §2–3). Does nothing on empty floor.
 - **Mark-safe action (second fire button, or a dedicated key on keyboard):** declares the current room safe. Checks for any remaining armed hazard in the room (Miss if so), sets the room's `marked` bit either way. Deliberately a different input than Fire so "disarm this hazard" and "I'm done with this room" can never be pressed by accident for each other.
+- **Up at the exit door:** leaves the building, if every room is signed off.
 - **L (keyboard, menu only):** toggles English/Greek (see Localization).
 
 ## Core Systems
@@ -49,24 +50,28 @@ Keeping both sprite classes small (8×8 and 16×16 only, no 32×32 anywhere) is 
 
 Each room is defined by a compact structure to keep the 5-building campaign inside a few KB:
 
+As built (milestones 1–3):
+
 ```
-Room {
-  tile_map_id      ; index into shared tileset bank (8x8 tiles, 40x25 = 1000 cells, RLE-packed)
-  hazard_count     ; 0-6 per room
-  hazards[6] {
-    tile_x, tile_y     ; placement on the 8x8 grid
-    hazard_type        ; 0-11, see Hazard Table
-    tell_sprite_id      ; which 8x8 "tell" graphic variant to draw
-    state               ; armed / disarmed
+Room data (generated from assets/rooms/<name>.txt):
+  RLE tiles        ; (count, tile) pairs for the 40x23 play area, terminated by count 0
+  hazard_count
+  hazards[n] {     ; 4 bytes each
+    x, row         ; cell on the 8x8 grid (row in screen rows, HUD included)
+    type           ; HZ_* -> hz_types: vignette script, tell sprite, caption, energy cost
+    state          ; armed / disarmed, written back at runtime
   }
-  marked           ; 1 bit: has this room been declared safe yet? (see Inspection & Exit Gating)
-  exits[4]          ; N/S/E/W -> room_id or 0xFF (none), matches stairwell/door tile position
-}
+  (exits[]         ; milestone 5: neighbouring rooms)
+
+Building:
+  room_count, room pointers[]
+  bld_marked       ; RAM bitfield, one "signed off" bit per room (max 32)
 ```
 
-- Tile maps are RLE-compressed (buildings reuse a handful of tile types: floor, wall, door, stairs, carpet, pipe-run, etc.) and decompressed into a small working tile-index buffer on room entry, not held fully expanded for every room simultaneously.
+- Tile maps are RLE-compressed (buildings reuse a handful of tile types: floor, wall, door, stairs, carpet, pipe-run, etc.) and decompressed into a 40×25 working map on room entry, not held fully expanded for every room simultaneously. Map cells that hold a hazard have bit 7 set, so redraws know to overlay its 8×8 tell.
+- Room data lives in RAM and hazard states are written straight back into it, so a room remembers what was disarmed when Thanos comes back. Restarting a building will need to reset states to armed.
 - Hazard placement tables are authored per room (hand-placed for puzzle fairness) rather than randomly generated — this is a "spot the difference" game, so hand-tuned tells matter more than procedural variety.
-- The `marked` bits for every room in a building are also mirrored into one small building-wide bitfield (≤1 byte per 8 rooms) so the exit check (below) is a single cheap scan rather than walking the room table.
+- The signed-off flags live only in the building-wide `bld_marked` bitfield, not in room data, so the exit check is a single cheap scan.
 
 ### 2. Hazard / Trap Table (12 types)
 
@@ -104,7 +109,7 @@ States: IDLE_WALK, TRIGGERED(trap_id), MARKING_SAFE, TRANSITION(room)
 
 - **Mark-safe action:** a dedicated control, distinct from Fire-on-hazard (see Controls) — usable anywhere inside the current room, any number of times per visit, and the player can leave and come back to a still-unmarked room with no penalty for waiting. This is the deliberate "I'm calling it" action separate from disarming individual hazards.
 - **Miss:** the outcome when `mark-safe` is used while the room still has an `armed` hazard. Costs more energy than a single hazard trigger and increments a per-building **miss tally** (1 byte, capped e.g. at 99) — this is the number that actually grades the building-end result (see Scoring), since exit itself no longer depends on hazard coverage.
-- **Exit gate:** the building's lobby/exit tile checks the building-wide `marked` bitfield; it only lets the player leave once every room's bit is set, regardless of whether each one was a clean mark or a Miss. This makes a full sweep of the building mandatory, while leaving the player free to trade thoroughness (find everything, pay small hazard-trigger costs) against speed (call rooms safe early, risk the bigger Miss cost) room by room.
+- **Exit gate:** pressing Up in front of the building's exit door checks the building-wide `marked` bitfield; it only lets the player leave once every room's bit is set, regardless of whether each one was a clean mark or a Miss. This makes a full sweep of the building mandatory, while leaving the player free to trade thoroughness (find everything, pay small hazard-trigger costs) against speed (call rooms safe early, risk the bigger Miss cost) room by room.
 
 ### 5. Energy, Scoring, and the Outside Clock
 

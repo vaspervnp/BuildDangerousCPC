@@ -15,6 +15,7 @@ START_Y         equ 21
 
 PS_WALK         equ 0
 PS_VIGNETTE     equ 1           ; a trap is going off: input locked
+PS_DONE         equ 2           ; left the building: input locked
 
 player_init:
         ld a,START_X
@@ -31,14 +32,30 @@ player_init:
 
 player_update:
         ld a,(pl_state)
+        or a
+        jr z,.walking
         cp PS_VIGNETTE
         jp z,vig_update
-        ld a,(keys_new)         ; Fire is checked every frame, not just on step frames
+        ret
+
+; One-shot actions are checked every frame (keys_new lasts a single frame),
+; movement only on step frames.
+.walking:
+        ld a,(keys_new)
         and KEY_FIRE
         jr z,.no_fire
         call try_trigger
         ret c
 .no_fire:
+        ld a,(keys_new)
+        and KEY_MARK
+        jp nz,try_mark
+        ld a,(keys_new)
+        and KEY_UP
+        jr z,.no_exit
+        call at_exit
+        jp c,try_exit
+.no_exit:
         ld a,(pl_wait)
         or a
         jr z,.act

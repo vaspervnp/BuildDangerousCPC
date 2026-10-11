@@ -1,0 +1,59 @@
+; Milestone 3, clean path: disarm all three live sockets, sign off without a Miss, leave.
+
+run 30
+run 25 right                    ; bottom floor socket (col 10)
+expect pl_x 8
+run 5
+run 1 fire
+run 70
+expect *room_hazards+4 1
+
+run 300 right
+run 35 left
+expect pl_x 30
+run 60 up
+expect pl_y 14
+run 25 left                     ; middle floor socket (col 24)
+expect pl_x 25
+run 5
+run 1 fire
+run 70
+expect *room_hazards+8 1
+
+run 200 left
+run 35 right
+expect pl_x 8
+run 60 up
+expect pl_y 7
+run 55 right                    ; top floor socket (col 20)
+expect pl_x 19
+run 5
+run 1 fire
+run 70
+expect *room_hazards+12 1
+expect energy 5                 ; three triggers, one hat each
+
+run 1 mark                      ; nothing armed left: clean sign-off
+run 3
+expect bld_marked 1
+expect miss_tally 0
+expect energy 5
+run 20
+shot sw_signed_off
+
+run 55 left                     ; back down to the exit
+expect pl_x 8
+run 60 down
+expect pl_y 14
+run 110 right
+expect pl_x 30
+run 60 down
+expect pl_y 21
+run 25 right
+expect pl_x 35
+run 5
+run 1 up
+run 3
+expect pl_state 2
+run 20
+shot sw_exit_done

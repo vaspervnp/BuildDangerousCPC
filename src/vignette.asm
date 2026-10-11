@@ -34,16 +34,12 @@ vig_start:
         inc hl
         inc hl
         ld b,(hl)               ; cost
-        ld a,(energy)
-        sub b
-        jr nc,.charged
-        xor a
-.charged:
-        ld (energy),a
         dec hl
         ld a,(hl)               ; caption
+        push af
+        call energy_lose
+        pop af
         call caption_show
-        call hud_draw_energy
         xor a
         ld (vig_timer),a
         ld a,PS_VIGNETTE

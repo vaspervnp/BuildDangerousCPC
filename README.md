@@ -11,18 +11,18 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 
 ## Status
 
-**Milestone 2 (hazard-trigger loop) done.** On top of the milestone 1 engine (bare-machine boot, Mode 1, tile rooms, walking/climbing/gravity), live hazards now sit in rooms as 8×8 "tells". Fire within reach sets one off: a scripted vignette plays (electrocution: screen flash, X-ray, singed and smoking), a deadpan caption types itself out in English or Greek, a hard hat of energy goes, and the hazard stays disarmed. One hazard type so far, with placeholder art. Next up: milestone 3, mark-room-safe / Miss / exit gate.
+**Milestone 3 (mark-safe / Miss / exit gate) done — the core loop is complete.** Thanos walks a side-view building, sets off live hazards with Fire to disarm them (vignette, typed caption in English or Greek, one hard hat of energy), signs rooms off with M / Fire 2, and can only leave through the exit door once every room is signed off. Signing off a room that still has a live hazard is a Miss: two hard hats, an orange border flash, and a mark on the tally. One hazard type and one room so far, placeholder art. Next up: milestone 4, the remaining 11 hazard types.
 
 | Area | Status |
 |---|---|
 | Scenario / narrative | Drafted |
 | Technical plan | Drafted |
-| Engine (Z80 ASM) | Milestones 1–2 done: boot, video, tiles, masked 16×16 and 8×8 sprites, input, room RLE, movement, hazards, vignettes |
+| Engine (Z80 ASM) | Milestones 1–3 done: boot, video, tiles, masked 16×16 and 8×8 sprites, input, room RLE, movement, hazards, vignettes, building/rooms, sign-off, exit |
 | Hazards | 1 of 12 types (electrocution); generic vignette player, so the rest are mostly data |
-| Mark-safe / Miss / exit gate | Not started (milestone 3) |
-| Tile/sprite art | Placeholder: 13 tiles, 4 Thanos frames (+4 mirrored), 3 vignette frames, 2 hazard sprites |
-| Level data (5 buildings) | One test room with 3 live and 3 safe sockets |
-| HUD | Energy hats + typed caption line; clock/score/miss tally not started |
+| Mark-safe / Miss / exit gate | Done: per-room signed-off bits, Miss tally, exit door gate |
+| Tile/sprite art | Placeholder: 17 tiles, 4 Thanos frames (+4 mirrored), 3 vignette frames, 2 hazard sprites |
+| Level data (5 buildings) | One test building: one room, 3 live and 3 safe sockets, an exit door |
+| HUD | Energy hats, current-room checkbox, typed caption line; clock/score/miss-tally display not started |
 | Font / localization (EN/GR) | 56-glyph capitals font (Latin + Greek), EN/GR string tables, language flag; L key waits for the title menu |
 | Audio | Not started |
 
@@ -40,7 +40,7 @@ Produces `build/bd.dsk`. In an emulator (CPCEC, Caprice32, Arnold, WinAPE…) or
 make test
 ```
 
-Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 32 checks, all passing; worst frame ~33% of the 50Hz budget.
+Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in `tests/`: holds keys for a number of game-loop iterations, checks variables (position, energy, hazard states), saves screenshots to `build/shots/`, and reports the worst per-frame CPU use. Currently 65 checks across 4 scripts, all passing; worst frame ~34% of the 50Hz budget.
 
 ## Controls
 
@@ -48,7 +48,8 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 |---|---|---|
 | Move / climb | Cursor keys or Q A O P | Stick |
 | Trigger hazard | Space | Fire 1 |
-| Mark room safe (milestone 3) | M | Fire 2 |
+| Sign off the current room | M | Fire 2 |
+| Leave the building (at the exit door) | Up | Up |
 | Toggle language (menu) | L | — |
 
 ## Layout
@@ -70,6 +71,8 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - **Load address #1000**, firmware discarded after load; stack at #C000 down.
 - **Capitals-only font.** All text is upper case; Greek accents are dropped (all-caps Greek is normally written without them anyway). Greek letters shaped like Latin ones reuse the Latin glyph, so the whole font is 56 glyphs.
 - **Captions are typed out** a couple of characters per frame rather than printed in one go: printing a full line plus starting a vignette in a single frame went over the 50Hz budget, and the typewriter delivery suits the deadpan tone.
+- **Signed-off flags are one bit per room in a building-wide bitfield** (`bld_marked`), not stored in room data. A room's outcome (clean or Miss) is fixed the first time it is signed off; pressing M again only says it is already signed off.
+- **Leaving = Up at the exit door**, like entering any door, so it can't happen by walking past it.
 - **Vignettes are full 16×16 frames** (128 bytes each) rather than FX overlays on the walk frames, for now: three frames for electrocution. If RAM gets tight once all 12 are in, frames can be shared between hazards first.
 
 ## Log
@@ -80,6 +83,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-11 — Core loop reworked: triggering a hazard (Fire) always disarms it and always costs a small fixed energy hit — that's just the job, not a failure. The real mistake is a **Miss**: using the separate "mark room safe" action while a hazard is still armed in that room, which costs more energy and adds to a per-building miss tally. Rooms can be re-checked freely; the building exit only requires every room to have been marked at some point (full sweep mandatory), while the miss tally (not coverage %) now grades the ending. Replaces the earlier "pass-threshold %" and "clean inspect vs. failed inspect" framing in both scenario.md and plan.md.
 - 2026-10-11 — **Milestone 1 implemented.** Engine skeleton in Z80 (rasm), asset converter, Makefile producing `build/bd.dsk`, headless test harness with a 12-check smoke test (all passing). Placeholder art authored through Aseprite. Chose a side-view cross-section layout (see Decisions). Worst frame currently uses ~17% of the 50Hz budget.
 - 2026-10-11 — **Milestone 2 implemented.** Hazard list in room data (state written back into it, so rooms remember what was disarmed), 8×8 masked tell sprites, reach test on Fire, data-driven vignette player (frames, hold times, screen-flash FX), electrocution vignette, energy hats in the HUD, custom Latin+Greek font, EN/GR string tables generated from `assets/text/strings.txt`, typed caption line. Harness now counts game-loop iterations (deterministic tests), supports `poke`, and pointer-relative addresses. Fixed a frame overrun (109% → 33%) by typing captions out over several frames.
+- 2026-10-11 — **Milestone 3 implemented.** Building structure (room list, entering a room by index), signed-off bitfield, M / Fire 2 to sign off, Miss detection (any armed hazard left → −2 energy, tally +1, orange border flash), exit door tile with the all-rooms-signed-off gate, HUD checkbox for the current room. Two new test scripts (Miss path and clean sweep); 65 checks pass.
 
 ---
 

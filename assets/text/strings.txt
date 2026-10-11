@@ -1,3 +1,8 @@
 ; ID | English | Greek
 ; Capitals only (lower case is folded, Greek accents are dropped). Max 40 characters.
 CAP_ZAP | Filed under: electrocution. Again. | Καταχωρήθηκε: ηλεκτροπληξία. Ξανά.
+MARK_SAFE | Signed off. Room is safe. | Υπογράφηκε. Το δωμάτιο είναι ασφαλές.
+MARK_MISS | Miss! The crowd will find it first. | Αστοχία! Το κοινό θα το βρει πρώτο.
+MARK_ALREADY | Already signed off. | Έχει ήδη υπογραφεί.
+EXIT_LOCKED | Can't leave. Rooms still unchecked. | Δεν φεύγω. Υπάρχουν ανέλεγκτα δωμάτια.
+EXIT_DONE | Inspection complete. | Η επιθεώρηση ολοκληρώθηκε.
