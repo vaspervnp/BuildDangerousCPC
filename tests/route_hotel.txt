@@ -109,17 +109,17 @@ expect outcome 0
 expect miss_tally 0
 expect energy 16
 expect evidence 0
-expect bld_hotel_0+198 1
-expect bld_hotel_0+202 1
+expect bld_hotel_0+205 1
+expect bld_hotel_0+209 1
 expect bld_hotel_1+201 1
 expect bld_hotel_1+205 1
 expect bld_hotel_1+209 1
-expect bld_hotel_2+232 1
-expect bld_hotel_2+236 1
-expect bld_hotel_3+213 1
-expect bld_hotel_3+217 1
-expect bld_hotel_4+173 1
-expect bld_hotel_4+177 1
-expect bld_hotel_5+178 1
-expect bld_hotel_5+182 1
+expect bld_hotel_2+245 1
+expect bld_hotel_2+249 1
+expect bld_hotel_3+227 1
+expect bld_hotel_3+231 1
+expect bld_hotel_4+187 1
+expect bld_hotel_4+191 1
+expect bld_hotel_5+192 1
+expect bld_hotel_5+196 1
 shot route_hotel_results

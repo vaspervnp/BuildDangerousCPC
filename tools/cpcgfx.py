@@ -33,6 +33,8 @@ ROOM_LEGEND = {
     '$': 52, 'G': 53, 'A': 54,                  # Hard Knock: slot machine, guitar, amp
     'y': 55, 'z': 56, 'P': 57, 'c': 58,         # furniture: sofa left/right, picture, clock,
     't': 59, 'F': 60, 'f': 61, 'm': 62,         # TV, fridge top/bottom, bin
+    'B': 63, 'E': 64, 'W': 65, 'V': 66,         # bookcase top/bottom, water cooler top/bottom
+    'R': 67, 'M': 68, 'J': 69,                  # reception desk left/middle/right
 }
 
 # Building palettes: hardware ink for pen 2 (walls, windows... and Thanos's suit).
@@ -201,11 +203,11 @@ def convert_tilemap(src, dst, label):
 def encode_cells(cells, width=ROOM_W):
     """Room tiles, row by row, as byte codes (room.asm room_load decodes them):
       1-127, tile        a run of that many of one tile
-      %10tttttt          one tile (0-63)
+      %10tttttt          one tile (0-63; tiles 64-127 go as a run of 1)
       %11nnnnnn          copy n+1 cells from the row above (rooms repeat a lot vertically)
       0                  end
     Greedy: the longer of a run and a copy; a single cell is one byte."""
-    assert max(cells) < 64, "tile ids must stay below 64 for the one-byte form"
+    assert max(cells) < 128, "tile ids must stay below 128 (bit 7 marks hazards in the map)"
     out, i, n = bytearray(), 0, len(cells)
     while i < n:
         run = 1
@@ -218,7 +220,7 @@ def encode_cells(cells, width=ROOM_W):
         if copy >= 2 and copy >= run:
             out.append(0xC0 | (copy - 1))
             i += copy
-        elif run >= 2:
+        elif run >= 2 or cells[i] >= 64:
             out += bytes((run, cells[i]))
             i += run
         else:

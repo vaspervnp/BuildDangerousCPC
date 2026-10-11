@@ -98,15 +98,15 @@ expect energy 16
 expect evidence 0
 expect bld_hardknock_0+222 1
 expect bld_hardknock_0+226 1
-expect bld_hardknock_1+183 1
-expect bld_hardknock_1+187 1
+expect bld_hardknock_1+196 1
+expect bld_hardknock_1+200 1
 expect bld_hardknock_2+176 1
 expect bld_hardknock_2+180 1
 expect bld_hardknock_2+184 1
-expect bld_hardknock_3+216 1
-expect bld_hardknock_3+220 1
-expect bld_hardknock_4+166 1
-expect bld_hardknock_4+170 1
+expect bld_hardknock_3+229 1
+expect bld_hardknock_3+233 1
+expect bld_hardknock_4+182 1
+expect bld_hardknock_4+186 1
 expect bld_hardknock_5+158 1
 expect bld_hardknock_5+162 1
 shot route_hardknock_results

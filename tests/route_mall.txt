@@ -101,16 +101,16 @@ expect outcome 0
 expect miss_tally 0
 expect energy 16
 expect evidence 0
-expect bld_mall_0+224 1
-expect bld_mall_0+228 1
+expect bld_mall_0+231 1
+expect bld_mall_0+235 1
 expect bld_mall_1+199 1
 expect bld_mall_1+203 1
-expect bld_mall_2+188 1
-expect bld_mall_2+192 1
+expect bld_mall_2+200 1
+expect bld_mall_2+204 1
 expect bld_mall_3+226 1
 expect bld_mall_3+230 1
-expect bld_mall_4+200 1
-expect bld_mall_4+204 1
-expect bld_mall_5+184 1
-expect bld_mall_5+188 1
+expect bld_mall_4+215 1
+expect bld_mall_4+219 1
+expect bld_mall_5+210 1
+expect bld_mall_5+214 1
 shot route_mall_results

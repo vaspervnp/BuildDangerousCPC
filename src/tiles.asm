@@ -39,7 +39,9 @@ TILE_SLOT       equ 52          ; Hard Knock decor: slot machine, guitar on the 
 TILE_GUITAR     equ 53
 TILE_AMP        equ 54
 ; 55-62 furniture: sofa (2), picture, clock, TV, fridge (2, top/bottom), bin
-TILE_COUNT      equ 63              ; < 64: room data's one-byte tile code
+; 63-69 bookcase (top/bottom), water cooler (top/bottom), reception desk (3)
+; (tiles from 64 on cost two bytes each in room data: no one-byte code for them)
+TILE_COUNT      equ 70
 
 TILEF_SOLID     equ 1
 TILEF_CLIMB     equ 2           ; ladder
@@ -80,5 +82,6 @@ tile_flags:
         ds 3,0                  ; title logo materials
         ds 3,0                  ; Hard Knock decor
         ds 8,0                  ; furniture
+        ds 7,0                  ; bookcase, water cooler, reception desk
 tile_flags_end:
         assert tile_flags_end-tile_flags == TILE_COUNT, "one tile_flags entry per tile"
