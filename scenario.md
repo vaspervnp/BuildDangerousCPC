@@ -20,9 +20,13 @@ Personality: deadpan, weary, professionally unimpressed by physics. He's seen it
 
 ## Core Fantasy
 
-Thanks to a lifetime of claims adjusting, Thanos has a sixth sense: hazards *look* almost normal, but not quite — a crooked sign, a damp patch, a coil of wire that shouldn't be visible. The player is trained to read the same tells. Spotting one and holding the "Inspect" action in time disarms it cleanly (for score and energy). Walking past it, or fumbling the inspection, sets it off — and the trap plays out in a short, silly, fully-animated vignette while Thanos absorbs the hit and energy drops.
+Thanks to a lifetime of claims adjusting, Thanos has a sixth sense: hazards *look* almost normal, but not quite — a crooked sign, a damp patch, a coil of wire that shouldn't be visible. The player is trained to read the same tells.
 
-The game is equally a spot-the-difference puzzle and an action-platformer: hazards are seeded into otherwise-identical room layouts, and most of the challenge is pattern-reading under time pressure, not reflexes alone.
+**Disarming a hazard always hurts — that's the job, not a failure state.** Finding a trap and actually deactivating it means getting bitten, shocked, drenched, or otherwise comically wrecked; the vignette plays, energy drops a little, and the hazard is gone. There is no clean way to defuse a trap. The only real mistake is **declaring a room safe when it isn't** — walking through, deciding (rightly or wrongly) that it's clear, and marking it off the inspection sheet. If a live hazard is still sitting in that room when he does, that's a **Miss**: a bigger hit to his Reputation Energy, and a mark on the building's tally that follows him to the end-of-level report.
+
+Thanos can re-enter any room and re-check it as many times as he likes — there's no penalty for taking his time or backtracking. The building's exit only unlocks once **every room has been marked safe at least once**, whether he actually cleared it or just called it and moved on. So the real choice each room presents isn't "disarm or don't" — it's "go find every hazard in here and take the small, certain hits that costs, or call it safe now, save the time, and gamble on a Miss."
+
+The game is equally a spot-the-difference puzzle and a risk/reward management game: hazards are seeded into otherwise-identical room layouts, and most of the challenge is reading tells and deciding how thoroughly to check each room against the outside clock, not reflexes alone.
 
 ## The Twelve Ways to Get Got
 
@@ -55,7 +59,7 @@ Each hazard has a matching "tell" — a visual detail slightly wrong in that roo
 
 The owner of the Skyscraper isn't just cheap — he's deliberately under-building to fail the structure after the opening, for the insurance payout, timed to a packed lobby. Thanos finds the paperwork taped under a stairwell (a one-off "evidence" pickup, not a new mechanic) partway through the floor. The ending branches on how the inspection actually went, not on a separate confrontation scene:
 
-- **Good ending:** enough hazards disarmed, energy held, clock beaten — Thanos walks back out, hands the owner a condemnation notice instead of letting him cut the ribbon, and the crowd cheers for the inspector instead.
+- **Good ending:** every room marked safe, energy held, clock beaten — Thanos walks back out, hands the owner a condemnation notice instead of letting him cut the ribbon, and the crowd cheers for the inspector instead. A zero-Miss clean sweep gets its own extra beat of applause.
 - **Bad ending:** clock runs out or energy zeroes — the ribbon gets cut on schedule, the crowd files in, and the last image is Thanos's inspection contract getting stamped "TERMINATED" while chaos starts behind him. Deadpan narration, not gore — this is a comedy.
 
 ## Tone & Presentation
@@ -67,12 +71,14 @@ The owner of the Skyscraper isn't just cheap — he's deliberately under-buildin
 
 ## Win / Lose per Building
 
-- **Win:** all hazards in the building disarmed or safely passed (the player isn't required to find 100% — see Plan for the pass threshold) before the outside clock runs out, with energy above zero.
-- **Partial/soft-fail:** clock or energy runs out but enough hazards were cleared — owner is embarrassed into a delay, small reputation penalty, proceed to next building.
-- **Fail:** energy hits zero, or clock runs out with too few hazards cleared — contract-ending outcome for that run (game over, or a "fired, try again" restart depending on difficulty mode).
+Every room must be marked safe before the exit unlocks — that part isn't optional or graded, it's the gate. What's graded is *how* he got there:
+
+- **Win (clean/good exit):** every room marked safe, energy above zero, exit reached before the outside clock runs out. The fewer Misses on the building's tally, the better the grade — a zero-Miss run is a "clean sweep" and the best version of this ending.
+- **Partial/soft-fail:** the outside clock runs out before every room is marked, but energy is still above zero and he'd gotten through most of the building — owner is embarrassed into a short delay, small reputation penalty, proceed to next building anyway.
+- **Fail:** energy hits zero at any point, or the clock runs out with too much of the building still unchecked — contract-ending outcome for that run (game over, or a "fired, try again" restart depending on difficulty mode).
 
 ## Scoring
 
-- Points for each hazard correctly identified and disarmed, with a speed bonus for early finds.
-- Points lost per hazard triggered (energy cost doubles as the score cost).
-- End-of-building bonus tied to how much clock time remained and how much energy was left — rewards efficient, careful play over either recklessness or dawdling.
+- Small points for each hazard actually found and disarmed — it costs energy and a vignette either way, so the points are the only thing softening that cost, and they reward thoroughness over guessing.
+- A larger points penalty for every **Miss** (a room marked safe with a live hazard still in it), matching its bigger energy cost — misses are the expensive mistake, not the slapstick hits.
+- End-of-building bonus tied to how much clock time remained, how much energy was left, and a flat bonus for a zero-Miss "clean sweep" — rewards careful, thorough play over either recklessness or dawdling.
