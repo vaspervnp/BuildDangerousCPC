@@ -55,7 +55,10 @@ caption_col:    defs 1
 vig_ptr:        defs 2
 vig_timer:      defs 1
 vig_hazard:     defs 2
-vig_row:        defs 1          ; row the last vignette frame was drawn at
+vig_col:        defs 1          ; vig_col/vig_row adjacent: where the last frame went
+vig_row:        defs 1
+vig_particle:   defs 1          ; P_* of the vignette playing
+vig_spots:      defs 4          ; col,row of each particle drawn (row #ff: none)
 
 bld_ptr:        defs 2          ; building being played
 bld_start:      defs 1          ; room Thanos enters first
@@ -132,7 +135,7 @@ wk_dir:         defs 1              ; 0 right, 1 left
 wk_anim:        defs 1
 wk_step:        defs 1
 wk_pose:        defs 1              ; 0 idle, 1 tool raised
-wk_timer:       defs 1
+wk_timer:       defs 2              ; frames to the next look / throw
 wk_said:        defs 1              ; grumbled at him this visit
 wk_line:        defs 1              ; grumble rotation
 pj_on:          defs 1              ; the tool in flight

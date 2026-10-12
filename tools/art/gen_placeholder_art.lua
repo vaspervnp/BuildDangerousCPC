@@ -605,6 +605,15 @@ gen.hazards = function()
     { "WW......","W.W.....",".WWW....","...WW...","....WWW.",".....W.W","......WW","........" },
     { "........","........","BWWWWW..","........","...BWWWW","........","........","........" }, -- nails
     { "........","........","..BWWWWW","........","BWWWWW..","........","........","........" },
+    -- trap particles (vignette.asm P_*), drawn around Thanos while a trap goes off
+    { "...W....","..WB....",".WB.....","WWWWWW..","....BW..","...BW...","..BW....",".W......" }, -- spark
+    { "..WWWW..",".W....W.","W..W...W","W.W....W","W......W","W......W",".W....W.","..WWWW.." }, -- bubble
+    { "...O....","..OO..O.","..OWO.O.",".OWWOOO.",".OWWWWO.","OOWWWWOO","OOWWWWOO",".OOOOOO." }, -- flame
+    { "...BB...","..BBBB..",".BB.BBB.","BBBBB.BB","BB.BBBBB",".BBBBBB.","..BBBB..","........" }, -- smoke
+    { "...O....","...O....","OOOWOOO.",".OWWWO..","..OWO...",".OO.OO..",".O...O..","........" }, -- star
+    { "....B...","...BW...","..BWB...",".BWB....","BWB.....","WB......","B.......","........" }, -- ice shard
+    { ".WWWWW..","WWWWWWW.","WKKWKKW.","WKKWKKW.","WWWKWWW.",".WWWWW..",".W.W.W..","........" }, -- skull
+    { "......W.",".....WW.","....WWW.","...WWW..","..WWW...",".WWW....","WW......","W......." }, -- feather
   }), 8, 8)
 end
 

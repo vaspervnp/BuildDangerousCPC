@@ -7,7 +7,8 @@
 ; One tool in the air at a time.
 
 WK_WINDUP       equ 22          ; frames the tool is up before it flies: the warning
-WK_PAUSE        equ 40          ; frames between throws, plus up to 63
+WK_PAUSE        equ 40          ; frames before his first look, on entering the room
+WK_REST         equ 500         ; frames after a throw before the next: 10 s, plus up to 63
 WK_LOOK         equ 10          ; Thanos off his floor: look again this soon
 WK_LINES        equ 4
 AF_WORKER       equ AF_PEOPLE+13 ; idle (and walking A), tool up
@@ -65,8 +66,9 @@ worker_init:
         xor a
         ld (wk_dir),a
         ld (wk_anim),a
-        ld a,WK_PAUSE
-        ld (wk_timer),a
+        ld hl,WK_PAUSE
+        ld (wk_timer),hl
+        ld a,l
         ld (wk_step),a
         ; fall through
 
@@ -111,13 +113,17 @@ worker_update:
         ld a,(wk_pose)          ; walking, unless the tool is up
         or a
         call z,worker_walk
-        ld hl,wk_timer
-        dec (hl)
+        ld hl,(wk_timer)
+        dec hl
+        ld (wk_timer),hl
+        ld a,h
+        or l
         ret nz
         ld a,(wk_pose)
         or a
-        jr nz,worker_throw
-        ld (hl),WK_LOOK
+        jp nz,worker_throw
+        ld l,WK_LOOK            ; (H is 0)
+        ld (wk_timer),hl
         ld a,(pj_on)
         or a
         ret nz
@@ -126,8 +132,8 @@ worker_update:
         sub (hl)
         cp 4
         ret nc
-        ld a,WK_WINDUP          ; tool up
-        ld (wk_timer),a
+        ld hl,WK_WINDUP         ; tool up
+        ld (wk_timer),hl
         ld a,1
         ld (wk_pose),a
         call worker_redraw
@@ -187,10 +193,13 @@ worker_throw:
         xor a
         ld (wk_pose),a
         call worker_redraw
-        call rand
+        call rand               ; then a long rest
         and 63
-        add a,WK_PAUSE
-        ld (wk_timer),a
+        ld l,a
+        ld h,0
+        ld de,WK_REST
+        add hl,de
+        ld (wk_timer),hl
         ld a,(pl_x)             ; towards Thanos, from beside him
         ld hl,wk_x
         cp (hl)                 ; carry: Thanos is to the left

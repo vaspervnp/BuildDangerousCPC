@@ -37,27 +37,30 @@ expect pj_dx 1
 poke pj_row 21
 run 9
 shot worker_throw
-until pj_on 0 down 60           ; ducked under it: it flies on into the wall
+until pj_on 0 down 120          ; ducked under it: it flies on into the wall
 shot worker_ducked
 expect energy 16
 expect pl_x 22
 run 1
 
+run 300
+expect wk_pose 0                 ; ~8 s after the throw: still resting (10 s between)
+
 ; --- nails at the feet: jump
-until pj_on 1 - 200
+until pj_on 1 - 700             ; he rests 10 s between throws
 poke pj_row 22
 until pj_x 21 - 40
 run 1 up                        ; straight up
-until pj_on 0 - 60
+until pj_on 0 - 120
 expect energy 16
 until pl_jump 0 - 40
 run 8
 expect pl_y 21
 
 ; --- and one he doesn't dodge
-until pj_on 1 - 200
+until pj_on 1 - 700             ; he rests 10 s between throws
 poke pj_row 22
-until pj_on 0 - 60
+until pj_on 0 - 120
 expect energy 15                ; half a hat
 expect pl_x 22
 shot worker_hit

@@ -33,10 +33,9 @@ run 2
 shot hz_zap_flash               ; pen 0 flashed white
 run 4
 shot hz_zap_xray
-run 30
+run 60
 shot hz_zap_singed              ; caption still up
-run 30
-expect pl_state 0
+until pl_state 0 - 120          ; the rest of the vignette (133 frames in all)
 expect *room_hazards+4 1
 shot hz_disarmed
 
@@ -62,7 +61,6 @@ expect pl_state 1
 expect energy 16
 run 40
 shot hz_greek_caption
-run 30
-expect pl_state 0
+until pl_state 0 - 120
 expect *room_hazards+8 1
 expect *room_hazards+12 0       ; the top-floor socket is untouched

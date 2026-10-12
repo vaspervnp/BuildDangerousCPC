@@ -13,7 +13,7 @@ run 25 right                    ; bottom floor socket (col 10)
 expect pl_x 8
 run 5
 run 1 fire
-run 70
+until pl_state 0 - 200          ; the vignette
 expect *room_hazards+4 1
 
 run 300 right
@@ -25,7 +25,7 @@ run 25 left                     ; middle floor socket (col 24)
 expect pl_x 25
 run 5
 run 1 fire
-run 70
+until pl_state 0 - 200          ; the vignette
 expect *room_hazards+8 1
 
 run 200 left
@@ -37,7 +37,7 @@ run 55 right                    ; top floor socket (col 20)
 expect pl_x 19
 run 5
 run 1 fire
-run 70
+until pl_state 0 - 200          ; the vignette
 expect *room_hazards+12 1
 expect energy 16                ; traps cost time, not energy
 

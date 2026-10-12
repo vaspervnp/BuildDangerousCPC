@@ -21,10 +21,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_bite
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+4 1
 
 ; --- drown
@@ -35,10 +34,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_drown
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+8 1
 
 ; --- head
@@ -49,10 +47,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_head
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+12 1
 
 ; --- cut
@@ -63,10 +60,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_cut
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+16 1
 
 ; --- ice
@@ -81,10 +77,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_ice
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+20 1
 
 ; --- fire
@@ -95,10 +90,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_fire
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+24 1
 
 ; --- squash
@@ -109,10 +103,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_squash
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+28 1
 
 ; --- impale
@@ -123,10 +116,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_impale
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+32 1
 
 ; --- poison
@@ -141,10 +133,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_poison
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+36 1
 
 ; --- suck
@@ -155,10 +146,9 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_suck
-run 110
-expect pl_state 0
+until pl_state 0 - 300          ; the whole vignette (2-4 s)
 expect *room_hazards+40 1
 
 ; --- catapult
@@ -169,12 +159,11 @@ poke energy 8
 run 1 fire
 expect pl_state 1
 expect energy 8
-run 8
+run 20
 shot gal_catapult
 run 12
 shot gal_catapult_airborne
-run 98
-expect pl_state 0
+until pl_state 0 - 300
 expect *room_hazards+44 1
 
 ; --- the owner's papers: no energy, no Miss if left, +500

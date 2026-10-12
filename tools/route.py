@@ -27,7 +27,7 @@ FLAGS = {'=': SOLID, '#': SOLID, '[': CLIMB, ']': CLIMB, '/': STAIR_R, '\\': STA
 
 # Costs in frames (game-loop iterations): a step is STEP_DELAY+1, a fall row FALL_DELAY+1.
 STEP, FALL, ESC = 5, 2, 3
-VIGNETTE = 160              # rough length of a trap vignette, for the time estimate only
+VIGNETTE = 135              # length of a trap vignette (src/vignette.asm, ~2.7 s), for the time estimate only
 CALL_S, SELFIE_S = 8, 5     # rough cost of a phone call (right/wrong mix) and of a room with
                             # the nephew (a selfie, sometimes two visits), in seconds
 WORKER_S = 2                # a room with a worker: waiting for a throw to pass, the odd hit

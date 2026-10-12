@@ -27,7 +27,7 @@ run 25 right
 expect pl_x 8
 run 5
 run 1 fire
-run 70
+until pl_state 0 - 200          ; the vignette
 expect energy 16
 expect score+2 80               ; the disarm scored 50
 poke energy 4

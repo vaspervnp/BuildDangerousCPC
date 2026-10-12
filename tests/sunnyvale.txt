@@ -142,8 +142,8 @@ print score 3
 run 1 fire                      ; Sunny Vale alone: the ending
 run 3
 expect game_state 5
-expect hi_score+1 #44           ; 004440 recorded as the hi-score
-expect hi_score+2 #40
+expect hi_score+1 #44           ; 004470 recorded as the hi-score
+expect hi_score+2 #70
 shot sv_ending
 run 1 fire
 run 3
