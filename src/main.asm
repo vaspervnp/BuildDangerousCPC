@@ -58,6 +58,7 @@ main_loop:
         jr nz,main_loop         ; paused: everything waits, the clock too
         call player_update
         call nephew_update
+        call worker_update
         call hud_update
         call play_update
         jr main_loop
@@ -87,6 +88,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "sound.asm"
         include "phone.asm"
         include "nephew.asm"
+        include "workers.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

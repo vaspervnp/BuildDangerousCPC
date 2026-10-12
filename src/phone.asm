@@ -129,6 +129,9 @@ phone_check:
         ld a,(calls_enabled)
         or a
         ret z
+        ld a,(pl_jump)          ; not in mid-air: she can wait for him to land
+        or a
+        ret nz
         ld a,(call_next)
         cp 3
         ret nc

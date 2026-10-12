@@ -1,0 +1,65 @@
+; Last-minute workers (Sunny Vale upper east, room 3: one at x 14 on the ground floor,
+; screen row 21). With Thanos on his floor he raises a tool, then throws it at him.
+; Head-height tools are ducked, feet-height ones jumped; a hit costs half a hat.
+; The kind is random, so the script sets the row of each tool once it is in the air.
+
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
+poke nephew_enabled 0             ; no selfies (tests/nephew.txt)
+pokew boot_campaign campaign_single
+run 5
+run 1 fire                      ; title: start
+run 3
+run 1 fire                      ; skip the outdoor intro
+until game_state 0 -
+run 1
+expect wk_on 0                  ; nobody working in the lobby
+
+goto 0 17 21 right              ; up through the lobby and the east wing
+goto 0 24 14 up
+goto 1 0 14 right
+goto 1 23 14 right
+goto 1 30 7 up
+goto 1 34 7 right
+goto 3 25 21 up                 ; the flight carries on in the room above
+run 1
+expect wk_on 1
+expect wk_x 14
+expect wk_y 21
+goto 3 22 21 left               ; clear of the flight down at x 26
+poke energy 16
+
+; --- a hammer at head height: duck
+until wk_pose 1 - 200           ; tool up: the warning
+shot worker_windup
+until pj_on 1 - 40              ; thrown, from beside him towards Thanos
+expect pj_x 16
+expect pj_dx 1
+poke pj_row 21
+run 9
+shot worker_throw
+until pj_on 0 down 60           ; ducked under it: it flies on into the wall
+shot worker_ducked
+expect energy 16
+expect pl_x 22
+run 1
+
+; --- nails at the feet: jump
+until pj_on 1 - 200
+poke pj_row 22
+until pj_x 21 - 40
+run 1 up                        ; straight up
+until pj_on 0 - 60
+expect energy 16
+until pl_jump 0 - 40
+run 8
+expect pl_y 21
+
+; --- and one he doesn't dodge
+until pj_on 1 - 200
+poke pj_row 22
+until pj_on 0 - 60
+expect energy 15                ; half a hat
+expect pl_x 22
+shot worker_hit
+run 20
+expect pl_wait 10               ; still reeling

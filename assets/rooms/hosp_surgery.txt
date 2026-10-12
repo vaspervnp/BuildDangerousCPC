@@ -24,3 +24,4 @@
 #####################/##################
 hazard electric 18 11
 hazard squash 30 4
+worker 36 13

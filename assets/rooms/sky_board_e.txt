@@ -25,3 +25,4 @@
 hazard evidence 18 20
 hazard catapult 36 13
 hazard drown 8 4
+worker 16 20

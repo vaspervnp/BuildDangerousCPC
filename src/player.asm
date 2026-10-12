@@ -5,6 +5,8 @@
 STEP_DELAY      equ 4           ; frames between walk/climb steps
 FALL_DELAY      equ 1
 ESC_DELAY       equ 2           ; escalators are quicker than legs
+JUMP_STEPS      equ 7           ; up 3, hang 1, down 3 - one cell per step, steerable
+HIT_STUN        equ 30          ; frames he reels after a thrown tool (workers.asm)
 
 ; Frames in build/thanos.bin: 0-3 as drawn, 4-7 mirrored copies (cpcgfx.py --mirror).
 THANOS_WALK_R   equ 0
@@ -16,6 +18,7 @@ PS_VIGNETTE     equ 1           ; a trap is going off: input locked
 PS_DONE         equ 2           ; left the building: input locked
 PS_PHONE        equ 3           ; on the phone to Tasha (phone.asm): input is hers
 PS_SELFIE       equ 4           ; caught by the nephew (nephew.asm)
+AF_DUCK         equ AF_PEOPLE+15 ; ducking: a front-facing frame in the people sheet
 
 ; Position comes from building_start; he is drawn when his first room is.
 player_init:
@@ -25,6 +28,8 @@ player_init:
         ld (pl_anim),a
         ld (pl_climb),a
         ld (pl_wait),a
+        ld (pl_jump),a
+        ld (pl_duck),a
         ret
 
 player_update:
@@ -45,6 +50,9 @@ player_update:
         ld a,(keys_new)
         and KEY_FIRE
         jr z,.no_fire
+        ld a,(pl_jump)          ; no traps from mid-air
+        or a
+        jr nz,.no_fire
         call try_trigger
         ret c
 .no_fire:
@@ -69,6 +77,9 @@ player_update:
         xor a
         ld (pl_stair),a
         ld (pl_stepped),a
+        ld a,(pl_jump)
+        or a
+        jp nz,jump_step
         inc d                   ; feet row: hanging on a ladder?
         call flags_pair
         and b
@@ -109,26 +120,59 @@ player_update:
         xor a
         ld (pl_climb),a
         ld a,ESC_DELAY
-        jr .walk_pose
+        jp .walk_pose
 .fall:  dec d                   ; nothing: fall one row
         ld a,d
         ld (pl_y),a
         xor a
         ld (pl_climb),a
         ld a,FALL_DELAY
-        jr .moved
+        jp .moved
 
 .input: ld a,(keys)
         ld c,a
         bit 0,c                 ; KEY_UP
-        jr z,.no_up
+        jr z,.up_off
         call try_up
-        jr c,.climbed
+        jr c,.up_climb
+        ld a,(pl_uphold)        ; still held from a climb: no jump at the top
+        or a
+        jr nz,.no_up
+        call on_floor           ; nothing to climb: jump
+        jr nz,.no_up
+        ld (pl_duck),a
+        ld hl,sfx_jump
+        call sfx_play_b
+        ld a,JUMP_STEPS
+        jp jump_step
+.up_climb:
+        ld a,1
+        ld (pl_uphold),a
+        jr .climbed
+.up_off:
+        xor a
+        ld (pl_uphold),a
 .no_up: bit 1,c                 ; KEY_DOWN
         jr z,.no_down
         call try_down
         jr c,.climbed
+        call on_floor           ; nothing to climb down: duck, and stay down while held
+        jr nz,.no_down
+        ld a,(pl_duck)
+        or a
+        ret nz
+        inc a
+        jr .redraw
 .no_down:
+        ld a,(pl_duck)          ; down let go: stand up
+        or a
+        jr z,.standing
+        xor a
+.redraw:
+        ld (pl_duck),a
+        xor a
+        jr .moved
+.standing:
         bit 2,c                 ; KEY_LEFT
         jr z,.no_left
         call try_left
@@ -157,6 +201,60 @@ player_update:
         ld (pl_anim),a
         pop af
 .moved: ld (pl_wait),a
+        ld de,(old_xy)
+        call restore_2x2
+        jp player_draw
+
+; Out: Z if he stands on plain floor - not on a ladder, not mid-flight. A = 0 then.
+on_floor:
+        ld a,(pl_onladder)
+        ld hl,pl_stair
+        or (hl)
+        ret
+
+; One step of a jump. In: A = steps left before this one (JUMP_STEPS..1). Up 3, hang 1,
+; down 3, moving with left/right as he goes; a ceiling cuts the rise short, a floor the
+; fall. Below the arc plain gravity takes over (a jump off a ledge falls on).
+jump_step:
+        dec a
+        ld (pl_jump),a
+        ld de,(pl_x)
+        cp 3
+        jr c,.fall
+        jr z,.across            ; the top of the arc
+        dec d                   ; rising: the row over his head must be free
+        call flags_pair
+        or b
+        and TILEF_SOLID
+        jr nz,.bonk
+        ld a,d
+        ld (pl_y),a
+        jr .across
+.bonk:  ld a,3                  ; head on the ceiling: come down
+        ld (pl_jump),a
+        jr .across
+.fall:  inc d                   ; anything to land on under either foot?
+        inc d
+        call flags_pair
+        or b
+        jr z,.down
+        xor a                   ; landed
+        ld (pl_jump),a
+        jr .across
+.down:  ld hl,pl_y
+        inc (hl)
+.across:
+        xor a
+        ld (pl_climb),a
+        ld a,(keys)
+        bit 2,a
+        jr z,.right
+        call try_left
+        jr .drawn
+.right: bit 3,a
+        call nz,try_right
+.drawn: ld a,STEP_DELAY
+        ld (pl_wait),a
         ld de,(old_xy)
         call restore_2x2
         jp player_draw
@@ -404,7 +502,13 @@ restore_2x2:
         jp draw_cell
 
 player_draw:
-        ld a,(pl_climb)
+        ld a,(pl_duck)
+        or a
+        jr z,.up
+        ld a,AF_DUCK
+        call frame_addr
+        jr .draw
+.up:    ld a,(pl_climb)
         or a
         jr z,.walk
         ld a,(pl_anim)
@@ -427,5 +531,5 @@ player_draw:
         add hl,hl
         ld de,thanos_gfx
         add hl,de
-        ld de,(pl_x)
+.draw:  ld de,(pl_x)
         jp draw_sprite16

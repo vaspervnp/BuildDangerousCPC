@@ -283,6 +283,8 @@ sfx_hum:        db 3 : dw 900 : db 0, 0, #06
                 db 0
 sfx_tick:       db 2 : dw 47 : db 0, 0, #19
                 db 0
+sfx_jump:       db 8 : dw 300 : db -28, 0, #1c  ; boing
+                db 0
 sfx_crowd:      db 12 : dw 0 : db 0, 9, #07
                 db 12 : dw 0 : db 0, 8, #0a
                 db 12 : dw 0 : db 0, 9, #0c
@@ -461,6 +463,12 @@ sfx_ring:       db 2 : dw 45 : db 0, 0, #0c     ; brrring...
                 db 2 : dw 38 : db 0, 0, #0c
                 db 2 : dw 45 : db 0, 0, #0c
                 db 2 : dw 38 : db 0, 0, #0c
+                db 0
+sfx_throw:      db 2 : dw 0 : db 0, 2, #0c      ; grunt...
+                db 8 : dw 0 : db 0, 6, #18      ; ...whoosh
+                db 0
+sfx_bonk:       db 2 : dw 0 : db 0, 2, #0f      ; bonk
+                db 10 : dw 200 : db 16, 0, #1e
                 db 0
 sfx_click:      db 1 : dw 0 : db 0, 1, #0f      ; camera shutter
                 db 2 : dw 0 : db 0, 0, #00

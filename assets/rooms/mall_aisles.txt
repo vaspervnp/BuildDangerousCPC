@@ -25,3 +25,4 @@
 hazard poison 20 20
 hazard ice 23 12
 nephew 24 36 13
+worker 17 6

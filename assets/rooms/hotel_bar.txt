@@ -25,3 +25,4 @@
 hazard fire 26 20
 hazard ice 18 12
 hazard electric 34 4
+worker 7 6

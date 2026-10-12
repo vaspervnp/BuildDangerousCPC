@@ -1,5 +1,6 @@
 ; Bambis, the owner's nephew (Sunny Vale east wing, room 1: paces the ground floor,
-; columns 18-30). Walking into him costs a selfie; one per visit to the room.
+; columns 18-30). Walking into him costs a selfie; then he rests a few seconds before the
+; next. A jump clears him.
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 pokew boot_campaign campaign_single
@@ -15,7 +16,7 @@ expect npc_on 1
 expect npc_y 21
 shot nephew_room
 until pl_state 4 right 300      ; keep walking: he gets his selfie
-expect npc_done 1
+expect npc_done 200               ; NEPHEW_REST
 expect npc_pose 1
 run 75                          ; the caption, then the first flash
 expect selfie_step 2
@@ -24,7 +25,7 @@ until pl_state 0 - 400          ; flash, flash, "like and subscribe", done
 expect npc_pose 0
 expect selfie_index 1
 shot nephew_after
-goto 1 34 21 right              ; straight past him now: one selfie per visit
+goto 1 34 21 right              ; straight past him while he rests
 expect pl_state 0
 
 goto 0 38 21 left               ; out and back in: he's back for more
@@ -32,4 +33,16 @@ goto 1 0 21 right
 expect npc_done 0
 until pl_state 4 right 300
 until pl_state 0 - 400
+expect selfie_index 2
+
+goto 1 34 21 right              ; past him while he rests, to the right of his beat
+until npc_done 0 - 300          ; rested: he wants another
+until npc_dir 0 - 200           ; coming this way...
+until npc_x 28 - 200
+run 1 up+left                   ; ...hop over him
+run 35 left
+expect pl_state 0
+expect selfie_index 2
+shot nephew_jumped
+goto 1 8 21 left                ; and away: he can't keep up
 expect selfie_index 2

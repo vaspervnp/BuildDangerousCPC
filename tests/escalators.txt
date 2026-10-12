@@ -4,6 +4,7 @@
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 poke nephew_enabled 0             ; no selfies either (tests/nephew.txt)
+poke workers_enabled 0            ; no workers either (tests/workers.txt)
 pokew campaign_single+1 bld_mall
 pokew boot_campaign campaign_single
 run 5
@@ -39,7 +40,9 @@ goto 0 22 15 down
 until pl_y 21 - 25
 expect pl_x 16
 run 1
-run 15 up                       ; can't walk up a down escalator
+run 15 up                       ; can't walk up a down escalator: up is a jump here
+until pl_jump 0 - 40            ; ...straight up and down again
+run 6
 expect pl_x 16
 expect pl_y 21
 run 15 left                     ; off the bottom, walking as normal

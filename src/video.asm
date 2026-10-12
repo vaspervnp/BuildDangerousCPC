@@ -10,6 +10,7 @@ INK_BLACK       equ #54
 INK_ORANGE      equ #4e
 INK_SKYBLUE     equ #57
 INK_BRWHITE     equ #4b
+INK_RED         equ #4c
 
 video_init:
         ld bc,#7f8d             ; RMR: mode 1, lower + upper ROM disabled

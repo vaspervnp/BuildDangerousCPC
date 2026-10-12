@@ -241,15 +241,18 @@ def skip_cells(data):
 def load_room(src):
     """Room text -> (grid of chars, room data bytes): the tiles (encode_cells), then
     hazard count and (x, row, type, state) per hazard, then the owner's nephew: 0, or 1 and
-    (x, top row, xmin, xmax) - he paces xmin..xmax on one floor.
+    (x, top row, xmin, xmax) - he paces xmin..xmax on one floor - then a worker: 0, or 1
+    and (x, top row) - he stays put and throws tools along his floor.
 
       hazard <type> <x> <row>          (row within the room, 0-22)
-      nephew <xmin> <xmax> <feet row>  (the row his feet are on, e.g. 20 on the ground floor)"""
+      nephew <xmin> <xmax> <feet row>  (the row his feet are on, e.g. 20 on the ground floor)
+      worker <x> <feet row>"""
     lines = open(src, encoding='utf-8').read().split('\n')
     lines = [l for l in lines if not l.startswith(';')]
     hazard_lines = [l for l in lines if l.startswith('hazard ')]
     nephew_lines = [l for l in lines if l.startswith('nephew ')]
-    lines = [l for l in lines if not l.startswith(('hazard ', 'nephew '))]
+    worker_lines = [l for l in lines if l.startswith('worker ')]
+    lines = [l for l in lines if not l.startswith(('hazard ', 'nephew ', 'worker '))]
     while lines and lines[-1] == '':
         lines.pop()
     if len(lines) != ROOM_H:
@@ -277,24 +280,44 @@ def load_room(src):
         seen.add((x, y))
         out += bytes((x, y + HUD_ROWS, HAZARD_TYPES.index(parts[1]), 0))
 
-    if len(nephew_lines) > 1:
-        sys.exit(f"{src}: one nephew per room")
+    if len(nephew_lines) > 1 or len(worker_lines) > 1:
+        sys.exit(f"{src}: one nephew and one worker per room")
     if not nephew_lines:
         out.append(0)
-        return lines, out
+    else:
+        out += nephew(src, lines, nephew_lines[0])
+    if not worker_lines:
+        out.append(0)
+    else:
+        try:
+            x, feet = (int(v) for v in worker_lines[0].split()[1:])
+        except ValueError:
+            sys.exit(f"{src}: bad worker line {worker_lines[0]!r} (worker <x> <feet row>)")
+        if not (0 <= x <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
+            sys.exit(f"{src}: worker out of range: {worker_lines[0]!r}")
+        for c in (x, x + 1):
+            if lines[feet + 1][c] not in SOLID_CHARS:
+                sys.exit(f"{src}: worker: no floor under column {c}")
+            if lines[feet][c] in SOLID_CHARS or lines[feet - 1][c] in SOLID_CHARS:
+                sys.exit(f"{src}: worker: column {c} is blocked")
+        out += bytes((1, x, feet - 1 + HUD_ROWS))
+    return lines, out
+
+
+def nephew(src, lines, line):
+    """nephew <xmin> <xmax> <feet row> -> his 5 bytes of room data."""
     try:
-        xmin, xmax, feet = (int(v) for v in nephew_lines[0].split()[1:])
+        xmin, xmax, feet = (int(v) for v in line.split()[1:])
     except ValueError:
-        sys.exit(f"{src}: bad nephew line {nephew_lines[0]!r} (nephew <xmin> <xmax> <feet row>)")
+        sys.exit(f"{src}: bad nephew line {line!r} (nephew <xmin> <xmax> <feet row>)")
     if not (0 <= xmin < xmax <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
-        sys.exit(f"{src}: nephew out of range: {nephew_lines[0]!r}")
+        sys.exit(f"{src}: nephew out of range: {line!r}")
     for x in range(xmin, xmax + 2):
         if lines[feet + 1][x] not in SOLID_CHARS + '/\\uUnN':
             sys.exit(f"{src}: nephew: no floor under column {x}")
         if lines[feet][x] in SOLID_CHARS or lines[feet - 1][x] in SOLID_CHARS:
             sys.exit(f"{src}: nephew: column {x} is blocked")
-    out += bytes((1, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
-    return lines, out
+    return bytes((1, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
 
 
 SOLID_CHARS = '=#'

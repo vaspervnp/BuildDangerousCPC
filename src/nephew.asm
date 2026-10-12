@@ -1,11 +1,12 @@
 ; ---------------------------------------------------------------- the owner's nephew
-; Bambis, influencer, paces one floor of some rooms (room data: after the hazards). If he
+; Bambis, influencer, paces one floor of many rooms (room data: after the hazards). If he
 ; gets within a cell of Thanos he takes a selfie: Thanos is stuck for a few seconds -
-; two camera flashes and a caption - while the clock runs. One selfie per visit to the
-; room. He can be dodged: time it, or wait a few steps up a flight while he walks under.
+; two camera flashes and a caption - while the clock runs. A few seconds later he is ready
+; for another. He can be dodged: jump over him, or wait up a flight while he walks under.
 
 NEPHEW_DELAY    equ 9           ; frames per step
 SELFIE_PAIRS    equ 3           ; pairs of captions, taken in turn
+NEPHEW_REST     equ 200         ; frames after a selfie before he wants another
 
 ; The test harness pokes this to 0 for scripts written without him.
 nephew_enabled: db 1
@@ -66,7 +67,13 @@ nephew_update:
         ld a,(pl_state)
         or a                    ; PS_WALK only: not over a vignette or the phone
         ret nz
-        ld a,(npc_done)
+        ld hl,npc_done          ; resting after the last selfie?
+        ld a,(hl)
+        or a
+        jr z,.look
+        dec (hl)
+        jr .walk
+.look:  ld a,(pl_jump)          ; no selfie with Thanos in the air
         or a
         jr nz,.walk
         ld a,(pl_y)             ; within a cell, same floor: selfie
@@ -128,8 +135,9 @@ nephew_overlap:
 selfie_start:
         ld a,PS_SELFIE
         ld (pl_state),a
-        ld a,1
+        ld a,NEPHEW_REST
         ld (npc_done),a
+        ld a,1
         ld (npc_pose),a
         xor a
         ld (selfie_step),a

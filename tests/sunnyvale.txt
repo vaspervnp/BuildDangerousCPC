@@ -9,6 +9,7 @@
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
 poke nephew_enabled 0             ; no selfies either (tests/nephew.txt)
+poke workers_enabled 0            ; no workers either (tests/workers.txt)
 pokew boot_campaign campaign_single   ; Sunny Vale alone: the campaign would go on to the mall
 run 5                           ; title screen
 expect game_state 4
@@ -141,7 +142,7 @@ print score 3
 run 1 fire                      ; Sunny Vale alone: the ending
 run 3
 expect game_state 5
-expect hi_score+1 #42           ; 004240 recorded as the hi-score
+expect hi_score+1 #43           ; 004340 recorded as the hi-score (10 s more clock: +100)
 expect hi_score+2 #40
 shot sv_ending
 run 1 fire

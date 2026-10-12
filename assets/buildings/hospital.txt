@@ -8,7 +8,7 @@ room hosp_surgery   right=hosp_icu                       down=hosp_er
 room hosp_icu       left=hosp_surgery  right=hosp_pharmacy down=hosp_wards
 room hosp_pharmacy  left=hosp_icu                        down=hosp_lab
 start hosp_er 5 21
-clock 270
+clock 295
 misses_ok 1
 sign BLD_HOSP_SIGN
 welcome BLD_HOSP_WELCOME

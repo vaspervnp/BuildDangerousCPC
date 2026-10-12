@@ -518,8 +518,52 @@ gen.people = function()
     [6] = "....KOKKKKOK.OK.", [7] = "....KOOWWOOK.OK.", [8] = ".....KOOOOK..OK.",
     [9] = "...KKWWWWWWKKOK.", [10] = "..KWWWWBBWWWWK..", [11] = "..KWKWWBBWWWWK..",
     [12] = "..KOKWWWWWWWWK.." })
+  -- A last-minute worker (workers.asm): hard hat, scowl, overalls. Faces front, so one pair
+  -- of frames throws either way: idle, then the tool up over his head.
+  local worker = {
+    "......KKKK......",
+    ".....KOOOOK.....",
+    "....KOOOOOOK....",
+    "...KKKKKKKKKK...",
+    "....KOOOOOOK....",
+    "....KKOOOOKK....",
+    "....KOKOOKOK....",
+    "....KOOOOOOK....",
+    "....KOKKKKOK....",
+    ".....KKKKKK.....",
+    "...KBWBBBBWBK...",
+    "..KOBWBBBBWBOK..",
+    "..KOBBBBBBBBOK..",
+    "....BBBBBBBB....",
+    "....BBB..BBB....",
+    "...KKKK..KKKK...",
+  }
+  local workerThrow = edit(worker, { [1] = "KKK...KKKK......", [2] = "KWK..KOOOOK.....",
+    [3] = "KWOKKOOOOOOK....", [4] = ".KOKKKKKKKKKK...", [5] = "..OKKOOOOOOK....",
+    [6] = "..OBKKOOOOKK....", [11] = "..BBBWBBBBWBK...", [12] = "...KBWBBBBWBOK..",
+    [13] = "....BBBBBBBBOK.." })
+  -- Thanos ducking (player.asm): hands on the helmet, all of him in the lower row of cells
+  local thanosDuck = {
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "......KKKKK.....",
+    ".....KWWWWWK....",
+    "..OKKWWWWWWWKKO.",
+    "...KKKKKKKKKKK..",
+    "....KOKKOKKOK...",
+    "....KOOOOOOOK...",
+    "...KBBKKKKKBBK..",
+    "..KBBBBBBBBBBBK.",
+    "..KKKKK...KKKKK.",
+    "..KKKKK...KKKKK.",
+  }
   saveStrip("people", cells({ owner, ownerTalk, ownerCut, ownerShrug, grandma, grandmaCheer,
-    man, manCheer, kid, kidCheer, nephew, nephewStep, nephewSelfie }), 16, 16)
+    man, manCheer, kid, kidCheer, nephew, nephewStep, nephewSelfie,
+    worker, workerThrow, thanosDuck }), 16, 16)
 end
 
 ------------------------------------------------------------------ hazard tells (8x8, masked)
@@ -553,6 +597,13 @@ gen.hazards = function()
     { "...O....","...O....","...O....","...O....","...O....","...O....","WWWWWWWW","BBBBBBBB" }, --   new cable
     { "........","........",".OOOOOO.",".WWWWWO.",".WKKWWO.",".WWWWWO.",".OOOOOO.","........" }, -- evidence: folder
     { "........","........","........","........","........","........","........","........" }, --   taken
+    -- thrown by workers (workers.asm PJ_GFX), two spinning frames each
+    { "........",".KKK....","KWWWK...","KWWWOOOO","KWWWK...",".KKK....","........","........" }, -- hammer
+    { "..KKKKK.",".KWWWWWK","..KKOKK.","....O...","....O...","....O...","....O...","........" },
+    { "........","WW....WW",".W....W.",".WWWWWW.",".W....W.","WW....WW","........","........" }, -- wrench
+    { "WW......","W.W.....",".WWW....","...WW...","....WWW.",".....W.W","......WW","........" },
+    { "........","........","BWWWWW..","........","...BWWWW","........","........","........" }, -- nails
+    { "........","........","..BWWWWW","........","BWWWWW..","........","........","........" },
   }), 8, 8)
 end
 

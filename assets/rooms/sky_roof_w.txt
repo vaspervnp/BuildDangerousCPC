@@ -24,3 +24,4 @@
 ###########################/############
 hazard head 10 8
 hazard catapult 20 6
+worker 4 13

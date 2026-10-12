@@ -13,7 +13,7 @@ room sky_board_e      left=sky_server_w      up=sky_penthouse_e down=sky_office_
 room sky_roof_w       right=sky_penthouse_e  down=sky_server_w
 room sky_penthouse_e  left=sky_roof_w        down=sky_board_e
 start sky_lobby 5 21
-clock 335
+clock 365
 misses_ok 1
 sign BLD_SKY_SIGN
 welcome BLD_SKY_WELCOME

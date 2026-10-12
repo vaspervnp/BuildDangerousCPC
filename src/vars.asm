@@ -112,7 +112,7 @@ npc_min:        defs 1
 npc_max:        defs 1
 npc_dir:        defs 1              ; 0 right, 1 left
 npc_wait:       defs 1
-npc_done:       defs 1              ; had his selfie this visit
+npc_done:       defs 1              ; frames of rest left after a selfie
 npc_anim:       defs 1
 npc_pose:       defs 1              ; 1: phone up
 selfie_step:    defs 1
@@ -121,3 +121,21 @@ selfie_index:   defs 1
 paused:         defs 1              ; ESC in a building
 call_tick:      defs 1              ; halves the answer countdown
 rnd_seed:       defs 2              ; phone.asm rand
+pl_jump:        defs 1              ; player.asm: steps of a jump still to go, 0 on the ground
+pl_duck:        defs 1              ; 1: ducking (down held on the floor)
+wk_on:          defs 1              ; workers.asm: a worker in this room
+wk_x:           defs 1              ; wk_x/wk_y adjacent
+wk_y:           defs 1
+wk_pose:        defs 1              ; 0 idle, 1 tool raised
+wk_timer:       defs 1
+wk_said:        defs 1              ; grumbled at him this visit
+wk_line:        defs 1              ; grumble rotation
+pj_on:          defs 1              ; the tool in flight
+pj_x:           defs 1              ; pj_x/pj_row adjacent
+pj_row:         defs 1
+pj_dx:          defs 1
+pj_gfx:         defs 1              ; first of its two spinning frames
+pj_speed:       defs 1
+pj_wait:        defs 1
+pj_spin:        defs 1
+pl_uphold:      defs 1              ; up held since a climb: let go before jumping

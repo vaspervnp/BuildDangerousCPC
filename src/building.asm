@@ -159,6 +159,7 @@ room_change:
         call hud_draw_room_status
         call hud_draw_numbers
         call nephew_init
+        call worker_init
         ld de,(pl_x)
         ld (old_xy),de
         call player_draw

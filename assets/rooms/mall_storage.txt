@@ -24,3 +24,5 @@
 ########################################
 hazard squash 32 18
 hazard catapult 14 6
+nephew 1 14 6
+worker 27 13

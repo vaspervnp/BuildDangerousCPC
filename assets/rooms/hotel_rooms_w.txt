@@ -24,3 +24,4 @@
 ###############/########################
 hazard drown 6 18
 hazard impale 33 6
+worker 25 13

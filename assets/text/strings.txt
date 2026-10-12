@@ -137,5 +137,10 @@ NEPHEW_HI2 | Bambis: Say hi to my 12 followers! | Μπάμπης: Πες γει�
 NEPHEW_BYE2 | Flash was off. One more! ...Done. | Δεν είχε φλας. Άλλη μία! ...Τέλεια.
 NEPHEW_HI3 | Bambis: Uncle says you're too slow. | Μπάμπης: Ο θείος λέει ότι αργείς.
 NEPHEW_BYE3 | Now you're content! Bye! | Τώρα είσαι περιεχόμενο! Γεια!
+WORKER1 | Worker: Not finished! Come back Monday! | Εργάτης: Δεν τελειώσαμε! Έλα Δευτέρα!
+WORKER2 | Worker: Inspector? Here, catch! | Εργάτης: Επιθεωρητής; Για πιάσε!
+WORKER3 | Worker: That bit's not on the plans! | Εργάτης: Αυτό δεν είναι στα σχέδια!
+WORKER4 | Worker: Mind your head! ...Too late. | Εργάτης: Πρόσεχε το κεφάλι! ...Αργά.
+OUCH | Ow! That's going in the report. | Άου! Αυτό θα μπει στην αναφορά.
 PAUSED | Paused. ESC to carry on. | Παύση. ESC για συνέχεια.
 PHONE_HINT | Up/down, then fire: | Πάνω/κάτω και fire:
