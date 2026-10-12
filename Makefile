@@ -11,7 +11,7 @@ ASSETS := $(B)/tiles.bin $(B)/font.bin $(B)/thanos.bin $(B)/vignettes.bin \
           $(BUILDINGS:%=$(B)/bld_%.asm)
 SRC    := $(wildcard src/*.asm)
 
-all: $(B)/bd.dsk
+all: $(B)/bd.dsk $(B)/bd.cdt
 
 $(B):
 	mkdir -p $@
@@ -54,8 +54,8 @@ $(B)/bd.bin: $(SRC) $(ASSETS)
 
 # The loading screen: the picture -> Mode 0 screen + the BASIC loader (BD.BAS). It is
 # 1024x572: 28 px off each side (clear of BUILD and the crane), then stretched ~6% to 16:10.
-$(B)/screen.bin $(B)/bd.bas: assets/gfx/loadscreen_cartoon.jpg tools/loadscreen.py | $(B)
-	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas --crop 28,0,996,572
+$(B)/screen.bin $(B)/bd.bas $(B)/inks.bin: assets/gfx/loadscreen_cartoon.jpg tools/loadscreen.py | $(B)
+	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas --crop 28,0,996,572 --inks-out $(B)/inks.bin
 
 # The disk: RUN"BD finds BD.BAS (loader: inks, SCREEN.BIN to #C000, RUN"GAME").
 $(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas
@@ -69,6 +69,15 @@ $(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas
 # Planned clean runs through each campaign building (tools/route.py), run by `make test`.
 tests/route_%.txt: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/route.py tools/cpcgfx.py
 	$(PY) tools/route.py $< $@
+
+# The tape, for the CPC 464: RUN"" loads the loader (src/tape_loader.asm), which sets the
+# picture's inks and loads SCREEN to #C000 and GAME to #1000. 2000 baud (SPEED WRITE 1).
+$(B)/tapeldr.bin: src/tape_loader.asm $(B)/inks.bin
+	$(RASM) src/tape_loader.asm -I. -ob $@
+
+$(B)/bd.cdt: $(B)/tapeldr.bin $(B)/screen.bin $(B)/bd.bin tools/mkcdt.py
+	$(PY) tools/mkcdt.py $@ "BUILD DANGEROUS:$(B)/tapeldr.bin:0x0A00" \
+	    SCREEN:$(B)/screen.bin:0xC000 GAME:$(B)/bd.bin:0x1000
 
 # Headless runs of every tests/*.txt script; screenshots go to build/shots/.
 test: $(B)/bd.bin $(ROUTES)

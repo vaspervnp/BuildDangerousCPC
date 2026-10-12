@@ -52,27 +52,31 @@ title_draw:                     ; (L redraws it in the other language, without t
         ld c,PEN3_MASK
         call print_text_centered
         ld a,STR_TITLE_START
-        ld d,17
+        ld d,16
         ld c,PEN2_MASK
         call print_text_centered
         ld a,STR_TITLE_LANG
-        ld d,18
+        ld d,17
         ld c,PEN1_MASK
         call print_text_centered
         ld a,STR_TITLE_KEYS1
-        ld d,20
+        ld d,19
         ld c,PEN3_MASK
         call print_text_centered
         ld a,STR_TITLE_KEYS2
-        ld d,21
+        ld d,20
         ld c,PEN3_MASK
         call print_text_centered
         ld a,STR_TITLE_KEYS3
-        ld d,22
+        ld d,21
         ld c,PEN3_MASK
         call print_text_centered
-        ld d,24
+        ld d,22
         call hiscore_line
+        ld a,STR_TITLE_CREDIT
+        ld d,24
+        ld c,PEN1_MASK
+        call print_text_centered
         jp palette_normal
 
 title_update:

@@ -61,6 +61,7 @@ TITLE_LANG | L: Ελληνικά | L: English
 TITLE_KEYS1 | Move: cursor keys or Q A O P | Κίνηση: βελάκια ή Q A O P
 TITLE_KEYS2 | Space: trap  M: sign off  ESC: pause | Space: παγίδα  M: υπογραφή  ESC: παύση
 TITLE_KEYS3 | Up at the exit door: leave | Πάνω στην έξοδο: αποχώρηση
+TITLE_CREDIT | REVIVE8BIT - 2026 - VASPER | REVIVE8BIT - 2026 - VASPER
 LBL_HISCORE | Hi-score | Ρεκόρ
 LBL_FINAL | Final score | Τελικό σκορ
 OVER_BIG | Terminated | Απόλυση

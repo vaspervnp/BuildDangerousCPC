@@ -3,12 +3,14 @@
 
   loadscreen.py IN.png|jpg SCREEN.BIN LOADER.BAS [--preview OUT.png] [--dither ordered|fs]
                 [--crop x0,y0,x1,y1] [--inks a,b,...] [--saturation f] [--contrast f]
+                [--inks-out INKS.BIN]
 
 Scales to 160x200 (Mode 0 pixels are twice as wide), picks the 16 of the CPC's 27 colours
 that fit the picture best (black always kept for pen 0, the border), dithers with
 Floyd-Steinberg, and writes the screen as the 16K at #C000 in CPC memory order. LOADER.BAS
 is the disk's BD.BAS (ASCII BASIC; RUN"BD finds it before BD.BIN): Mode 0, the inks, load
 the picture to #C000 (it appears as it loads, the classic way), then run the game (GAME.BIN).
+INKS.BIN is the 16 firmware colours as bytes, for the tape loader (src/tape_loader.asm).
 """
 import argparse
 from PIL import Image, ImageEnhance, ImageFilter
@@ -125,6 +127,7 @@ def main():
     ap.add_argument('--contrast', type=float, default=1.15)
     ap.add_argument('--crop', help='x0,y0,x1,y1: use this part of the picture (it is then '
                                    'stretched to 16:10, so get close)')
+    ap.add_argument('--inks-out', help='also write the 16 inks as bytes here')
     ap.add_argument('--inks', help='the 16 firmware colours to use (comma-separated), '
                                    'instead of picking them; 0 first')
     args = ap.parse_args()
@@ -148,6 +151,8 @@ def main():
     pens = dither_ordered(half, inks) if args.dither == 'ordered' else dither(half, inks)
     open(args.screen, 'wb').write(encode(pens))
     open(args.basic, 'wb').write(loader(inks))
+    if args.inks_out:
+        open(args.inks_out, 'wb').write(bytes(inks))
     if args.preview:
         pv = Image.new('RGB', (640, 400))
         for y in range(200):
