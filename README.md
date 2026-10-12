@@ -31,6 +31,10 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 | Workers | In every room but Sunny Vale's lobby (35), pacing a floor: they throw hammers and wrenches at head height (duck) and nails and wrenches at the feet (jump); a hit costs half a hat |
 | Audio | Sound effects done (own AY player, two voices): every trap, sign-off, Miss, exit, footsteps, escalator hum, last-30-seconds ticks, speech babble, ribbon snip, crowd, fanfare, sad trombone, title jingle. No music. |
 
+## Manual
+
+[manual.md](manual.md) (English) and [manual_gr.md](manual_gr.md) (Ελληνικά), also as [manual.pdf](manual.pdf) and [manual_gr.pdf](manual_gr.pdf): loading, controls, how to play, the distractions, the buildings, scoring and tips, with screenshots (`docs/img/`). `make manual` rebuilds the PDFs (`tools/mkmanual.py`; needs `pip install markdown fpdf2` and the DejaVu fonts).
+
 ## Building
 
 Requirements: `rasm`, `iDSK`, `make`, Python 3 with Pillow, and the `z80` package (`pip install z80`) for the test harness.
@@ -151,6 +155,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-12 — **Tape version and credit.** `build/bd.cdt` for the CPC 464 (`make` builds it next to the disk): a 98-byte machine-code loader (`src/tape_loader.asm`: Mode 0, the picture's inks, tape messages off) loads SCREEN to #C000 and GAME to #1000; `tools/mkcdt.py` writes the firmware's tape format (2K blocks, header + data records, CRC per 256 bytes) at 2000 baud, with 2.5 s after every block because the firmware stops the motor after each one and waits ~2 s for the tape to reach speed when it restarts (shorter gaps gave "Rewind tape"). About 4.3 minutes to load. On a machine with a disc drive type `|TAPE` before `RUN"`. Title screen: "REVIVE8BIT - 2026 - VASPER" on the bottom row.
 - 2026-10-12 — **REVIVE8BIT splash, walking workers everywhere.** The disk's BD.BAS now shows `REVIVE8B.SCR` first (its inks read off `assets/revive8b.txt` by `tools/loadscreen.py --splash`) for 10 seconds or until Space — counted after the load, since TIME stands still during disc reads — then clears to the loading picture's inks as before. Workers in twice as many rooms (35 of 36: all but the starting lobby), and they walk: a beat on one floor, a second walking frame, stopping to throw. Clocks 10 s longer. The game now loads at #0B00 to make room (1.35K free).
 - 2026-10-12 — **Longer, busier trap vignettes; workers rest 10 s between throws** (requested). Every trap's vignette is now 2.5–3 s instead of ~1 s: particles around Thanos (eight new 8×8 sprites), screen jolts on impacts, the sound replayed at the second hit, sideways shoves, aftermaths (hopping on the bitten foot, stars circling, feathers settling, shivering after the ice). Workers wait 10 s after a throw. Clocks: Sunny Vale 335, Mall 365, Hotel 355, Hospital 325, Hard Knock 295, Skyscraper 405.
+- 2026-10-12 — **Manuals.** `manual.md` / `manual_gr.md` and their PDFs (A4, 6–7 pages, screenshots from the test runs): the story, loading from disk and tape, controls, the screen, traps and sign-off, how a building ends, Tasha, Bambis, the workers, the six buildings, scoring, tips.
 
 ---
 

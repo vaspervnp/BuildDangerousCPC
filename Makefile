@@ -92,7 +92,13 @@ test: $(B)/bd.bin $(ROUTES)
 	  $(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $$t --out $(B)/shots; \
 	done
 
+# The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
+manual: manual.pdf manual_gr.pdf
+
+manual%.pdf: manual%.md tools/mkmanual.py $(wildcard docs/img/*.png)
+	$(PY) tools/mkmanual.py $< $@
+
 clean:
 	rm -rf $(B)
 
-.PHONY: all test clean
+.PHONY: all test clean manual
