@@ -25,3 +25,4 @@
 hazard head 19 15
 hazard cut 22 12
 nephew 8 17 20
+worker 2 12 6

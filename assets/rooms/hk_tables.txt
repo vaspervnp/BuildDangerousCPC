@@ -24,4 +24,4 @@
 ########################################
 hazard bite 20 20
 hazard ice 34 12
-worker 5 6
+worker 0 6 6

@@ -269,7 +269,7 @@ def parse_value(v, cpc, syms):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('binary')
-    ap.add_argument('--org', default='1000')
+    ap.add_argument('--org', help='load address (hex); default: the START symbol, else 1000')
     ap.add_argument('--sym')
     ap.add_argument('--script')
     ap.add_argument('--out', default='build/shots')
@@ -278,7 +278,8 @@ def main():
     args = ap.parse_args()
 
     syms = load_symbols(args.sym)
-    cpc = CPC(open(args.binary, 'rb').read(), int(args.org, 16), syms)
+    org = int(args.org, 16) if args.org else syms.get('START', 0x1000)
+    cpc = CPC(open(args.binary, 'rb').read(), org, syms)
     os.makedirs(args.out, exist_ok=True)
 
     steps = []

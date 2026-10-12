@@ -25,3 +25,4 @@
 hazard bite 24 20
 hazard drown 18 11
 nephew 18 30 20
+worker 20 30 13

@@ -24,4 +24,4 @@
 #############\##########################
 hazard squash 34 18
 hazard ice 22 5
-worker 37 6
+worker 29 37 6

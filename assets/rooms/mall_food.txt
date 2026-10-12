@@ -25,3 +25,4 @@
 hazard fire 16 20
 hazard drown 26 4
 nephew 13 24 20
+worker 28 38 6

@@ -3,6 +3,7 @@
 ; next. A jump clears him.
 
 poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
+poke workers_enabled 0            ; no workers (tests/workers.txt)
 pokew boot_campaign campaign_single
 run 5
 run 1 fire                      ; title: start

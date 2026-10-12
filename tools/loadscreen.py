@@ -3,7 +3,7 @@
 
   loadscreen.py IN.png|jpg SCREEN.BIN LOADER.BAS [--preview OUT.png] [--dither ordered|fs]
                 [--crop x0,y0,x1,y1] [--inks a,b,...] [--saturation f] [--contrast f]
-                [--inks-out INKS.BIN]
+                [--inks-out INKS.BIN] [--splash NOTE.TXT]
 
 Scales to 160x200 (Mode 0 pixels are twice as wide), picks the 16 of the CPC's 27 colours
 that fit the picture best (black always kept for pen 0, the border), dithers with
@@ -11,6 +11,9 @@ Floyd-Steinberg, and writes the screen as the 16K at #C000 in CPC memory order. 
 is the disk's BD.BAS (ASCII BASIC; RUN"BD finds it before BD.BIN): Mode 0, the inks, load
 the picture to #C000 (it appears as it loads, the classic way), then run the game (GAME.BIN).
 INKS.BIN is the 16 firmware colours as bytes, for the tape loader (src/tape_loader.asm).
+--splash puts a ready-made screen up first (NOTE.TXT's picture: the .scr beside it, with
+its 16 inks read off the note's table), for 10 seconds or until Space, then the loading
+screen and the game as usual.
 """
 import argparse
 from PIL import Image, ImageEnhance, ImageFilter
@@ -105,13 +108,43 @@ def encode(pens):
     return scr
 
 
-def loader(inks):
-    lines = [
-        "10 MODE 0:BORDER 0",
-        "20 FOR i=0 TO 15:READ c:INK i,c:NEXT",
-        "30 LOAD\"SCREEN.BIN\",&C000",
-        "40 RUN\"GAME\"",
-        "50 DATA " + ",".join(str(i) for i in inks),
+SPLASH_TICKS = 3000         # 10 s: TIME counts in 1/300 s
+KEY_SPACE = 47
+
+
+def splash_inks(note):
+    """The firmware ink per pen from a palette note: rows of 'pen firmware &hardware ...'."""
+    import re
+    rows = {}
+    for line in open(note, encoding='utf-8'):
+        m = re.match(r"\s*(\d+)\s+(\d+)\s+&([0-9A-Fa-f]{2})\s", line)
+        if m:
+            rows[int(m[1])] = int(m[2])
+    if sorted(rows) != list(range(16)) or not all(0 <= c <= 26 for c in rows.values()):
+        raise SystemExit(f"{note}: expected 16 rows 'pen firmware &hw', pens 0-15")
+    return [rows[p] for p in range(16)]
+
+
+def loader(inks, splash=None):
+    """BD.BAS. With a splash (file name on the disc, its inks): that screen first, held for
+    10 s or until Space - counted after its load, as TIME stands still during disc reads -
+    then a clear screen in the loading picture's inks."""
+    lines = ["10 MODE 0:BORDER 0"]
+    if splash:
+        name, sinks = splash
+        lines += [
+            "20 " + ":".join(f"INK {p},{sinks[p]}" for p in range(8)),
+            "30 " + ":".join(f"INK {p},{sinks[p]}" for p in range(8, 16)),
+            f"40 LOAD\"{name}\",&C000",
+            f"50 t=TIME+{SPLASH_TICKS}",
+            f"60 IF INKEY({KEY_SPACE})<>0 AND TIME<t THEN 60",
+            "70 MODE 0",
+        ]
+    lines += [
+        "80 FOR i=0 TO 15:READ c:INK i,c:NEXT",
+        "90 LOAD\"SCREEN.BIN\",&C000",
+        "100 RUN\"GAME\"",
+        "110 DATA " + ",".join(str(i) for i in inks),
     ]
     return ("\r\n".join(lines) + "\r\n").encode('ascii') + b"\x1a"
 
@@ -128,6 +161,8 @@ def main():
     ap.add_argument('--crop', help='x0,y0,x1,y1: use this part of the picture (it is then '
                                    'stretched to 16:10, so get close)')
     ap.add_argument('--inks-out', help='also write the 16 inks as bytes here')
+    ap.add_argument('--splash', help="a screen to show first: its palette note (NAME.txt, "
+                                     "beside NAME.scr, which goes on the disc as NAME.SCR)")
     ap.add_argument('--inks', help='the 16 firmware colours to use (comma-separated), '
                                    'instead of picking them; 0 first')
     args = ap.parse_args()
@@ -150,7 +185,12 @@ def main():
         inks = pick_inks([half.getpixel((x, y)) for y in range(200) for x in range(160)])
     pens = dither_ordered(half, inks) if args.dither == 'ordered' else dither(half, inks)
     open(args.screen, 'wb').write(encode(pens))
-    open(args.basic, 'wb').write(loader(inks))
+    splash = None
+    if args.splash:
+        import os
+        name = os.path.splitext(os.path.basename(args.splash))[0].upper() + '.SCR'
+        splash = (name, splash_inks(args.splash))
+    open(args.basic, 'wb').write(loader(inks, splash))
     if args.inks_out:
         open(args.inks_out, 'wb').write(bytes(inks))
     if args.preview:

@@ -9,7 +9,7 @@ room hk_rooms    right=hk_suite                    down=hk_casino
 room hk_suite    left=hk_rooms    right=hk_pool    down=hk_tables
 room hk_pool     left=hk_suite                     down=hk_stage
 start hk_casino 5 21
-clock 265
+clock 275
 misses_ok 1
 sign BLD_HK_SIGN
 welcome BLD_HK_WELCOME

@@ -26,4 +26,4 @@ hazard fire 18 20
 hazard suck 24 10
 hazard electric 34 4
 nephew 2 15 20
-worker 31 6
+worker 26 36 6

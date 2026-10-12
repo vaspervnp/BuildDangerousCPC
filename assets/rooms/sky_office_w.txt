@@ -26,3 +26,4 @@ hazard electric 14 19
 hazard impale 28 13
 hazard poison 8 6
 nephew 2 15 20
+worker 28 38 6

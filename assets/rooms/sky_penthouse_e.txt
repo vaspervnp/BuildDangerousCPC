@@ -26,3 +26,4 @@ hazard bite 8 20
 hazard poison 34 13
 hazard fire 20 6
 nephew 18 30 13
+worker 12 22 6

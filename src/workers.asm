@@ -1,6 +1,7 @@
 ; ---------------------------------------------------------------- last-minute workers
-; Some rooms still have a worker in them (room data: after the nephew), and he is not
-; pleased to see the inspector. Whenever Thanos is on his floor he raises a tool, then
+; Most rooms still have a worker in them (room data: after the nephew), pacing one floor,
+; and he is not pleased to see the inspector. Whenever Thanos is on his floor he stops,
+; raises a tool, then
 ; throws it along the floor: hammers and half the wrenches at head height (duck), nails
 ; and the other wrenches at the feet (jump). A hit costs half a hat and leaves him reeling.
 ; One tool in the air at a time.
@@ -9,7 +10,9 @@ WK_WINDUP       equ 22          ; frames the tool is up before it flies: the war
 WK_PAUSE        equ 40          ; frames between throws, plus up to 63
 WK_LOOK         equ 10          ; Thanos off his floor: look again this soon
 WK_LINES        equ 4
-AF_WORKER       equ AF_PEOPLE+13 ; idle, tool up
+AF_WORKER       equ AF_PEOPLE+13 ; idle (and walking A), tool up
+AF_WORKER_STEP  equ AF_PEOPLE+16 ; walking B
+WK_PACE         equ 14          ; frames per step: slower than Bambis
 TOOL_GFX          equ 26          ; hazard sheet: hammer, wrench, nails, two spin frames each
 HIT_COST        equ 1           ; energy units: half a hat
 HIT_BORDER      equ 10
@@ -56,18 +59,28 @@ worker_init:
         ret z
         ld (wk_on),a
         inc hl
-        ld e,(hl)
-        inc hl
-        ld d,(hl)
-        ld (wk_x),de
+        ld de,wk_x              ; wk_x, wk_y, wk_min, wk_max
+        ld bc,4
+        ldir
+        xor a
+        ld (wk_dir),a
+        ld (wk_anim),a
         ld a,WK_PAUSE
         ld (wk_timer),a
+        ld (wk_step),a
         ; fall through
 
 worker_draw:
         ld a,(wk_pose)
-        add a,AF_WORKER
-        call frame_addr
+        or a
+        ld a,AF_WORKER+1        ; tool up
+        jr nz,.frame
+        ld a,(wk_anim)
+        or a
+        ld a,AF_WORKER
+        jr z,.frame
+        ld a,AF_WORKER_STEP
+.frame: call frame_addr
         ld de,(wk_x)
         jp draw_sprite16
 
@@ -95,6 +108,9 @@ worker_update:
         ld hl,wk_x              ; close to Thanos, redraws wipe each other: draw both
         call near_player
         call c,worker_overlap
+        ld a,(wk_pose)          ; walking, unless the tool is up
+        or a
+        call z,worker_walk
         ld hl,wk_timer
         dec (hl)
         ret nz
@@ -132,6 +148,40 @@ worker_update:
         add hl,de
         ld a,(hl)
         jp caption_show
+
+; A step along his beat every WK_PACE frames; at either end he turns round.
+worker_walk:
+        ld hl,wk_step
+        dec (hl)
+        ret nz
+        ld (hl),WK_PACE
+        ld de,(wk_x)
+        call restore_2x2
+        ld a,(wk_dir)
+        or a
+        ld a,(wk_x)
+        jr nz,.left
+        ld hl,wk_max
+        cp (hl)
+        jr nc,.turn
+        inc a
+        jr .moved
+.left:  ld hl,wk_min
+        cp (hl)
+        jr z,.turn
+        jr c,.turn
+        dec a
+.moved: ld (wk_x),a
+        jr .anim
+.turn:  ld hl,wk_dir
+        ld a,(hl)
+        xor 1
+        ld (hl),a
+.anim:  ld hl,wk_anim
+        ld a,(hl)
+        xor 1
+        ld (hl),a
+        jp worker_overlap
 
 worker_throw:
         xor a

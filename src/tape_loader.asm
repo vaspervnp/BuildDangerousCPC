@@ -1,7 +1,7 @@
 ; Tape loader for the CPC 464 (build/bd.cdt). RUN"" loads this first file and runs it,
 ; with the firmware still on: Mode 0 with the loading picture's inks, tape messages off,
 ; then SCREEN (straight onto the screen at #C000, so it appears as it loads) and GAME
-; (to #1000), and into the game. The disk version does the same in BASIC (BD.BAS).
+; (to #0B00), and into the game. The disk version does the same in BASIC (BD.BAS).
 ; Everything here sits below the game: this at #0A00, the tape buffer under it.
 
 CAS_NOISY       equ #bc6b
@@ -64,3 +64,5 @@ game_name:      db "GAME"
 game_name_end:
 
 inks:           incbin "build/inks.bin"     ; firmware colours for pens 0-15 (loadscreen.py)
+
+        assert $ <= #0b00, "the loader runs into the game's load address (main.asm LOAD_ADDR)"

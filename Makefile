@@ -54,30 +54,36 @@ $(B)/bd.bin: $(SRC) $(ASSETS)
 
 # The loading screen: the picture -> Mode 0 screen + the BASIC loader (BD.BAS). It is
 # 1024x572: 28 px off each side (clear of BUILD and the crane), then stretched ~6% to 16:10.
-$(B)/screen.bin $(B)/bd.bas $(B)/inks.bin: assets/gfx/loadscreen_cartoon.jpg tools/loadscreen.py | $(B)
-	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas --crop 28,0,996,572 --inks-out $(B)/inks.bin
+# On the disk REVIVE8BIT's screen comes first (assets/revive8b.scr, inks from its note):
+# 10 seconds or Space.
+$(B)/screen.bin $(B)/bd.bas $(B)/inks.bin: assets/gfx/loadscreen_cartoon.jpg assets/revive8b.txt tools/loadscreen.py | $(B)
+	$(PY) tools/loadscreen.py $< $(B)/screen.bin $(B)/bd.bas --crop 28,0,996,572 --inks-out $(B)/inks.bin \
+	    --splash assets/revive8b.txt
 
-# The disk: RUN"BD finds BD.BAS (loader: inks, SCREEN.BIN to #C000, RUN"GAME").
-$(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas
+# The disk: RUN"BD finds BD.BAS (loader: REVIVE8B.SCR for 10 s, then inks, SCREEN.BIN to
+# #C000, RUN"GAME").
+$(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas assets/revive8b.scr
 	rm -f $@
 	cp $(B)/bd.bin $(B)/game.bin
+	cp assets/revive8b.scr $(B)/revive8b.scr
 	$(IDSK) $@ -n
 	$(IDSK) $@ -i $(B)/bd.bas -t 0
+	$(IDSK) $@ -i $(B)/revive8b.scr -t 1 -c c000
 	$(IDSK) $@ -i $(B)/screen.bin -t 1 -c c000
-	$(IDSK) $@ -i $(B)/game.bin -t 1 -c 1000 -e 1000
+	$(IDSK) $@ -i $(B)/game.bin -t 1 -c 0b00 -e 0b00
 
 # Planned clean runs through each campaign building (tools/route.py), run by `make test`.
 tests/route_%.txt: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/route.py tools/cpcgfx.py
 	$(PY) tools/route.py $< $@
 
 # The tape, for the CPC 464: RUN"" loads the loader (src/tape_loader.asm), which sets the
-# picture's inks and loads SCREEN to #C000 and GAME to #1000. 2000 baud (SPEED WRITE 1).
+# picture's inks and loads SCREEN to #C000 and GAME to #0B00. 2000 baud (SPEED WRITE 1).
 $(B)/tapeldr.bin: src/tape_loader.asm $(B)/inks.bin
 	$(RASM) src/tape_loader.asm -I. -ob $@
 
 $(B)/bd.cdt: $(B)/tapeldr.bin $(B)/screen.bin $(B)/bd.bin tools/mkcdt.py
 	$(PY) tools/mkcdt.py $@ "BUILD DANGEROUS:$(B)/tapeldr.bin:0x0A00" \
-	    SCREEN:$(B)/screen.bin:0xC000 GAME:$(B)/bd.bin:0x1000
+	    SCREEN:$(B)/screen.bin:0xC000 GAME:$(B)/bd.bin:0x0B00
 
 # Headless runs of every tests/*.txt script; screenshots go to build/shots/.
 test: $(B)/bd.bin $(ROUTES)

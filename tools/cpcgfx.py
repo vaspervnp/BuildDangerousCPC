@@ -241,12 +241,12 @@ def skip_cells(data):
 def load_room(src):
     """Room text -> (grid of chars, room data bytes): the tiles (encode_cells), then
     hazard count and (x, row, type, state) per hazard, then the owner's nephew: 0, or 1 and
-    (x, top row, xmin, xmax) - he paces xmin..xmax on one floor - then a worker: 0, or 1
-    and (x, top row) - he stays put and throws tools along his floor.
+    (x, top row, xmin, xmax) - he paces xmin..xmax on one floor - then a worker, the same
+    way: he paces his floor and throws tools along it.
 
       hazard <type> <x> <row>          (row within the room, 0-22)
       nephew <xmin> <xmax> <feet row>  (the row his feet are on, e.g. 20 on the ground floor)
-      worker <x> <feet row>"""
+      worker <xmin> <xmax> <feet row>"""
     lines = open(src, encoding='utf-8').read().split('\n')
     lines = [l for l in lines if not l.startswith(';')]
     hazard_lines = [l for l in lines if l.startswith('hazard ')]
@@ -285,38 +285,29 @@ def load_room(src):
     if not nephew_lines:
         out.append(0)
     else:
-        out += nephew(src, lines, nephew_lines[0])
+        out += pacer(src, lines, nephew_lines[0], 'nephew', SOLID_CHARS + '/\\uUnN')
     if not worker_lines:
         out.append(0)
     else:
-        try:
-            x, feet = (int(v) for v in worker_lines[0].split()[1:])
-        except ValueError:
-            sys.exit(f"{src}: bad worker line {worker_lines[0]!r} (worker <x> <feet row>)")
-        if not (0 <= x <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
-            sys.exit(f"{src}: worker out of range: {worker_lines[0]!r}")
-        for c in (x, x + 1):
-            if lines[feet + 1][c] not in SOLID_CHARS:
-                sys.exit(f"{src}: worker: no floor under column {c}")
-            if lines[feet][c] in SOLID_CHARS or lines[feet - 1][c] in SOLID_CHARS:
-                sys.exit(f"{src}: worker: column {c} is blocked")
-        out += bytes((1, x, feet - 1 + HUD_ROWS))
+        out += pacer(src, lines, worker_lines[0], 'worker', SOLID_CHARS)
     return lines, out
 
 
-def nephew(src, lines, line):
-    """nephew <xmin> <xmax> <feet row> -> his 5 bytes of room data."""
+def pacer(src, lines, line, who, floor):
+    """<who> <xmin> <xmax> <feet row> -> 1, x (starts at xmin), top row, xmin, xmax: someone
+    who paces xmin..xmax on one floor (xmin = xmax: stands still). `floor`: what may be under
+    his feet."""
     try:
         xmin, xmax, feet = (int(v) for v in line.split()[1:])
     except ValueError:
-        sys.exit(f"{src}: bad nephew line {line!r} (nephew <xmin> <xmax> <feet row>)")
-    if not (0 <= xmin < xmax <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
-        sys.exit(f"{src}: nephew out of range: {line!r}")
+        sys.exit(f"{src}: bad {who} line {line!r} ({who} <xmin> <xmax> <feet row>)")
+    if not (0 <= xmin <= xmax <= ROOM_W - 2 and 1 <= feet < ROOM_H - 1):
+        sys.exit(f"{src}: {who} out of range: {line!r}")
     for x in range(xmin, xmax + 2):
-        if lines[feet + 1][x] not in SOLID_CHARS + '/\\uUnN':
-            sys.exit(f"{src}: nephew: no floor under column {x}")
+        if lines[feet + 1][x] not in floor:
+            sys.exit(f"{src}: {who}: no floor under column {x}")
         if lines[feet][x] in SOLID_CHARS or lines[feet - 1][x] in SOLID_CHARS:
-            sys.exit(f"{src}: nephew: column {x} is blocked")
+            sys.exit(f"{src}: {who}: column {x} is blocked")
     return bytes((1, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
 
 

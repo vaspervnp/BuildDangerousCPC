@@ -24,4 +24,4 @@
 ###########################\############
 hazard drown 20 4
 hazard head 34 8
-worker 4 13
+worker 0 6 13

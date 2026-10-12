@@ -126,6 +126,11 @@ pl_duck:        defs 1              ; 1: ducking (down held on the floor)
 wk_on:          defs 1              ; workers.asm: a worker in this room
 wk_x:           defs 1              ; wk_x/wk_y adjacent
 wk_y:           defs 1
+wk_min:         defs 1              ; his beat (wk_x..wk_max follow the room data's order)
+wk_max:         defs 1
+wk_dir:         defs 1              ; 0 right, 1 left
+wk_anim:        defs 1
+wk_step:        defs 1
 wk_pose:        defs 1              ; 0 idle, 1 tool raised
 wk_timer:       defs 1
 wk_said:        defs 1              ; grumbled at him this visit

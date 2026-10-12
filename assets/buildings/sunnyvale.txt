@@ -6,7 +6,7 @@ room sv_east     left=sv_lobby    up=sv_upper_e
 room sv_upper_w  right=sv_upper_e down=sv_lobby
 room sv_upper_e  left=sv_upper_w  down=sv_east
 start sv_lobby 5 21
-clock 310
+clock 320
 misses_ok 2
 sign BLD_SV_SIGN
 welcome BLD_SV_WELCOME

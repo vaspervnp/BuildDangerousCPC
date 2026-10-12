@@ -542,6 +542,7 @@ gen.people = function()
     [3] = "KWOKKOOOOOOK....", [4] = ".KOKKKKKKKKKK...", [5] = "..OKKOOOOOOK....",
     [6] = "..OBKKOOOOKK....", [11] = "..BBBWBBBBWBK...", [12] = "...KBWBBBBWBOK..",
     [13] = "....BBBBBBBBOK.." })
+  local workerStep = edit(worker, { [15] = "...BBB....BBB...", [16] = "..KKKK....KKKK.." })
   -- Thanos ducking (player.asm): hands on the helmet, all of him in the lower row of cells
   local thanosDuck = {
     "................",
@@ -563,7 +564,7 @@ gen.people = function()
   }
   saveStrip("people", cells({ owner, ownerTalk, ownerCut, ownerShrug, grandma, grandmaCheer,
     man, manCheer, kid, kidCheer, nephew, nephewStep, nephewSelfie,
-    worker, workerThrow, thanosDuck }), 16, 16)
+    worker, workerThrow, thanosDuck, workerStep }), 16, 16)
 end
 
 ------------------------------------------------------------------ hazard tells (8x8, masked)

@@ -26,3 +26,4 @@ hazard fire 18 20
 hazard poison 14 13
 hazard ice 22 5
 nephew 1 14 20
+worker 0 10 13

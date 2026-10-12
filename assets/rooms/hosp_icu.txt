@@ -25,3 +25,4 @@
 hazard suck 8 17
 hazard poison 24 6
 nephew 1 14 6
+worker 5 15 20

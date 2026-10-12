@@ -25,3 +25,4 @@
 hazard impale 16 20
 hazard squash 34 4
 nephew 8 21 6
+worker 9 19 13

@@ -1,4 +1,4 @@
-; Last-minute workers (Sunny Vale upper east, room 3: one at x 14 on the ground floor,
+; Last-minute workers (Sunny Vale upper east, room 3: one pacing x 9-19 on the ground floor,
 ; screen row 21). With Thanos on his floor he raises a tool, then throws it at him.
 ; Head-height tools are ducked, feet-height ones jumped; a hit costs half a hat.
 ; The kind is random, so the script sets the row of each tool once it is in the air.
@@ -23,7 +23,7 @@ goto 1 34 7 right
 goto 3 25 21 up                 ; the flight carries on in the room above
 run 1
 expect wk_on 1
-expect wk_x 14
+expect wk_x 9                   ; he starts at the left end of his beat (9-19)
 expect wk_y 21
 goto 3 22 21 left               ; clear of the flight down at x 26
 poke energy 16
@@ -32,7 +32,7 @@ poke energy 16
 until wk_pose 1 - 200           ; tool up: the warning
 shot worker_windup
 until pj_on 1 - 40              ; thrown, from beside him towards Thanos
-expect pj_x 16
+
 expect pj_dx 1
 poke pj_row 21
 run 9

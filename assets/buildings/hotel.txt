@@ -9,7 +9,7 @@ room hotel_rooms_e  left=hotel_rooms_w   up=hotel_suite_e down=hotel_bar
 room hotel_suite_w  right=hotel_suite_e  down=hotel_rooms_w
 room hotel_suite_e  left=hotel_suite_w   down=hotel_rooms_e
 start hotel_lobby 5 21
-clock 325
+clock 335
 misses_ok 2
 sign BLD_HOTEL_SIGN
 welcome BLD_HOTEL_WELCOME

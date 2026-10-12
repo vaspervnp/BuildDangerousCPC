@@ -1,7 +1,9 @@
 ; Build Dangerous - Amstrad CPC (64K), Mode 1
-; Loaded by AMSDOS at #1000 (RUN"BD), then takes over the machine: firmware and ROMs off.
+; Loaded at #0B00 (disk: RUN"BD; tape: src/tape_loader.asm, which sits just below with its
+; buffer), then takes over the machine: firmware and ROMs off.
 
-        org #1000
+LOAD_ADDR       equ #0b00
+        org LOAD_ADDR
 
 start:
         di
