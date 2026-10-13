@@ -31,6 +31,10 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 | Workers | In every room but Sunny Vale's lobby (35), pacing a floor: they throw hammers and wrenches at head height (duck) and nails and wrenches at the feet (jump); a hit costs half a hat |
 | Audio | Sound effects done (own AY player, two voices): every trap, sign-off, Miss, exit, footsteps, escalator hum, last-30-seconds ticks, speech babble, ribbon snip, crowd, fanfare, sad trombone, title jingle. No music. |
 
+## Windows
+
+`make windows` (from WSL) builds `build/win/BuildDangerous.exe`: one 6.5 MB file with the game and an Amstrad CPC emulator inside (Caprice32's Windows build, GPLv2, with the CPC ROMs). Double-clicked, it unpacks to `%LOCALAPPDATA%\BuildDangerous\<hash>` the first time (nothing installed; a new build unpacks beside the old one) and starts Caprice32 as a 6128 with the disk in drive A, typing `RUN"BD`: the REVIVE8BIT screen, the loading picture, the game. A 1152×810 window, no FPS counter, pauses in the background; F2 full screen, F10 quits. `build/win/BuildDangerous-win64.zip` adds the manuals, a how-to-play `README.txt` and the licences. The launcher (`tools/windows/Launcher.cs`) is compiled by the .NET Framework's own `csc.exe` on the Windows side; arguments go through to Caprice32 (`-a` replaces `RUN"BD`), which is how `tools/mkwin.sh` was tested: run on Windows, screenshots of the loading picture and the game.
+
 ## Video
 
 `make video` records a full inspection of Sunny Vale Apartments to `build/video/sunnyvale.mp4` (960×600, 50 fps, with sound, about 1½ minutes): the title, the owner's speech, all eight traps, a call from Tasha, a selfie with Bambis, a worker's hammer, out through the door, the crowd and the results. It is the planned route of `tests/route_sunnyvale.txt` with every distraction left on (`videos/sunnyvale.txt`), played by `tools/cpcrun.py --video --wav --autophone --autododge` (Tasha gets the top answer, a second after she asks; Thanos jumps the workers' tools — in flight, or on the wind-up when he is too close to dodge one in the air — backs up the stairs rather than walk down into a throw, and once jumps over Bambis). No hits, a clean sweep. Needs ffmpeg.
@@ -162,6 +166,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-12 — **Manuals.** `manual.md` / `manual_gr.md` and their PDFs (A4, 6–7 pages, screenshots from the test runs): the story, loading from disk and tape, controls, the screen, traps and sign-off, how a building ends, Tasha, Bambis, the workers, the six buildings, scoring, tips.
 - 2026-10-13 — **Video capture.** `tools/cpcrun.py --video` records a run at 50 fps of emulated time (a frame whenever the beam would start one, rendered at 320×200 through a byte→pixels table and PIL's palette mode, piped into ffmpeg; muxed with `--wav`), and `--autophone` answers Tasha with Fire. `make video`: a full Sunny Vale inspection with every distraction on — clean sweep, 4300 points.
 - 2026-10-13 — **The video dodges.** `--autododge`: per-frame reflexes on the game's own variables — jump a tool on his rows when it is 4–5 cells off (head height needs two rows of clearance, so earlier), jump on a close worker's wind-up, back up the stairs from one, jump Bambis once when walking at him with room to land. The recorded inspection now takes no hits (all eight hats) and hops over the nephew.
+- 2026-10-13 — **Windows version.** `make windows`: `BuildDangerous.exe`, a single file with Caprice32, the ROMs and the disk embedded; it unpacks itself to the user's local app data and runs the game. Tested on Windows 11 through WSL interop.
 
 ---
 

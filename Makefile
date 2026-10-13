@@ -100,6 +100,11 @@ $(B)/video/%.mp4: videos/%.txt $(B)/bd.bin tools/cpcrun.py
 	$(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $< --out $(B)/shots \
 	    --autophone --autododge --wav $(B)/video/$*.wav --video $@
 
+# Windows: one .exe with the game and the Caprice32 emulator inside, and a release zip with
+# the manuals (build/win/; run from WSL - the launcher is compiled by Windows' own csc.exe).
+windows: $(B)/bd.dsk manual.pdf manual_gr.pdf
+	tools/mkwin.sh
+
 # The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
 manual: manual.pdf manual_gr.pdf
 
@@ -109,4 +114,4 @@ manual%.pdf: manual%.md tools/mkmanual.py $(wildcard docs/img/*.png)
 clean:
 	rm -rf $(B)
 
-.PHONY: all test clean manual video
+.PHONY: all test clean manual video windows
