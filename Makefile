@@ -105,6 +105,11 @@ $(B)/video/%.mp4: videos/%.txt $(B)/bd.bin tools/cpcrun.py
 windows: $(B)/bd.dsk manual.pdf manual_gr.pdf
 	tools/mkwin.sh
 
+# Linux: one self-extracting BuildDangerous.run with the game, Caprice32 (from the caprice32
+# snap) and its libraries, and a release tar.gz with the manuals (build/linux/).
+linux: $(B)/bd.dsk manual.pdf manual_gr.pdf
+	tools/mklinux.sh
+
 # The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
 manual: manual.pdf manual_gr.pdf
 
@@ -114,4 +119,4 @@ manual%.pdf: manual%.md tools/mkmanual.py $(wildcard docs/img/*.png)
 clean:
 	rm -rf $(B)
 
-.PHONY: all test clean manual video windows
+.PHONY: all test clean manual video windows linux
