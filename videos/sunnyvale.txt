@@ -1,0 +1,90 @@
+; Video: a full inspection of Sunny Vale Apartments, the first building, as the player
+; sees it - title, the owner's speech, all eight traps, Tasha's calls (answered with Fire
+; about a second after she asks: --autophone), Bambis, the workers, out through the door,
+; the crowd and the results. The route is tests/route_sunnyvale.txt's (tools/route.py),
+; with every distraction left on. Recorded by `make video`.
+pokew campaign_single+1 bld_sunnyvale
+pokew boot_campaign campaign_single
+run 150                         ; the title screen
+run 1 fire
+run 3
+until game_state 0 - 3000       ; the owner's speech; Thanos walks in
+run 25
+goto 0 11 21 right 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; electric at 13,21
+until pl_state 0 -
+goto 0 17 21 right 3000
+goto 0 24 14 up 3000
+goto 0 31 14 right 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; electric at 33,14
+until pl_state 0 -
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 mark                      ; sign off sv_lobby
+goto 1 16 14 right 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; drown at 18,13
+until pl_state 0 -
+goto 1 7 14 left 3000
+goto 1 14 21 down 3000
+goto 1 22 21 right 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; bite at 24,22
+until pl_state 0 -
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 mark                      ; sign off sv_east
+goto 1 14 21 left 3000
+goto 1 7 14 up 3000
+goto 1 23 14 right 3000
+goto 1 30 7 up 3000
+goto 1 34 7 right 3000
+goto 3 25 21 up 3000
+goto 3 21 21 left 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; poison at 20,22
+until pl_state 0 -
+goto 2 21 21 left 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; head at 20,17
+until pl_state 0 -
+goto 2 23 21 right 3000
+goto 2 30 14 up 3000
+goto 2 15 14 left 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; electric at 14,14
+until pl_state 0 -
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 mark                      ; sign off sv_upper_w
+goto 3 26 14 right 3000
+goto 3 19 7 up 3000
+goto 3 31 7 right 3000
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 fire                      ; fire at 33,8
+until pl_state 0 -
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 mark                      ; sign off sv_upper_e
+goto 3 19 7 left 3000
+goto 3 26 14 down 3000
+goto 3 36 14 right 3000
+goto 3 29 21 down 3000
+goto 3 25 21 left 3000
+goto 1 34 7 down 3000
+goto 1 30 7 left 3000
+goto 1 23 14 down 3000
+goto 0 24 14 left 3000
+goto 0 17 21 down 3000
+goto 0 3 21 left 3000
+run 1
+until pl_state 0 - 2000            ; not on the phone or in a selfie
+run 1 up                        ; out through the door
+expect pl_state 2
+until game_state 1 - 3000       ; outro: ribbon cut, the crowd cheers; then the results
+run 250
+print clock_hi 2
+print score 3
+print miss_tally
+print energy
+expect outcome 0
+run 1 fire                      ; the ending
+run 200

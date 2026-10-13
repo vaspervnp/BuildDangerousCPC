@@ -31,6 +31,10 @@ Bilingual: **English (default) and Greek**, toggled with **L** from the main men
 | Workers | In every room but Sunny Vale's lobby (35), pacing a floor: they throw hammers and wrenches at head height (duck) and nails and wrenches at the feet (jump); a hit costs half a hat |
 | Audio | Sound effects done (own AY player, two voices): every trap, sign-off, Miss, exit, footsteps, escalator hum, last-30-seconds ticks, speech babble, ribbon snip, crowd, fanfare, sad trombone, title jingle. No music. |
 
+## Video
+
+`make video` records a full inspection of Sunny Vale Apartments to `build/video/sunnyvale.mp4` (960×600, 50 fps, with sound, about 1½ minutes): the title, the owner's speech, all eight traps, a call from Tasha, a selfie with Bambis, a worker's hammer, out through the door, the crowd and the results. It is the planned route of `tests/route_sunnyvale.txt` with every distraction left on (`videos/sunnyvale.txt`), played by `tools/cpcrun.py --video --wav --autophone` (Tasha gets the top answer, a second after she asks). Needs ffmpeg.
+
 ## Manual
 
 [manual.md](manual.md) (English) and [manual_gr.md](manual_gr.md) (Ελληνικά), also as [manual.pdf](manual.pdf) and [manual_gr.pdf](manual_gr.pdf): loading, controls, how to play, the distractions, the buildings, scoring and tips, with screenshots (`docs/img/`). `make manual` rebuilds the PDFs (`tools/mkmanual.py`; needs `pip install markdown fpdf2` and the DejaVu fonts).
@@ -156,6 +160,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-12 — **REVIVE8BIT splash, walking workers everywhere.** The disk's BD.BAS now shows `REVIVE8B.SCR` first (its inks read off `assets/revive8b.txt` by `tools/loadscreen.py --splash`) for 10 seconds or until Space — counted after the load, since TIME stands still during disc reads — then clears to the loading picture's inks as before. Workers in twice as many rooms (35 of 36: all but the starting lobby), and they walk: a beat on one floor, a second walking frame, stopping to throw. Clocks 10 s longer. The game now loads at #0B00 to make room (1.35K free).
 - 2026-10-12 — **Longer, busier trap vignettes; workers rest 10 s between throws** (requested). Every trap's vignette is now 2.5–3 s instead of ~1 s: particles around Thanos (eight new 8×8 sprites), screen jolts on impacts, the sound replayed at the second hit, sideways shoves, aftermaths (hopping on the bitten foot, stars circling, feathers settling, shivering after the ice). Workers wait 10 s after a throw. Clocks: Sunny Vale 335, Mall 365, Hotel 355, Hospital 325, Hard Knock 295, Skyscraper 405.
 - 2026-10-12 — **Manuals.** `manual.md` / `manual_gr.md` and their PDFs (A4, 6–7 pages, screenshots from the test runs): the story, loading from disk and tape, controls, the screen, traps and sign-off, how a building ends, Tasha, Bambis, the workers, the six buildings, scoring, tips.
+- 2026-10-13 — **Video capture.** `tools/cpcrun.py --video` records a run at 50 fps of emulated time (a frame whenever the beam would start one, rendered at 320×200 through a byte→pixels table and PIL's palette mode, piped into ffmpeg; muxed with `--wav`), and `--autophone` answers Tasha with Fire. `make video`: a full Sunny Vale inspection with every distraction on — clean sweep, 4300 points.
 
 ---
 

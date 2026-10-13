@@ -24,12 +24,19 @@ Script lines (';' starts a comment):
 --wav <file> renders everything the PSG played to a WAV (a simple AY model: square tones,
 LFSR noise, logarithmic volumes; no envelopes, which the game doesn't use).
 
+--video <file.mp4> records the run at 50 frames a second of emulated time (a frame each
+time the beam would start one, so slow frames and room switches play at their real
+speed), 960x600, with the sound when --wav is given too. Needs ffmpeg.
+--autophone answers Tasha like a player would: about a second after her question, Fire
+(the top answer, right or wrong). For scripts that play with her calls on.
+
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
 Keys: up down left right fire mark lang esc (keyboard) and jup jdown jleft jright jfire1 jfire2.
 """
 import argparse
 import os
+import subprocess
 import sys
 
 import z80
@@ -47,6 +54,10 @@ KEYS = {
 }
 
 # Gate array hardware colour (0-31) -> RGB
+# A Mode 1 byte -> its four pens (bit 7/3 = pixel 0, bit 6/2 = pixel 1, ...)
+PIXELS = [bytes(((b >> (7 - n)) & 1) | (((b >> (3 - n)) & 1) << 1) for n in range(4))
+          for b in range(256)]
+
 HW_RGB = [
     (128, 128, 128), (128, 128, 128), (0, 255, 128), (255, 255, 128),
     (0, 0, 128), (255, 0, 128), (0, 128, 128), (255, 128, 128),
@@ -95,6 +106,11 @@ class CPC:
         self.wait_vbl = syms.get('WAIT_VBL')
         self.vsync_start_t = None
         self.last_vsync_read = 1
+        self.video = None       # ffmpeg's stdin while recording
+        self.next_frame_t = 0
+        self.script_matrix = self.matrix
+        self.phone = None       # (pl_state, call_state) addresses with --autophone
+        self.choosing = 0
         self.m.set_output_callback(self.on_out)
         self.m.set_input_callback(self.on_in)
         if self.wait_vbl is not None:
@@ -149,6 +165,38 @@ class CPC:
         for n in names:
             line, bit = KEYS[n]
             self.matrix[line] &= ~(1 << bit) & 0xFF
+        self.script_matrix = self.matrix
+
+    def autophone(self):
+        """Once a game loop: on the phone, choosing (CS_CHOOSE), wait ~1 s then Fire."""
+        pl_state, call_state = self.phone
+        if self.peek(pl_state) == 3 and self.peek(call_state) == 3:
+            self.choosing += 1
+            if self.choosing == 45:
+                line, bit = KEYS['fire']
+                self.matrix = list(self.script_matrix)
+                self.matrix[line] &= ~(1 << bit) & 0xFF
+                return
+        else:
+            self.choosing = 0
+        self.matrix = self.script_matrix
+
+    def frame_rgb(self):
+        """The Mode 1 screen as 320x200 RGB bytes (what the CRTC shows from its start)."""
+        base = ((self.crtc[12] & 0x30) << 10) | ((self.crtc[12] & 0x03) << 9) | (self.crtc[13] << 1)
+        page, mem = base & 0xC000, self.m.memory
+        out = []
+        for y in range(200):
+            off = (base + (y >> 3) * 80) & 0x7FF
+            row = page | ((y & 7) << 11)
+            if off + 80 <= 0x800:
+                data = bytes(mem[row + off:row + off + 80])
+            else:                               # the 2K block wraps mid-line
+                data = bytes(mem[row + off:row + 0x800]) + bytes(mem[row:row + off + 80 - 0x800])
+            out.append(b''.join(map(PIXELS.__getitem__, data)))
+        img = Image.frombytes('P', (320, 200), b''.join(out))
+        img.putpalette([c for pen in range(4) for c in HW_RGB[self.inks[pen]]])
+        return img.convert('RGB').tobytes()
 
     def run_frames(self, n):
         """Run n game-loop iterations: stop when the game enters wait_vbl for the n-th time,
@@ -167,6 +215,9 @@ class CPC:
             self.m.ticks_to_stop = SLICE_T
             events = self.m.run()
             self.t += SLICE_T - self.m.ticks_to_stop
+            while self.video and self.t >= self.next_frame_t:
+                self.video.write(self.frame_rgb())
+                self.next_frame_t += FRAME_T
             pc = self.m.pc
             if pc == self.wait_vbl and events & z80.Z80Machine._BREAKPOINT_HIT:
                 self.at_wait = True
@@ -174,6 +225,8 @@ class CPC:
                     self.booted = True
                     continue
                 loops += 1
+                if self.phone:
+                    self.autophone()
                 if self.vsync_start_t is not None:
                     self.busy.append((self.frame_no, self.t - self.vsync_start_t))
                     self.vsync_start_t = None
@@ -275,12 +328,25 @@ def main():
     ap.add_argument('--out', default='build/shots')
     ap.add_argument('--frames', type=int, default=50, help='frames to run when no script')
     ap.add_argument('--wav', help='render what the PSG played to this WAV file')
+    ap.add_argument('--video', help='record the run to this video file (needs ffmpeg)')
+    ap.add_argument('--autophone', action='store_true', help="answer Tasha's calls with Fire")
     args = ap.parse_args()
 
     syms = load_symbols(args.sym)
     org = int(args.org, 16) if args.org else syms.get('START', 0x1000)
     cpc = CPC(open(args.binary, 'rb').read(), org, syms)
     os.makedirs(args.out, exist_ok=True)
+    if args.autophone:
+        cpc.phone = (syms['PL_STATE'], syms['CALL_STATE'])
+    silent = None
+    if args.video:
+        silent = args.video + '.silent.mp4' if args.wav else args.video
+        ff = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo',
+                               '-pix_fmt', 'rgb24', '-s', '320x200', '-r', '50', '-i', '-',
+                               '-vf', 'scale=960:600:flags=neighbor', '-c:v', 'libx264',
+                               '-pix_fmt', 'yuv420p', '-crf', '20', silent],
+                              stdin=subprocess.PIPE)
+        cpc.video = ff.stdin
 
     steps = []
     if args.script:
@@ -355,6 +421,15 @@ def main():
     if args.wav:
         render_wav(cpc.psg_log, cpc.t, args.wav)
         print(f"wav {args.wav}: {cpc.t / 4e6:.1f} s, {len(cpc.psg_log)} PSG writes")
+    if args.video:
+        cpc.video.close()
+        ff.wait()
+        if args.wav:
+            subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', silent, '-i', args.wav,
+                            '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest',
+                            args.video], check=True)
+            os.remove(silent)
+        print(f"video {args.video}: {cpc.t / FRAME_T / 50:.1f} s")
     if cpc.busy:
         frame, worst = max(cpc.busy, key=lambda b: b[1])
         over = [f for f, t in cpc.busy if t > FRAME_T]

@@ -92,6 +92,14 @@ test: $(B)/bd.bin $(ROUTES)
 	  $(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $$t --out $(B)/shots; \
 	done
 
+# A video of a full inspection (videos/sunnyvale.txt), with sound: build/video/sunnyvale.mp4.
+video: $(B)/video/sunnyvale.mp4
+
+$(B)/video/%.mp4: videos/%.txt $(B)/bd.bin tools/cpcrun.py
+	mkdir -p $(B)/video
+	$(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $< --out $(B)/shots \
+	    --autophone --wav $(B)/video/$*.wav --video $@
+
 # The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
 manual: manual.pdf manual_gr.pdf
 
@@ -101,4 +109,4 @@ manual%.pdf: manual%.md tools/mkmanual.py $(wildcard docs/img/*.png)
 clean:
 	rm -rf $(B)
 
-.PHONY: all test clean manual
+.PHONY: all test clean manual video
