@@ -29,6 +29,9 @@ time the beam would start one, so slow frames and room switches play at their re
 speed), 960x600, with the sound when --wav is given too. Needs ffmpeg.
 --autophone answers Tasha like a player would: about a second after her question, Fire
 (the top answer, right or wrong). For scripts that play with her calls on.
+--autododge jumps like a player would: straight up (direction keys let go until he lands,
+so a goto still ends where it should) when a worker's tool is three cells off on his row,
+and once, over Bambis, when walking at him with room to land beyond him.
 
 <addr> is SYMBOL, SYMBOL+N, or *SYMBOL+N (N bytes past the pointer stored at SYMBOL).
 
@@ -111,6 +114,12 @@ class CPC:
         self.script_matrix = self.matrix
         self.phone = None       # (pl_state, call_state) addresses with --autophone
         self.choosing = 0
+        self.dodge = None       # symbol addresses with --autododge
+        self.jump = None        # None, or 'tool' / 'nephew' while a jump plays out
+        self.jump_frames = 0
+        self.nephew_jumped = False
+        self.goto_x = None      # the x a goto is heading for (same room)
+        self.log = []
         self.m.set_output_callback(self.on_out)
         self.m.set_input_callback(self.on_in)
         if self.wait_vbl is not None:
@@ -167,19 +176,96 @@ class CPC:
             self.matrix[line] &= ~(1 << bit) & 0xFF
         self.script_matrix = self.matrix
 
-    def autophone(self):
-        """Once a game loop: on the phone, choosing (CS_CHOOSE), wait ~1 s then Fire."""
-        pl_state, call_state = self.phone
-        if self.peek(pl_state) == 3 and self.peek(call_state) == 3:
-            self.choosing += 1
-            if self.choosing == 45:
-                line, bit = KEYS['fire']
-                self.matrix = list(self.script_matrix)
-                self.matrix[line] &= ~(1 << bit) & 0xFF
-                return
-        else:
-            self.choosing = 0
+    def reflexes(self):
+        """Once a game loop: the player's own reactions (--autophone, --autododge) on top of
+        the keys the script holds."""
         self.matrix = self.script_matrix
+        if self.phone:
+            pl_state, call_state = self.phone
+            if self.peek(pl_state) == 3 and self.peek(call_state) == 3:
+                self.choosing += 1
+                if self.choosing == 45:         # ~1 s to read, then Fire
+                    self.matrix = self.with_keys(self.script_matrix, ['fire'])
+                    return
+            else:
+                self.choosing = 0
+        if self.dodge:
+            self.dodge_reflex()
+
+    @staticmethod
+    def with_keys(matrix, names):
+        m = list(matrix)
+        for n in names:
+            line, bit = KEYS[n]
+            m[line] &= ~(1 << bit) & 0xFF
+        return m
+
+    def held(self, name):
+        line, bit = KEYS[name]
+        return not (self.script_matrix[line] >> bit) & 1
+
+    def dodge_reflex(self):
+        v = {k: self.peek(a) for k, a in self.dodge.items()}
+        if self.jump == 'retreat':              # back up the stairs until the tool is gone
+            self.jump_frames += 1
+            if (v['wk_pose'] == 0 and v['pj_on'] == 0) or self.jump_frames > 150:
+                self.jump = None
+            else:
+                self.matrix = self.with_keys([0xFF] * 10, ['up'])
+            return
+        if self.jump:                           # a jump under way
+            self.jump_frames += 1
+            if v['pl_jump'] == 0 and self.jump_frames > 1:
+                if self.jump_frames > 8 or self.jump == 'nephew':
+                    self.jump = None            # landed (or never took off): back to the script
+                    return
+            if v['pl_jump'] == 0:               # not off the ground yet: Up
+                keys = ['up'] + ([d for d in ('left', 'right') if self.held(d)]
+                                 if self.jump == 'nephew' else [])
+                self.matrix = self.with_keys([0xFF] * 10, keys)
+            elif self.jump == 'tool':           # in the air: straight up and down
+                self.matrix = [0xFF] * 10
+            return
+        if v['pl_state'] or v['pl_jump'] or v['pl_onladder']:
+            return
+        x, y = v['pl_x'], v['pl_y']
+        if v['pl_stair']:
+            # no jumping on stairs: coming down them at a worker winding up, go back up
+            near = v['wk_x'] - 1 - (x + 1) if x < v['wk_x'] else x - (v['wk_x'] + 2)
+            if v['wk_pose'] == 1 and 0 <= v['wk_y'] - y <= 3 and near <= 5:
+                self.jump, self.jump_frames = 'retreat', 0
+                self.matrix = self.with_keys([0xFF] * 10, ['up'])
+                self.log.append(f"frame {self.frame_no}: backs up the stairs from a worker")
+            return
+        # A tool in the air on his rows: take off so he is high enough when it gets there
+        # (head height: two rows up, five cells off; feet: one row, four cells off).
+        # Standing close to a worker the tool would appear on top of him, so there he
+        # goes on the wind-up instead, 10 frames before the throw (or as soon after as
+        # he is off the stairs).
+        tool = None
+        if v['pj_on'] and v['pj_row'] in (y, y + 1):
+            dist = x - v['pj_x'] if v['pj_dx'] == 1 else v['pj_x'] - (x + 1)
+            if 1 <= dist <= (5 if v['pj_row'] == y else 4):
+                tool = 'a thrown tool'
+        elif v['wk_pose'] == 1 and v['wk_y'] == y and 3 <= v['wk_timer'] <= 10:
+            near = v['wk_x'] - 1 - (x + 1) if x < v['wk_x'] else x - (v['wk_x'] + 2)
+            if near <= 5:
+                tool = 'a tool about to be thrown'
+        if tool:
+            self.jump, self.jump_frames = 'tool', 0
+            self.matrix = self.with_keys([0xFF] * 10, ['up'])
+            self.log.append(f"frame {self.frame_no}: jumps {tool}")
+            return
+        if (not self.nephew_jumped and v['npc_on'] and v['npc_y'] == y and not v['npc_done']
+                and self.goto_x is not None):
+            for d, sign in (('right', 1), ('left', -1)):
+                gap = (v['npc_x'] - x) * sign
+                if self.held(d) and 3 <= gap <= 5 and (self.goto_x - x) * sign >= 7:
+                    self.jump, self.jump_frames = 'nephew', 0
+                    self.nephew_jumped = True
+                    self.matrix = self.with_keys([0xFF] * 10, ['up', d])
+                    self.log.append(f"frame {self.frame_no}: jumps over Bambis")
+                    return
 
     def frame_rgb(self):
         """The Mode 1 screen as 320x200 RGB bytes (what the CRTC shows from its start)."""
@@ -225,8 +311,8 @@ class CPC:
                     self.booted = True
                     continue
                 loops += 1
-                if self.phone:
-                    self.autophone()
+                if self.phone or self.dodge:
+                    self.reflexes()
                 if self.vsync_start_t is not None:
                     self.busy.append((self.frame_no, self.t - self.vsync_start_t))
                     self.vsync_start_t = None
@@ -330,6 +416,8 @@ def main():
     ap.add_argument('--wav', help='render what the PSG played to this WAV file')
     ap.add_argument('--video', help='record the run to this video file (needs ffmpeg)')
     ap.add_argument('--autophone', action='store_true', help="answer Tasha's calls with Fire")
+    ap.add_argument('--autododge', action='store_true',
+                    help="jump thrown tools, and once over Bambis")
     args = ap.parse_args()
 
     syms = load_symbols(args.sym)
@@ -338,6 +426,11 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     if args.autophone:
         cpc.phone = (syms['PL_STATE'], syms['CALL_STATE'])
+    if args.autododge:
+        cpc.dodge = {k: syms[k.upper()] for k in (
+            'pl_state', 'pl_jump', 'pl_onladder', 'pl_stair', 'pl_x', 'pl_y', 'pj_on', 'pj_x',
+            'pj_row', 'pj_dx', 'npc_on', 'npc_x', 'npc_y', 'npc_done', 'wk_pose', 'wk_x',
+            'wk_y', 'wk_timer')}
     silent = None
     if args.video:
         silent = args.video + '.silent.mp4' if args.wav else args.video
@@ -383,10 +476,12 @@ def main():
             if len(rest) > 1:
                 limit = int(rest[1])
             cpc.set_keys(keys)
+            cpc.goto_x = want[1] if cmd == 'goto' and want[0] == cpc.peek(syms['CUR_ROOM']) else None
             n = 0
             while [cpc.peek(a) for a in addrs] != want and n < limit:
                 cpc.run_frames(1)
                 n += 1
+            cpc.goto_x = None
             if [cpc.peek(a) for a in addrs] != want:
                 failures += 1
                 print(f"FAIL {' '.join(st)}: got {[cpc.peek(a) for a in addrs]} after {n} frames")
@@ -418,6 +513,8 @@ def main():
         else:
             sys.exit(f"unknown script command: {cmd}")
 
+    for line in cpc.log:
+        print(line)
     if args.wav:
         render_wav(cpc.psg_log, cpc.t, args.wav)
         print(f"wav {args.wav}: {cpc.t / 4e6:.1f} s, {len(cpc.psg_log)} PSG writes")

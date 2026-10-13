@@ -98,7 +98,7 @@ video: $(B)/video/sunnyvale.mp4
 $(B)/video/%.mp4: videos/%.txt $(B)/bd.bin tools/cpcrun.py
 	mkdir -p $(B)/video
 	$(PY) tools/cpcrun.py $(B)/bd.bin --sym $(B)/bd.sym --script $< --out $(B)/shots \
-	    --autophone --wav $(B)/video/$*.wav --video $@
+	    --autophone --autododge --wav $(B)/video/$*.wav --video $@
 
 # The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
 manual: manual.pdf manual_gr.pdf
