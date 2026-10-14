@@ -25,4 +25,4 @@
 hazard poison 6 19
 hazard catapult 29 13
 nephew 26 36 20
-worker 16 26 6
+owner 26 34 13

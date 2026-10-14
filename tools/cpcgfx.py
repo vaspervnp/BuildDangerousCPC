@@ -246,13 +246,14 @@ def load_room(src):
 
       hazard <type> <x> <row>          (row within the room, 0-22)
       nephew <xmin> <xmax> <feet row>  (the row his feet are on, e.g. 20 on the ground floor)
-      worker <xmin> <xmax> <feet row>"""
+      worker <xmin> <xmax> <feet row>
+      owner <xmin> <xmax> <feet row>   (instead of a worker: re-arms traps he passes)"""
     lines = open(src, encoding='utf-8').read().split('\n')
     lines = [l for l in lines if not l.startswith(';')]
     hazard_lines = [l for l in lines if l.startswith('hazard ')]
     nephew_lines = [l for l in lines if l.startswith('nephew ')]
-    worker_lines = [l for l in lines if l.startswith('worker ')]
-    lines = [l for l in lines if not l.startswith(('hazard ', 'nephew ', 'worker '))]
+    worker_lines = [l for l in lines if l.startswith(('worker ', 'owner '))]
+    lines = [l for l in lines if not l.startswith(('hazard ', 'nephew ', 'worker ', 'owner '))]
     while lines and lines[-1] == '':
         lines.pop()
     if len(lines) != ROOM_H:
@@ -281,7 +282,7 @@ def load_room(src):
         out += bytes((x, y + HUD_ROWS, HAZARD_TYPES.index(parts[1]), 0))
 
     if len(nephew_lines) > 1 or len(worker_lines) > 1:
-        sys.exit(f"{src}: one nephew and one worker per room")
+        sys.exit(f"{src}: one nephew, and one worker or owner, per room")
     if not nephew_lines:
         out.append(0)
     else:
@@ -289,12 +290,13 @@ def load_room(src):
     if not worker_lines:
         out.append(0)
     else:
-        out += pacer(src, lines, worker_lines[0], 'worker', SOLID_CHARS)
+        who = worker_lines[0].split()[0]
+        out += pacer(src, lines, worker_lines[0], who, SOLID_CHARS, 2 if who == 'owner' else 1)
     return lines, out
 
 
-def pacer(src, lines, line, who, floor):
-    """<who> <xmin> <xmax> <feet row> -> 1, x (starts at xmin), top row, xmin, xmax: someone
+def pacer(src, lines, line, who, floor, kind=1):
+    """<who> <xmin> <xmax> <feet row> -> kind (1; the owner 2), x (from xmin), top row, xmin, xmax: someone
     who paces xmin..xmax on one floor (xmin = xmax: stands still). `floor`: what may be under
     his feet."""
     try:
@@ -308,7 +310,7 @@ def pacer(src, lines, line, who, floor):
             sys.exit(f"{src}: {who}: no floor under column {x}")
         if lines[feet][x] in SOLID_CHARS or lines[feet - 1][x] in SOLID_CHARS:
             sys.exit(f"{src}: {who}: column {x} is blocked")
-    return bytes((1, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
+    return bytes((kind, xmin, feet - 1 + HUD_ROWS, xmin, xmax))
 
 
 SOLID_CHARS = '=#'

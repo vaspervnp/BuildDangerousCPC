@@ -5,6 +5,12 @@
 ; throws it along the floor: hammers and half the wrenches at head height (duck), nails
 ; and the other wrenches at the feet (jump). A hit costs half a hat and leaves him reeling.
 ; One tool in the air at a time.
+;
+; In some rooms the slot holds the owner instead (room data type 2): he paces the same
+; way but doesn't throw - he puts traps back. Any disarmed trap he passes in a room that
+; isn't signed off yet is armed again ("That was decorative!") - though never in front of
+; the inspector: with Thanos close by he just walks on. So sign rooms off as soon as they
+; are clear.
 
 WK_WINDUP       equ 22          ; frames the tool is up before it flies: the warning
 WK_PAUSE        equ 40          ; frames before his first look, on entering the room
@@ -13,6 +19,7 @@ WK_LOOK         equ 10          ; Thanos off his floor: look again this soon
 WK_LINES        equ 4
 AF_WORKER       equ AF_PEOPLE+13 ; idle (and walking A), tool up
 AF_WORKER_STEP  equ AF_PEOPLE+16 ; walking B
+WK_OWNER        equ 2           ; the room data's type byte: 1 a worker, 2 the owner
 WK_PACE         equ 14          ; frames per step: slower than Bambis
 TOOL_GFX          equ 26          ; hazard sheet: hammer, wrench, nails, two spin frames each
 HIT_COST        equ 1           ; energy units: half a hat
@@ -73,6 +80,13 @@ worker_init:
         ; fall through
 
 worker_draw:
+        ld a,(wk_on)
+        cp WK_OWNER
+        jr nz,.worker
+        ld a,(wk_anim)          ; the owner: idle and talking frames, in step
+        add a,AF_OWNER_IDLE
+        jr .frame
+.worker:
         ld a,(wk_pose)
         or a
         ld a,AF_WORKER+1        ; tool up
@@ -110,6 +124,9 @@ worker_update:
         ld hl,wk_x              ; close to Thanos, redraws wipe each other: draw both
         call near_player
         call c,worker_overlap
+        ld a,(wk_on)
+        cp WK_OWNER
+        jr z,owner_update
         ld a,(wk_pose)          ; walking, unless the tool is up
         or a
         call z,worker_walk
@@ -154,6 +171,50 @@ worker_update:
         add hl,de
         ld a,(hl)
         jp caption_show
+
+; The owner: a step now and then, and any trap he is standing at put back.
+owner_update:
+        call worker_walk
+        ld hl,wk_x              ; not with the inspector watching
+        call near_player
+        ret c
+        call room_is_marked     ; signed off: too late for him
+        ret nz
+        ld ix,(room_hazards)
+        ld b,(ix+0)
+        inc ix
+        ld a,b
+        or a
+        ret z
+.loop:  ld a,(ix+HZ_STATE)
+        cp HZ_DISARMED
+        jr nz,.next
+        ld a,(ix+HZ_TYPE)
+        cp HZ_EVIDENCE          ; he'd never put his own papers back
+        jr z,.next
+        ld a,(ix+HZ_X)          ; under one of his two columns
+        ld hl,wk_x
+        sub (hl)
+        cp 2
+        jr nc,.next
+        ld a,(wk_y)             ; from his knees to a hand's reach over his head
+        inc a
+        sub (ix+HZ_ROW)
+        cp 5
+        jr nc,.next
+        ld (ix+HZ_STATE),HZ_ARMED
+        ld e,(ix+HZ_X)
+        ld d,(ix+HZ_ROW)
+        call draw_cell          ; the tell is back
+        call worker_draw
+        ld hl,sfx_locked
+        call sfx_play
+        ld a,STR_OWNER_REARM
+        jp caption_show
+.next:  ld de,HZ_SIZE
+        add ix,de
+        djnz .loop
+        ret
 
 ; A step along his beat every WK_PACE frames; at either end he turns round.
 worker_walk:

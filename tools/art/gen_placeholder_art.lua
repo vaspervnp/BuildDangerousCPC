@@ -562,6 +562,14 @@ gen.people = function()
     "..KKKKK...KKKKK.",
     "..KKKKK...KKKKK.",
   }
+  -- the owner's suit in pen 2 (the walls' colour) rather than black: indoors, on the black
+  -- background, a black suit left just a floating head (workers.asm: he walks the rooms)
+  local function suit(rows)
+    local t = {}
+    for i, r in ipairs(rows) do t[i] = (i >= 8 and i <= 15) and r:gsub("K", "B") or r end
+    return t
+  end
+  owner, ownerTalk, ownerCut, ownerShrug = suit(owner), suit(ownerTalk), suit(ownerCut), suit(ownerShrug)
   saveStrip("people", cells({ owner, ownerTalk, ownerCut, ownerShrug, grandma, grandmaCheer,
     man, manCheer, kid, kidCheer, nephew, nephewStep, nephewSelfie,
     worker, workerThrow, thanosDuck, workerStep }), 16, 16)

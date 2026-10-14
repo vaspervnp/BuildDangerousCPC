@@ -70,20 +70,20 @@ $(B)/bd.dsk: $(B)/bd.bin $(B)/screen.bin $(B)/bd.bas assets/revive8b.scr
 	$(IDSK) $@ -i $(B)/bd.bas -t 0
 	$(IDSK) $@ -i $(B)/revive8b.scr -t 1 -c c000
 	$(IDSK) $@ -i $(B)/screen.bin -t 1 -c c000
-	$(IDSK) $@ -i $(B)/game.bin -t 1 -c 0b00 -e 0b00
+	$(IDSK) $@ -i $(B)/game.bin -t 1 -c 0040 -e 0040
 
 # Planned clean runs through each campaign building (tools/route.py), run by `make test`.
 tests/route_%.txt: assets/buildings/%.txt $(wildcard assets/rooms/*.txt) tools/route.py tools/cpcgfx.py
 	$(PY) tools/route.py $< $@
 
 # The tape, for the CPC 464: RUN"" loads the loader (src/tape_loader.asm), which sets the
-# picture's inks and loads SCREEN to #C000 and GAME to #0B00. 2000 baud (SPEED WRITE 1).
+# picture's inks and loads SCREEN to #C000 and GAME to #0040. 2000 baud (SPEED WRITE 1).
 $(B)/tapeldr.bin: src/tape_loader.asm $(B)/inks.bin
 	$(RASM) src/tape_loader.asm -I. -ob $@
 
 $(B)/bd.cdt: $(B)/tapeldr.bin $(B)/screen.bin $(B)/bd.bin tools/mkcdt.py
-	$(PY) tools/mkcdt.py $@ "BUILD DANGEROUS:$(B)/tapeldr.bin:0x0A00" \
-	    SCREEN:$(B)/screen.bin:0xC000 GAME:$(B)/bd.bin:0x0B00
+	$(PY) tools/mkcdt.py $@ "BUILD DANGEROUS:$(B)/tapeldr.bin:0xA600" \
+	    SCREEN:$(B)/screen.bin:0xC000 GAME:$(B)/bd.bin:0x0040
 
 # Headless runs of every tests/*.txt script; screenshots go to build/shots/.
 test: $(B)/bd.bin $(ROUTES)

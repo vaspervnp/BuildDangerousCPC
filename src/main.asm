@@ -1,8 +1,10 @@
 ; Build Dangerous - Amstrad CPC (64K), Mode 1
-; Loaded at #0B00 (disk: RUN"BD; tape: src/tape_loader.asm, which sits just below with its
-; buffer), then takes over the machine: firmware and ROMs off.
+; Loaded at #0040, as low as memory goes (disk: RUN"BD, BD.BAS's RUN"GAME" loads it over
+; the BASIC; tape: src/tape_loader.asm, which waits just above it), then takes over the
+; machine: firmware and ROMs off. Below #0040 are the Z80's restart addresses (#0038 is
+; ours: the interrupt handler).
 
-LOAD_ADDR       equ #0b00
+LOAD_ADDR       equ #0040
         org LOAD_ADDR
 
 start:
@@ -58,6 +60,7 @@ main_loop:
         ld a,(paused)
         or a
         jr nz,main_loop         ; paused: everything waits, the clock too
+        call blackout_update
         call player_update
         call nephew_update
         call worker_update
@@ -93,6 +96,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "nephew.asm"
         include "workers.asm"
         include "hints.asm"
+        include "blackout.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

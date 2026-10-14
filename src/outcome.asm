@@ -38,6 +38,7 @@ building_new:
 
 ; The intro is over (or skipped): Thanos is through the door.
 play_begin:
+        call blackout_reset
         ld a,GS_PLAY
         ld (game_state),a
         xor a
@@ -109,6 +110,10 @@ play_update:
 
 ; In: A = OUT_*. Adds the bonuses (wins only), then plays that ending's outdoor scene.
 outcome_start:
+        push af
+        call blackout_reset     ; lights on for the crowd
+        call palette_normal
+        pop af
         ld (outcome),a
         ld hl,bonus_time
         ld b,6

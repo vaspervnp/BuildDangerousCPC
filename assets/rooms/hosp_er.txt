@@ -24,4 +24,4 @@
 ########################################
 hazard electric 12 19
 hazard cut 22 12
-worker 1 11 6
+owner 15 22 13

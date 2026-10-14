@@ -136,6 +136,14 @@ The builders haven't quite finished, and they are not pleased to see the inspect
 
 A jump clears either kind. A hit costs **half a hard hat** and leaves Thanos dizzy for a moment. After a throw, a worker rests for about ten seconds before the next.
 
+### The owner
+
+From the Mall on, the owner himself walks some of the rooms. He has his reasons for wanting the traps to stay. If he passes a trap you've made safe in a room you **haven't signed off yet**, he sets it again: *"That was decorative!"* He won't do it in front of the inspector, though — while Thanos is close by, he just walks past. So sign each room off as soon as it's clear.
+
+### Blackouts
+
+The owner of every building after the first hasn't paid the electricity bill. Every 40 to 60 seconds the lights go out for five seconds: the walls and floors all but vanish and only the white things show — Thanos's helmet, the edges of the floors, the sockets. The workers keep throwing in the dark.
+
 ## The buildings
 
 1. **Sunny Vale Apartments** — four rooms, a gentle start.
@@ -170,6 +178,7 @@ The best score of the session is shown on the title screen.
 - When a worker raises his tool, decide quickly: duck for the high ones, jump for the low ones. Or leave his floor.
 - Answer Tasha well. It's quicker, and it's better for the marriage.
 - If the clock is running out, make sure at least half the rooms are signed off.
+- When the lights go out, stand still or walk a floor you know. They're back in five seconds.
 
 ## Credits
 

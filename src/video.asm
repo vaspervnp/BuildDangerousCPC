@@ -37,6 +37,10 @@ black_table:
 
 palette_normal:
         ld hl,ink_table
+        ld a,(blackout)         ; the lights are out (blackout.asm)
+        or a
+        jr z,palette_set
+        ld hl,dark_table
         jr palette_set
 palette_black:
         ld hl,black_table
