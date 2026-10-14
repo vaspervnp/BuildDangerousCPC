@@ -394,16 +394,7 @@ phone_end:
         ld a,(call_row)
         ld d,a
         ld b,PANEL_ROWS
-.row:   push bc
-        ld e,0
-.cell:  call draw_cell
-        inc e
-        ld a,e
-        cp MAP_W
-        jr nz,.cell
-        inc d
-        pop bc
-        djnz .row
+        call rows_restore
         ld a,PS_WALK
         ld (pl_state),a
         ld a,(npc_on)

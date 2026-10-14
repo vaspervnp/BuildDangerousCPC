@@ -160,6 +160,8 @@ room_change:
         call hud_draw_numbers
         call nephew_init
         call worker_init
+        xor a                   ; a hint window went with the old room
+        ld (hint_row),a
         ld de,(pl_x)
         ld (old_xy),de
         call player_draw

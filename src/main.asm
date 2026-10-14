@@ -61,6 +61,7 @@ main_loop:
         call player_update
         call nephew_update
         call worker_update
+        call hint_update
         call hud_update
         call play_update
         jr main_loop
@@ -91,6 +92,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "phone.asm"
         include "nephew.asm"
         include "workers.asm"
+        include "hints.asm"
         include "build/strings.asm"
 
 ; ---------------------------------------------------------------- buildings

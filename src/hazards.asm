@@ -146,6 +146,14 @@ draw_hazard:
 ; Fire pressed: set off the first armed hazard within reach.
 ; Out: carry set if a vignette started.
 try_trigger:
+        call hazard_in_reach
+        ret nc
+        call vig_start
+        scf
+        ret
+
+; Out: carry set and IX = the first armed hazard within Thanos's reach (hints.asm too).
+hazard_in_reach:
         ld ix,(room_hazards)
         ld b,(ix+0)
         inc ix
@@ -168,10 +176,7 @@ try_trigger:
         ld a,(ix+HZ_ROW)
         sub c
         cp REACH_H
-        jr nc,.next
-        call vig_start
-        scf
-        ret
+        ret c                   ; (carry: found)
 .next:  ld de,HZ_SIZE
         add ix,de
         djnz .loop

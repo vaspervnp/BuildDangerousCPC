@@ -102,6 +102,10 @@ campaign_start:
         ld (call_count),a       ; Tasha's calls start from the first script
         ld (rant_index),a
         ld (selfie_index),a
+        ld (hint_count),a       ; the first-trap hints again
+        ld h,a
+        ld l,a
+        ld (hint_ptr),hl
         ld hl,score
         ld (hl),a
         inc hl

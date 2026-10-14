@@ -113,7 +113,7 @@ linux: $(B)/bd.dsk manual.pdf manual_gr.pdf
 # The manuals, English and Greek, as PDFs (needs: pip install markdown fpdf2).
 manual: manual.pdf manual_gr.pdf
 
-manual%.pdf: manual%.md tools/mkmanual.py $(wildcard docs/img/*.png)
+manual.pdf manual_gr.pdf: %.pdf: %.md tools/mkmanual.py $(wildcard docs/img/*.png)
 	$(PY) tools/mkmanual.py $< $@
 
 clean:

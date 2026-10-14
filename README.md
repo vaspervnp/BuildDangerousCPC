@@ -172,6 +172,7 @@ Runs the game headless on an emulated Z80 (`tools/cpcrun.py`) once per script in
 - 2026-10-13 — **The video dodges.** `--autododge`: per-frame reflexes on the game's own variables — jump a tool on his rows when it is 4–5 cells off (head height needs two rows of clearance, so earlier), jump on a close worker's wind-up, back up the stairs from one, jump Bambis once when walking at him with room to land. The recorded inspection now takes no hits (all eight hats) and hops over the nephew.
 - 2026-10-13 — **Windows version.** `make windows`: `BuildDangerous.exe`, a single file with Caprice32, the ROMs and the disk embedded; it unpacks itself to the user's local app data and runs the game. Tested on Windows 11 through WSL interop.
 - 2026-10-13 — **Linux version.** `make linux`: `BuildDangerous.run`, a self-extracting script with Caprice32 (from its snap), the libraries it needs beyond a desktop's own, the ROMs and the disk; same behaviour as the Windows exe.
+- 2026-10-14 — **First-trap hints** (requested). The first three traps Thanos comes within reach of open a brick-framed window, away from him: "You are in front of a trap. Press SPACE to activate it." — the third adds "From now on, you are on your own. Find and activate all the traps." It closes when the trap goes off or he walks away and reopens at the same trap; the count is campaign-wide (`src/hints.asm`, `tests/hints.txt`). Fire's reach test is shared (`hazard_in_reach`), and so is restoring room rows (`rows_restore`, used by the phone too). 6 bytes free.
 
 ---
 

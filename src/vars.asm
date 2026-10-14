@@ -147,3 +147,6 @@ pj_speed:       defs 1
 pj_wait:        defs 1
 pj_spin:        defs 1
 pl_uphold:      defs 1              ; up held since a climb: let go before jumping
+hint_count:     defs 1              ; hints.asm: traps hinted so far (up to HINT_COUNT)
+hint_ptr:       defs 2              ; the hazard the last hint was for
+hint_row:       defs 1              ; top row of the hint window, 0 when closed

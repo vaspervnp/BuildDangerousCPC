@@ -1,0 +1,65 @@
+; First-trap hints (hints.asm): the first three traps Thanos comes within reach of open a
+; window telling him to press SPACE; the third adds that he's on his own from now on.
+; Sunny Vale's route: lobby sockets at 13,21 and 33,14, the east wing's pipe at 18,13,
+; then the ferret grille at 24,22 - no window for that one.
+
+poke calls_enabled 0              ; no phone calls in this script (tests/phone.txt has them)
+poke nephew_enabled 0             ; no selfies (tests/nephew.txt)
+poke workers_enabled 0            ; no workers (tests/workers.txt)
+pokew boot_campaign campaign_single
+run 5
+run 1 fire                      ; title: start
+run 3
+run 1 fire                      ; skip the outdoor intro
+until game_state 0 -
+run 1
+expect hint_count 0
+expect hint_row 0
+
+; --- the first trap: a window at the top (he's on the ground floor)
+goto 0 11 21 right
+run 2
+expect hint_count 1
+expect hint_row 2
+shot hint_first
+goto 0 7 21 left                ; walk away: it closes
+expect hint_row 0
+goto 0 11 21 right              ; back again: it opens, still the first
+run 2
+expect hint_row 2
+expect hint_count 1
+run 1 fire                      ; SPACE: the trap goes off, the window goes
+run 2
+expect hint_row 0
+until pl_state 0 - 300
+run 2
+expect hint_row 0               ; disarmed: nothing to hint
+
+; --- the second, in the lobby's 1st floor
+goto 0 17 21 right
+goto 0 24 14 up
+goto 0 31 14 right
+run 2
+expect hint_count 2
+expect hint_row 2
+run 1 fire
+until pl_state 0 - 300
+run 1 mark
+
+; --- the third, in the east wing: the long version
+goto 1 16 14 right
+run 2
+expect hint_count 3
+expect hint_row 2
+shot hint_third
+run 1 fire
+until pl_state 0 - 300
+
+; --- the fourth: on his own
+goto 1 7 14 left
+goto 1 14 21 down
+goto 1 22 21 right
+run 2
+expect hint_count 3
+expect hint_row 0
+shot hint_none
