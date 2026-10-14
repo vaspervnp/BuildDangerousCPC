@@ -103,6 +103,7 @@ campaign_start:
         ld (rant_index),a
         ld (selfie_index),a
         ld (hint_count),a       ; the first-trap hints again
+        ld (hint_marked),a      ; and the sign-off one
         ld h,a
         ld l,a
         ld (hint_ptr),hl

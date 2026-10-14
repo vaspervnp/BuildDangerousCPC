@@ -80,7 +80,7 @@ Every trap shows a small **tell**: a socket with a bare wire, a lamp hanging by 
 
 Stand next to it and press **SPACE**. Thanos sets it off on purpose and lives through it, as always. That takes a few seconds, and the clock keeps running. The trap is then safe for good (+50 points).
 
-The first three times you are within reach of a trap, a window tells you so: *You are in front of a trap. Press SPACE to activate it.* After the third, you're on your own.
+The first three times you are within reach of a trap, a window tells you so: *You are in front of a trap. Press SPACE to activate it.* After the third, you're on your own. And when you have set off every trap in a room, a window reminds you to sign it off with **M** — until the first time you do.
 
 Not everything that looks dangerous is: some sockets are perfectly safe, and some buildings have decoys. Pressing SPACE next to a safe one does nothing. Look closely at the tell.
 

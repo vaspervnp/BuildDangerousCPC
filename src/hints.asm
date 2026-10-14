@@ -4,6 +4,8 @@
 ; The third adds "From now on, you are on your own. Find and activate all the traps."
 ; The window closes when the trap goes off or he walks away, and opens again if he comes
 ; back to that trap. After the third trap, no more.
+; And when he has set off every trap in a room, until he first signs one off: "This room is
+; clear. Don't forget to sign it off: press M."
 
 HINT_TRAPS      equ 3
 HINT_ROWS       equ 6               ; bricks, four lines, bricks
@@ -41,6 +43,9 @@ hint_update:
         ld a,(pl_state)
         or a                    ; walking only; a trap, a call or a selfie closes it
         jr nz,hint_hide
+        call mark_hint_due      ; a cleared room, not signed off: that comes first
+        ld a,HK_MARK
+        jr c,.want
         call hazard_in_reach
         jr nc,hint_hide
         push ix                 ; the trap the last window was for?
@@ -48,7 +53,7 @@ hint_update:
         ld hl,(hint_ptr)
         or a
         sbc hl,de
-        jr z,.show
+        jr z,.trap
         ld a,(hint_count)       ; a new trap: one of the first three?
         cp HINT_TRAPS
         jr nc,hint_hide
@@ -56,10 +61,23 @@ hint_update:
         ld (hint_count),a
         ld (hint_ptr),ix
         call hint_hide          ; (a window still up for another trap)
-.show:  ld a,(hint_row)
+.trap:  ld a,(hint_count)       ; two lines, or four on the last
+        cp HINT_TRAPS
+        ld a,HK_TRAP
+        jr nz,.want
+        ld a,HK_LAST
+.want:  ld hl,hint_kind         ; the window wanted: up already?
+        cp (hl)
+        jr nz,.new
+        ld a,(hint_row)
         or a
-        ret nz                  ; already up
-        ld a,(pl_y)
+        ret nz
+        jr .show
+.new:   push af
+        call hint_hide
+        pop af
+        ld (hint_kind),a
+.show:  ld a,(pl_y)             ; where he isn't
         cp 12
         ld a,HINT_TOP
         jr nc,.row
@@ -85,37 +103,75 @@ hint_update:
         jr nz,.cell
         pop bc
         djnz .side
-.bottom:
         inc d
         call brick_row
-        ld a,(hint_count)       ; the text: two lines, or four on the last
-        cp HINT_TRAPS
+        ld a,(hint_kind)        ; the text: line count, then row, string, pen per line
+        add a,a
+        ld hl,hint_texts-2
+        add a,l
+        ld l,a
+        adc a,h
+        sub l
+        ld h,a
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        ld b,(hl)
+        inc hl
+.line:  push bc
         ld a,(hint_row)
-        jr z,.four
-        add a,2
-        jr .two
-.four:  inc a
-        push af
-        add a,2
+        add a,(hl)
         ld d,a
-        ld a,STR_HINT_OWN1
-        ld c,PEN1_MASK
+        inc hl
+        ld a,(hl)
+        inc hl
+        ld c,(hl)
+        inc hl
+        push hl
         call print_text_centered
-        pop af
-        push af
-        add a,3
-        ld d,a
-        ld a,STR_HINT_OWN2
-        ld c,PEN1_MASK
-        call print_text_centered
-        pop af
-.two:   ld d,a
-        push de
-        ld a,STR_HINT_TRAP1
-        ld c,PEN3_MASK
-        call print_text_centered
-        pop de
-        inc d
-        ld a,STR_HINT_TRAP2
-        ld c,PEN3_MASK
-        jp print_text_centered
+        pop hl
+        pop bc
+        djnz .line
+        ret
+
+HK_TRAP         equ 1
+HK_LAST         equ 2
+HK_MARK         equ 3
+hint_texts:
+        dw .trap,.last,.mark
+.trap:  db 2, 2,STR_HINT_TRAP1,PEN3_MASK, 3,STR_HINT_TRAP2,PEN3_MASK
+.last:  db 4, 1,STR_HINT_TRAP1,PEN3_MASK, 2,STR_HINT_TRAP2,PEN3_MASK
+        db    3,STR_HINT_OWN1,PEN1_MASK,  4,STR_HINT_OWN2,PEN1_MASK
+.mark:  db 2, 2,STR_HINT_MARK1,PEN3_MASK, 3,STR_HINT_MARK2,PEN3_MASK
+
+; Out: carry set if this room's traps have all gone off, it isn't signed off yet and
+; no room has been signed off this campaign (after that he knows about M).
+mark_hint_due:
+        ld a,(hint_marked)
+        or a
+        ret nz
+        call room_is_marked
+        ret nz
+        ld hl,(room_hazards)
+        ld b,(hl)
+        ld c,0                  ; traps gone off
+        ld a,b
+        or a
+        ret z
+.loop:  inc hl
+        inc hl
+        inc hl
+        ld a,(hl)               ; type
+        inc hl
+        cp HZ_EVIDENCE
+        ld a,(hl)               ; state
+        jr z,.next
+        cp HZ_ARMED
+        ret z                   ; (no carry: one still armed)
+        inc c
+.next:  djnz .loop
+        ld a,c
+        cp 1
+        ccf                     ; carry if at least one
+        ret

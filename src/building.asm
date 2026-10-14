@@ -239,6 +239,7 @@ try_mark:
 .new:   ld a,(hl)
         or b
         ld (hl),a
+        ld (hint_marked),a      ; (non-zero) he knows about M now
         ld hl,bld_signed
         inc (hl)
         ld a,(signed_bcd)

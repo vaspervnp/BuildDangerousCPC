@@ -150,5 +150,7 @@ pl_uphold:      defs 1              ; up held since a climb: let go before jumpi
 hint_count:     defs 1              ; hints.asm: traps hinted so far (up to HINT_COUNT)
 hint_ptr:       defs 2              ; the hazard the last hint was for
 hint_row:       defs 1              ; top row of the hint window, 0 when closed
+hint_kind:      defs 1              ; what it says: HK_TRAP, HK_LAST, HK_MARK
+hint_marked:    defs 1              ; a room has been signed off: no more "press M"
 blackout:       defs 1              ; blackout.asm: 1 while the lights are out
 blackout_timer: defs 2              ; frames to the next change, 0: not scheduled

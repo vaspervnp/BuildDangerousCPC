@@ -147,6 +147,8 @@ HINT_TRAP1 | You are in front of a trap. | Είσαι μπροστά σε μια
 HINT_TRAP2 | Press SPACE to activate it. | Πάτα SPACE για να την ενεργοποιήσεις.
 HINT_OWN1 | From now on, you are on your own. | Από εδώ και πέρα είσαι μόνος σου.
 HINT_OWN2 | Find and activate all the traps. | Βρες κι ενεργοποίησε όλες τις παγίδες.
+HINT_MARK1 | This room is clear. Don't forget | Το δωμάτιο είναι καθαρό. Μην ξεχάσεις
+HINT_MARK2 | to sign it off: press M. | να το σημειώσεις ως ελεγμένο με το M.
 BLACKOUT | Who turned off the lights?! | Ποιος έσβησε τα φώτα;!
 OWNER_REARM | Owner: That was decorative! | Ιδιοκτήτης: Ήταν διακοσμητικό!
 PAUSED | Paused. ESC to carry on. | Παύση. ESC για συνέχεια.
