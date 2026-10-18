@@ -133,6 +133,7 @@ nephew_overlap:
         jp player_draw
 
 selfie_start:
+        call sense_hide
         ld a,PS_SELFIE
         ld (pl_state),a
         ld a,NEPHEW_REST

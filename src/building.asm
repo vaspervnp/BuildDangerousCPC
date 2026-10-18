@@ -162,6 +162,7 @@ room_change:
         call worker_init
         xor a                   ; a hint window went with the old room
         ld (hint_row),a
+        ld (sense_on),a         ; and the "?"
         ld de,(pl_x)
         ld (old_xy),de
         call player_draw

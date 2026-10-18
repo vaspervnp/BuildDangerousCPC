@@ -155,6 +155,7 @@ phone_check:
         ; fall through
 
 phone_start:
+        call sense_hide
         ld a,PS_PHONE
         ld (pl_state),a
         xor a                   ; CS_RING

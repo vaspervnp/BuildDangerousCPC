@@ -326,6 +326,7 @@ vig_evidence:
 
 ; In: IX = hazard entry. Charges the energy, shows the caption, starts the script.
 vig_start:
+        call sense_hide         ; the "?" first: the vignette draws over his head
         ld (vig_hazard),ix
         call vig_sound
         ld a,(ix+HZ_TYPE)

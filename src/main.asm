@@ -65,6 +65,7 @@ main_loop:
         call nephew_update
         call worker_update
         call hint_update
+        call sense_update
         call hud_update
         call play_update
         jr main_loop
@@ -96,6 +97,7 @@ boot_campaign:  dw campaign_main   ; the test harness pokes this to play other c
         include "nephew.asm"
         include "workers.asm"
         include "hints.asm"
+        include "sense.asm"
         include "blackout.asm"
         include "build/strings.asm"
 
