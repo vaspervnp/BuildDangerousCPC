@@ -151,5 +151,5 @@ HINT_MARK1 | This room is clear. Don't forget | Το δωμάτιο είναι �
 HINT_MARK2 | to sign it off: press M. | να το σημειώσεις ως ελεγμένο με το M.
 BLACKOUT | Who turned off the lights?! | Ποιος έσβησε τα φώτα;!
 OWNER_REARM | Owner: That was decorative! | Ιδιοκτήτης: Ήταν διακοσμητικό!
-PAUSED | Paused. ESC to carry on. | Παύση. ESC για συνέχεια.
+PAUSED | Paused. ESC or both fires to carry on. | Παύση. ESC ή Fire 1 και 2 για συνέχεια.
 PHONE_HINT | Up/down, then fire: | Πάνω/κάτω και fire:

@@ -122,6 +122,9 @@ selfie_step:    defs 1
 selfie_timer:   defs 1
 selfie_index:   defs 1
 paused:         defs 1              ; ESC in a building
+joy_wait:       defs 1              ; input.asm: frames one joystick fire has been held
+joy_last:       defs 1              ; which: KEY_FIRE or KEY_MARK
+joy_lock:       defs 1              ; both were down: nothing until both are up
 call_tick:      defs 1              ; halves the answer countdown
 rnd_seed:       defs 2              ; phone.asm rand
 pl_jump:        defs 1              ; player.asm: steps of a jump still to go, 0 on the ground

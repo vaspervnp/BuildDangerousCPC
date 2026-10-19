@@ -49,7 +49,7 @@ The language applies to everything: the captions, the dialogue and the results.
 | Sign off the room | M | Fire 2 |
 | Leave the building (at the exit door) | ↑ or Q | Up |
 | Answer the phone | ↑ / ↓ to choose, SPACE to answer | Up / Down, Fire 1 |
-| Pause | ESC | — |
+| Pause | ESC | Fire 1 + Fire 2 together |
 | Skip a scene / continue | SPACE | Fire 1 |
 
 Once you are on a flight of stairs, left and right follow it up or down. Escalators (in the mall and the hospital) carry you on their own: step on and enjoy the ride. You can't walk up a down escalator.

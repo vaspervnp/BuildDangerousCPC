@@ -17,7 +17,7 @@ KEYS
   M                        sign off the room
   ESC                      pause
   L                        English / Greek (on the title screen)
-  A joystick works too (Fire 1 = SPACE, Fire 2 = M).
+  A joystick works too (Fire 1 = SPACE, Fire 2 = M, both together = pause).
 
   F1 opens the emulator's menu, F2 switches to full screen, F10 quits.
 
