@@ -53,7 +53,8 @@ pause_toggle:
         ld (paused),a
         ld d,1                  ; the caption row
         jr z,.resume
-        call sound_init         ; silence
+        call sound_init         ; silence (trashes DE)
+        ld d,1
         call clear_row
         ld a,STR_PAUSED
         call get_string

@@ -17,6 +17,7 @@ run 1
 goto 0 11 21 right
 run 2
 expect paused 0
+shot joypause_before
 
 ; --- both at once: paused, and neither Fire nor M
 run 3 jfire1+jfire2
@@ -30,6 +31,7 @@ expect bld_signed 0
 run 3 jfire1+jfire2             ; both again: carry on
 expect paused 0
 run 5
+shot joypause_after
 expect pl_state 0
 expect bld_signed 0
 
